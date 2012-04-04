@@ -1,0 +1,7 @@
+Android implementation of Notch's DCPU-16 (http://0x10c.com)
+By Andrew "Stick" Boothroyd (@sticksoft)
+
+Probably going to be licensed under the WTFPL: http://en.wikipedia.org/wiki/WTFPL
+
+This version is stable but broken.  Currently debugging, but feel free to browse the code!
+
