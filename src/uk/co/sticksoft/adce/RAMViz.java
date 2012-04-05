@@ -2,9 +2,11 @@ package uk.co.sticksoft.adce;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Bitmap.Config;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 public class RAMViz extends ImageView
 {
@@ -22,14 +24,23 @@ public class RAMViz extends ImageView
 		buffers[0] = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
 		buffers[1] = Bitmap.createBitmap(256, 256, Config.ARGB_8888);
 		
+		setAdjustViewBounds(true);
+		
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(512, 512);
+		lp.topMargin = 50;
+		setLayoutParams(lp);
+		
 		setImageBitmap(buffers[0]);
-		updateBuffer();
+		updateBitmapBuffer();
+		updateFinished();
+		//updateBuffer();
 	}
 	
 	private Thread thread;
-	private int[] bitmapBuffer = new int[256*256];
+	private volatile int[] bitmapBuffer = new int[256*256];
 	public void updateBuffer()
 	{
+		/*
 		if (thread != null)
 			return;
 		
@@ -37,17 +48,26 @@ public class RAMViz extends ImageView
 		{
 			public void run()
 			{
-				for (int i = 0; i < 256*256; i++)
-				{
-					char c = RAM[i];
-					bitmapBuffer[i] = 0xff000000 | c;  
-				}
+				updateBitmapBuffer();
 				
 				post(new Runnable() { public void run() { updateFinished(); } });
 			}
 		});
 		
 		thread.start();
+		*/
+		
+		updateBitmapBuffer();
+		updateFinished();
+	}
+	
+	private void updateBitmapBuffer()
+	{
+		for (int i = 0; i < 256*256; i++)
+		{
+			int c = RAM[i];
+			bitmapBuffer[i] = ((c != 0) ? 0xff000000 | c : 0xff401010);  
+		}
 	}
 	
 	private void updateFinished()

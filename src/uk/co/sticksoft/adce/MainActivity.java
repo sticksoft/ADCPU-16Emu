@@ -68,6 +68,7 @@ public class MainActivity extends Activity
     
     private void reset()
     {
+    	stop();
     	cpu.reset();
     	
     	char[] notchs_example =
@@ -79,6 +80,8 @@ public class MainActivity extends Activity
 		};
     	
     	System.arraycopy(notchs_example, 0, cpu.RAM, 0, notchs_example.length);
+    	
+    	updateInfo();
     }
     
     private void start()
@@ -107,7 +110,7 @@ public class MainActivity extends Activity
 				{
 					update();
 				}
-			}, 1000);
+			}, 100);
     }
     
     private void updateInfo()

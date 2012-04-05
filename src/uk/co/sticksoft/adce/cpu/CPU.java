@@ -162,6 +162,8 @@ public class CPU
 		}
 	}
 	
+	private boolean skipping = false;
+	
 	public void execute()
 	{
 		char instruction = RAM[PC];
@@ -170,6 +172,9 @@ public class CPU
 		
 		if (op != 0) // Basic instruction!
 		{
+			// Increment now in case PC is modified by instruction or reading a or b
+			PC++;
+			
 			// Work out value type
 			char _a = (char)((instruction >> 0x04) & 0x3f);
 			char _b = (char)((instruction >> 0x0a) & 0x3f);
@@ -181,11 +186,14 @@ public class CPU
 		
 			// Grab the actual values
 			char a = read(aType, aAddr), b = read(bType, bAddr);
-		
-			// Increment now in case PC is modified by instruction
-			PC++;
 			
 			int res; // Result holder
+			
+			if (skipping)
+			{
+				skipping = false;
+				return;
+			}
 			
 			// TODO: Replace with something faster?
 			switch (Opcode.values()[op])
@@ -248,19 +256,19 @@ public class CPU
 				break;
 			case IFE:
 				if (a != b)
-					PC++;
+					skipping = true;
 				break;
 			case IFN:
 				if (a == b)
-					PC++;
+					skipping = true;
 				break;
 			case IFG:
 				if (a <= b)
-					PC++;
+					skipping = true;
 				break;
 			case IFB:
 				if ((a & b) == 0)
-					PC++;
+					skipping = true;
 				break;
 			}
 		}
@@ -280,7 +288,7 @@ public class CPU
 				break;
 			case 0x01: // JSR a
 				// Push PC
-				RAM[--SP] = PC;
+				RAM[--SP] = (char)(PC+1);
 				// Set PC to a
 				PC = read(addressType(_a), address(_a));
 				break;
