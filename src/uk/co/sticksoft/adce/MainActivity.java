@@ -1,14 +1,22 @@
 package uk.co.sticksoft.adce;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
-import android.app.*;
-import android.os.*;
-import android.view.*;
-import android.view.View.*;
-import android.widget.*;
 import uk.co.sticksoft.adce.asm.Assembler;
-import uk.co.sticksoft.adce.cpu.*;
+import uk.co.sticksoft.adce.cpu.CPU;
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 public class MainActivity extends Activity
 {
@@ -66,7 +74,7 @@ public class MainActivity extends Activity
         
         asmInput = new EditText(this);
         asmInput.setTextSize(8);
-        asmInput.setText(notchs_example_asm);
+        load();
         lyt.addView(asmInput);
         
         Button assembleButton = new Button(this);
@@ -191,12 +199,46 @@ public class MainActivity extends Activity
     	startButton.setText("Start");
     }
     
+    private void save()
+    {
+    	try
+		{
+			FileOutputStream fos = openFileOutput("asm", MODE_PRIVATE);
+			fos.write(asmInput.getText().toString().getBytes());
+			fos.flush();
+			fos.close();
+		}
+		catch (Exception e) // Pokémon exceptions are evil, apparently.  I think just the name is evil :s
+		{
+			e.printStackTrace();
+		}
+    }
+    
+    private void load()
+    {
+    	try
+		{
+			FileInputStream fis = openFileInput("asm");
+			byte[] buffer = new byte[(int) fis.getChannel().size()];
+			fis.read(buffer);
+			fis.close();
+			asmInput.setText(new String(buffer));
+		}
+		catch (Exception e) // Pokémon exceptions are evil, apparently.  I think just the name is evil :s
+		{
+			asmInput.setText(notchs_example_asm);
+			e.printStackTrace();
+		}
+    }
+    
     private void assemble()
     {
     	stop();
+    	save();
     	log("Assembling...");
     	cpu.reset();
     	asmOutput.setText("");
+    	
     	
     	ArrayList<String> messages = new ArrayList<String>();
     	char[] assembled = new Assembler().assemble(asmInput.getText().toString(), messages);
