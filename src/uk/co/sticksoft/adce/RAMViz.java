@@ -10,7 +10,7 @@ import android.widget.LinearLayout;
 
 public class RAMViz extends ImageView
 {
-	private volatile char[] RAM;
+	public volatile char[] RAM;
 	
 	private Bitmap[] buffers = new Bitmap[2];
 	
@@ -31,16 +31,16 @@ public class RAMViz extends ImageView
 		setLayoutParams(lp);
 		
 		setImageBitmap(buffers[0]);
-		updateBitmapBuffer();
-		updateFinished();
+		//updateBitmapBuffer();
+		//updateFinished();
 		//updateBuffer();
 	}
 	
 	private Thread thread;
-	private volatile int[] bitmapBuffer = new int[256*256];
+	private int[] bitmapBuffer = new int[256*256];
 	public void updateBuffer()
 	{
-		/*
+		
 		if (thread != null)
 			return;
 		
@@ -50,15 +50,17 @@ public class RAMViz extends ImageView
 			{
 				updateBitmapBuffer();
 				
+				thread = null;
 				post(new Runnable() { public void run() { updateFinished(); } });
 			}
 		});
 		
 		thread.start();
-		*/
 		
+		
+		/*
 		updateBitmapBuffer();
-		updateFinished();
+		updateFinished();*/
 	}
 	
 	private void updateBitmapBuffer()
@@ -76,6 +78,7 @@ public class RAMViz extends ImageView
 		Bitmap bmp = buffers[which];
 		bmp.setPixels(bitmapBuffer, 0, 256, 0, 0, 256, 256);
 		setImageBitmap(bmp);
+		invalidate();
 		thread = null;
 	}
 	

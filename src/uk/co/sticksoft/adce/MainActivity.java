@@ -1,15 +1,11 @@
 package uk.co.sticksoft.adce;
 
-import java.io.NotSerializableException;
-
-import uk.co.sticksoft.adce.cpu.CPU;
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.app.*;
+import android.os.*;
+import android.view.*;
+import android.view.View.*;
+import android.widget.*;
+import uk.co.sticksoft.adce.cpu.*;
 
 public class MainActivity extends Activity
 {
@@ -24,9 +20,12 @@ public class MainActivity extends Activity
 	{
         super.onCreate(savedInstanceState);
         
+		ScrollView scroll = new ScrollView(this);
         LinearLayout lyt = new LinearLayout(this);
         lyt.setOrientation(LinearLayout.VERTICAL);
-        setContentView(lyt);
+        //setContentView(lyt);
+		scroll.addView(lyt);
+		setContentView(scroll);
         
         lyt.addView(ramviz = new RAMViz(this, cpu.RAM));
         
@@ -56,19 +55,17 @@ public class MainActivity extends Activity
 		{
 			public void onClick(View v)
 			{
-				stop();
 				reset();
 			}
 		});
         lyt.addView(resetButton);
         
         reset();
-        updateInfo();
     }
     
     private void reset()
     {
-    	stop();
+		stop();
     	cpu.reset();
     	
     	char[] notchs_example =
@@ -95,7 +92,6 @@ public class MainActivity extends Activity
     {
     	running = false;
     	startButton.setText("Start");
-    	updateInfo();
     }
     
     private void update()
