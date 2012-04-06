@@ -19,6 +19,14 @@ This version successfully assembles and runs the example found at http://0x10c.c
 
 CHANGELOG
 =========
+v0.07
+-----
+Added loading and saving of the ASM buffer
+
+v0.06
+-----
+Added text entry
+
 v0.05
 -----
 Added an assembler
