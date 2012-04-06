@@ -1,8 +1,32 @@
-Android implementation of Notch's DCPU-16 (http://0x10c.com)
+ADCPU16Emu
+==========
+Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
+Version 0.05
 By Andrew "Stick" Boothroyd (@sticksoft)
 
-Probably going to be licensed under the WTFPL: http://en.wikipedia.org/wiki/WTFPL
 
-This version successfully runs the example found at http://0x10c.com/doc/dcpu-16.txt
-No real functionality yet, but feel free to browse the code!
+LICENSE
+=======
+You may do whatever the fsck you want with this software, at your own risk. (http://en.wikipedia.org/wiki/WTFPL)
+If you use it in a project, letting me know and putting a link to https://github.com/sticksoft/ADCPU-16Emu in would be appreciated.
+If I ever meet you in person, a beer would be even more appreciated!
 
+
+README
+======
+This version successfully assembles and runs the example found at http://0x10c.com/doc/dcpu-16.txt
+
+
+CHANGELOG
+=========
+v0.05
+-----
+Added an assembler
+
+v0.03, v0.04
+------------
+Minor bugfixes
+
+v0.02
+-----
+Fixed a bug with the PC, first working version
