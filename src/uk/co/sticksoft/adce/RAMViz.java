@@ -36,6 +36,7 @@ public class RAMViz extends ImageView
 		//updateBuffer();
 	}
 	
+	// There'a something wrong with the threading code.  I don't know what it is.
 	private Thread thread;
 	private int[] bitmapBuffer = new int[256*256];
 	public void updateBuffer()

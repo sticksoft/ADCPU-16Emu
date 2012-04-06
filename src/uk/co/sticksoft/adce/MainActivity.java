@@ -1,5 +1,7 @@
 package uk.co.sticksoft.adce;
 
+import java.util.ArrayList;
+
 import android.app.*;
 import android.os.*;
 import android.view.*;
@@ -15,7 +17,7 @@ public class MainActivity extends Activity
 	private TextView[] statusLabels;
 	private Button startButton, resetButton;
 	private boolean running;
-	private TextView log;
+	private TextView asmInput, asmOutput, log;
 	
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -62,12 +64,31 @@ public class MainActivity extends Activity
 		});
         lyt.addView(resetButton);
         
+        asmInput = new EditText(this);
+        asmInput.setTextSize(8);
+        asmInput.setText(notchs_example_asm);
+        lyt.addView(asmInput);
+        
+        Button assembleButton = new Button(this);
+        assembleButton.setText("Assemble");
+        assembleButton.setOnClickListener(new OnClickListener()
+		{
+			public void onClick(View v)
+			{
+				assemble();
+			}
+		});
+        lyt.addView(assembleButton);
+        
+        asmOutput = new TextView(this);
+        lyt.addView(asmOutput);
+        
         log = new TextView(this);
         lyt.addView(log);
         
         reset();
         
-        testMyAssembler();
+        //testMyAssembler();
     }
     
     final String notchs_example_asm =
@@ -158,6 +179,7 @@ public class MainActivity extends Activity
     
     private void start()
     {
+    	log("Starting...\n");
     	startButton.setText("Pause");
     	running = true;
     	update();
@@ -169,8 +191,46 @@ public class MainActivity extends Activity
     	startButton.setText("Start");
     }
     
+    private void assemble()
+    {
+    	stop();
+    	log("Assembling...");
+    	cpu.reset();
+    	asmOutput.setText("");
+    	
+    	ArrayList<String> messages = new ArrayList<String>();
+    	char[] assembled = new Assembler().assemble(asmInput.getText().toString(), messages);
+    	
+    	for (int i = 0; i < messages.size(); i++)
+    	{
+    		log(messages.get(i));
+    		asmOutput.append(messages.get(i) + "\n");
+    	}
+    	
+    	StringBuilder sb = new StringBuilder();
+    	for (int i = 0; i < assembled.length; i += 8)
+    	{
+    		sb.append(String.format("%04x", i)).append(":");
+    		for (int j = 0; j < 8; j++)
+    		{
+    			if (i+j < assembled.length)
+    				sb.append(" ").append(String.format("%04x", (int)assembled[i+j]));
+    			else
+    				sb.append(" 0000");
+    		}
+    		sb.append('\n');
+    	}
+    	asmOutput.append(sb);
+    	
+    	System.arraycopy(assembled, 0, cpu.RAM, 0, assembled.length);
+    	log("");
+    }
+    
     private void update()
     {
+    	if (!running)
+    		return;
+    	
     	cpu.execute();
     	updateInfo();
     	
