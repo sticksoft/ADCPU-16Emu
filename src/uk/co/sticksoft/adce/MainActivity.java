@@ -73,7 +73,7 @@ public class MainActivity extends Activity
         lyt.addView(resetButton);
         
         asmInput = new EditText(this);
-        asmInput.setTextSize(8);
+        asmInput.setTextSize(12);
         load();
         lyt.addView(asmInput);
         
@@ -208,7 +208,7 @@ public class MainActivity extends Activity
 			fos.flush();
 			fos.close();
 		}
-		catch (Exception e) // Pokémon exceptions are evil, apparently.  I think just the name is evil :s
+		catch (Exception e) // Pokï¿½mon exceptions are evil, apparently.  I think just the name is evil :s
 		{
 			e.printStackTrace();
 		}
@@ -224,7 +224,7 @@ public class MainActivity extends Activity
 			fis.close();
 			asmInput.setText(new String(buffer));
 		}
-		catch (Exception e) // Pokémon exceptions are evil, apparently.  I think just the name is evil :s
+		catch (Exception e) // Pokï¿½mon exceptions are evil, apparently.  I think just the name is evil :s
 		{
 			asmInput.setText(notchs_example_asm);
 			e.printStackTrace();
