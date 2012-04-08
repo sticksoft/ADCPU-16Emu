@@ -1,7 +1,7 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.05
+Version 0.08
 By Andrew "Stick" Boothroyd (@sticksoft)
 
 
@@ -19,6 +19,10 @@ This version successfully assembles and runs the example found at http://0x10c.c
 
 CHANGELOG
 =========
+v0.08
+-----
+Added Load and Save commands for SD storage
+
 v0.07
 -----
 Added loading and saving of the ASM buffer

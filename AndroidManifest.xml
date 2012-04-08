@@ -7,6 +7,7 @@
     <uses-sdk 
         android:minSdkVersion="8" 
         android:targetSdkVersion="11" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -20,6 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="DirectoryBrowserActivity"></activity>
     </application>
 
 </manifest>

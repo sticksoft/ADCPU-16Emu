@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import uk.co.sticksoft.adce.asm.Assembler;
 import uk.co.sticksoft.adce.cpu.CPU;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -18,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import java.util.*;
+import android.widget.Toast;
 
 public class MainActivity extends Activity
 {
@@ -75,7 +79,7 @@ public class MainActivity extends Activity
         
         asmInput = new EditText(this);
         asmInput.setTextSize(12);
-        load();
+        autoload();
         lyt.addView(asmInput);
         
         Button assembleButton = new Button(this);
@@ -141,6 +145,7 @@ public class MainActivity extends Activity
 	private void log(String s)
 	{
 		log.append(s+'\n');
+		Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
 	}
 	
 	private void testMyAssembler()
@@ -200,7 +205,7 @@ public class MainActivity extends Activity
     	startButton.setText("Start");
     }
     
-    private void save()
+    private void autosave()
     {
     	try
 		{
@@ -209,13 +214,13 @@ public class MainActivity extends Activity
 			fos.flush();
 			fos.close();
 		}
-		catch (Exception e) // Pok�mon exceptions are evil, apparently.  I think just the name is evil :s
+		catch (Exception e) // Pokemon exceptions are evil, apparently.  I think just the name is evil :s
 		{
 			e.printStackTrace();
 		}
     }
     
-    private void load()
+    private void autoload()
     {
     	try
 		{
@@ -225,7 +230,7 @@ public class MainActivity extends Activity
 			fis.close();
 			asmInput.setText(new String(buffer));
 		}
-		catch (Exception e) // Pok�mon exceptions are evil, apparently.  I think just the name is evil :s
+		catch (Exception e) // Pokemon exceptions are evil, apparently.  I think just the name is evil :s
 		{
 			asmInput.setText(notchs_example_asm);
 			e.printStackTrace();
@@ -235,7 +240,7 @@ public class MainActivity extends Activity
     private void assemble()
     {
     	stop();
-    	save();
+    	autosave();
     	log("Assembling...");
     	cpu.reset();
     	asmOutput.setText("");
@@ -270,12 +275,15 @@ public class MainActivity extends Activity
     	log("");
     }
     
+    public final static int CYCLES_PER_UPDATE = 20;
     private void update()
     {
     	if (!running)
     		return;
     	
-    	cpu.execute();
+    	for (int i = 0; i < CYCLES_PER_UPDATE; i++)
+    		cpu.execute();
+    	
     	updateInfo();
     	
     	if (running)
@@ -285,7 +293,7 @@ public class MainActivity extends Activity
 				{
 					update();
 				}
-			}, 100);
+			}, 50);
     }
     
     private void updateInfo()
@@ -310,5 +318,85 @@ public class MainActivity extends Activity
     			" O:"+String.format("%04x", (int)cpu.O));
     	
     	ramviz.updateBuffer();
+    }
+    
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		menu.add(Menu.NONE, 1, Menu.NONE, "Load...");
+		menu.add(Menu.NONE, 2, Menu.NONE, "Save...");
+		return super.onCreateOptionsMenu(menu);
+	}
+    
+    private boolean loading = true;
+    
+    @Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		switch (item.getItemId())
+		{
+			case 1:
+			{
+				loading = true;
+				Intent intent = new Intent(this, DirectoryBrowserActivity.class);
+				startActivityForResult(intent, 1);
+				break;
+			}
+			case 2:
+			{
+				loading = false;
+				Intent intent = new Intent(this, DirectoryBrowserActivity.class);
+				startActivityForResult(intent, 2);
+				break;
+			}
+		}
+		
+		return super.onOptionsItemSelected(item);
+	}
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+    	super.onActivityResult(requestCode, resultCode, data);
+    	
+    	String path;
+    	if (data == null || (path = data.getStringExtra("path")) == null || path.length() == 0)
+    	{
+    		log("No file path returned!\n");
+    		return;
+    	}
+    	
+    	if (loading)
+    	{
+    		log("Loading from "+path+"...");
+    		try
+    		{
+    			FileInputStream fis = new FileInputStream(path);
+    			byte[] buffer = new byte[(int) fis.getChannel().size()];
+    			fis.read(buffer);
+    			fis.close();
+    			asmInput.setText(new String(buffer));
+    		}
+    		catch (Exception ex)
+    		{
+    			log("Exception loading file: "+ex);
+    		}
+    	}
+    	else
+    	{
+    		log("Saving to "+path+"...");
+    		try
+    		{
+    			FileOutputStream fos = new FileOutputStream(path);
+				fos.write(asmInput.getText().toString().getBytes());
+				fos.flush();
+				fos.close();
+    		}
+    		catch (Exception ex)
+    		{
+    			log("Exception saving file: "+ex);
+    		}
+    	}
+    	
     }
 }
