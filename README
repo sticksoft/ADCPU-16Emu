@@ -19,6 +19,12 @@ This version successfully assembles and runs the example found at http://0x10c.c
 
 CHANGELOG
 =========
+v0.09
+-----
+Included binary APK
+Included a sample pong-like program
+Fixed label bug in assembler
+
 v0.08
 -----
 Added Load and Save commands for SD storage
