@@ -16,8 +16,8 @@ public class Assembler
 	private HashMap<String, Integer> labels = new HashMap<String, Integer>();
 	private HashMap<Integer, String> labelUsages = new HashMap<Integer, String>();
 	
-	public char[] assemble(String s) { return assemble(s, new ArrayList<String>()); }
-	public char[] assemble(String s, ArrayList<String> out_messages)
+	public char[] assemble(String s) { return assemble(s, new ArrayList<String>(), new HashMap<Integer,String>()); }
+	public char[] assemble(String s, ArrayList<String> out_messages, HashMap<Integer,String> debugsymbols)
 	{
 		source = s;
 		sourceIndex = 0;

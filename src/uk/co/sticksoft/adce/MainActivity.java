@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import java.util.*;
 
 public class MainActivity extends Activity
 {
@@ -241,7 +242,8 @@ public class MainActivity extends Activity
     	
     	
     	ArrayList<String> messages = new ArrayList<String>();
-    	char[] assembled = new Assembler().assemble(asmInput.getText().toString(), messages);
+		HashMap<Integer,String> debugSymbols = new HashMap<Integer,String>();
+    	char[] assembled = new Assembler().assemble(asmInput.getText().toString(), messages, debugSymbols);
     	
     	for (int i = 0; i < messages.size(); i++)
     	{
