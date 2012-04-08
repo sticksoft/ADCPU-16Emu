@@ -122,17 +122,25 @@ public class Assembler
 		if (line.length() == 0)
 			return null;
 		
-		int space = line.indexOf(' ');
-		if (space != -1)
+		
+		StringBuilder sb = new StringBuilder();
+		int index;
+		for (index = 0; index < line.length(); index++)
 		{
-			labels.put(line.substring(0, space), Integer.valueOf(machinecode.size()));
-			return line.substring(space);
+			char c = line.charAt(index);
+			if (Character.isWhitespace(c))
+				break;
+			else
+				sb.append(c);
 		}
-		else
-		{
-			labels.put(line, Integer.valueOf(machinecode.size()));
-			return null;
-		}
+		
+		
+		labels.put(line.substring(0, index), Integer.valueOf(machinecode.size()));
+		
+		if (index < line.length())
+			return line.substring(index);
+		
+		return null;
 	}
 	
 	
