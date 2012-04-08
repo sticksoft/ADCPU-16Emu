@@ -12,9 +12,10 @@ public class Assembler
 	private String source;
 	private int sourceIndex;
 	
-	ArrayList<Character> machinecode = new ArrayList<Character>();
+	private ArrayList<Character> machinecode = new ArrayList<Character>();
 	private HashMap<String, Integer> labels = new HashMap<String, Integer>();
 	private HashMap<Integer, String> labelUsages = new HashMap<Integer, String>();
+	private ArrayList<String> out_messages;
 	
 	public char[] assemble(String s) { return assemble(s, new ArrayList<String>(), new HashMap<Integer,String>()); }
 	public char[] assemble(String s, ArrayList<String> out_messages, HashMap<Integer,String> debugSymbols)
@@ -23,6 +24,7 @@ public class Assembler
 		sourceIndex = 0;
 		StringBuilder debugBuilder = new StringBuilder();
 		int lastInstruction = 0;
+		this.out_messages = out_messages;
 		
 		String line = null;
 		for (;;)
@@ -196,8 +198,7 @@ public class Assembler
 			}
 		}
 		
-		// TODO: Handle non-basic instructions
-		if (opcode.equals("JSR"))
+		if (opcode.equalsIgnoreCase("JSR"))
 		{
 			// Find address
 			int start = -1, end = line.length();
@@ -222,6 +223,10 @@ public class Assembler
 			String addr = line.substring(start, end);
 			writeNonBasicInstruction(1, addr);
 		}
+		else if (opcode.equalsIgnoreCase("DAT") && line.length() > 4)
+		{
+			return writeDat(line.substring(3));
+		}
 		
 		return null;
 	}
@@ -237,6 +242,91 @@ public class Assembler
 		opcode = ((opcode & 0x3f) << 4) | ((argval & 0x3f) << 10);
 		
 		machinecode.set(instr_addr, Character.valueOf((char)opcode));
+	}
+	
+	private String writeDat(String line)
+	{
+		boolean inString = false, inValue = false, escaping = false;
+		StringBuilder buffer = new StringBuilder();
+		int index = 0;
+		for (; index < line.length(); index++)
+		{
+			char c = line.charAt(index);
+			if (c == ';' && !inString)
+				break;
+			else if (c == '"')
+			{
+				if (!inString)
+					inString = true;
+				else
+				{
+					if (escaping)
+					{
+						machinecode.add(Character.valueOf(c));
+						escaping = false;
+					}
+					else
+						inString = false;
+				}
+			}
+			else if (c == '\\')
+			{
+				if (!inString)
+				{
+					out_messages.add("Invalid escape found: "+line);
+				}
+				else
+				{
+					if (escaping)
+					{
+						machinecode.add(Character.valueOf(c));
+						escaping = false;
+					}
+					else
+						escaping = true;
+				}
+			}
+			else if (inValue && !(Character.isLetterOrDigit(c)))
+			{
+				if (buffer.length() > 0)
+				{
+					try
+					{
+						machinecode.add(Character.valueOf((char)Integer.decode(buffer.toString()).intValue()));
+					}
+					catch (Exception ex)
+					{
+						out_messages.add("Invalid value found: "+line);
+					}
+					buffer.setLength(0);
+				}
+				
+				inValue = false;
+			}
+			else if (inString)
+				machinecode.add(Character.valueOf(c));
+			else if (Character.isLetterOrDigit(c))
+			{
+				buffer.append(c);
+				inValue = true;
+			}
+		}
+		
+		if (buffer.length() > 0 && inValue)
+		{
+			try
+			{
+				machinecode.add(Character.valueOf((char)Integer.decode(buffer.toString()).intValue()));
+			}
+			catch (Exception ex)
+			{
+				out_messages.add("Invalid value found: "+line);
+			}
+		}
+		
+		if (index < line.length())
+			return line.substring(index);
+		return null;
 	}
 	
 	private void writeBasicInstruction(int opcode, String A, String B)
