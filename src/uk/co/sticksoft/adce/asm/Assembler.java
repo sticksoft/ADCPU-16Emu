@@ -17,21 +17,32 @@ public class Assembler
 	private HashMap<Integer, String> labelUsages = new HashMap<Integer, String>();
 	
 	public char[] assemble(String s) { return assemble(s, new ArrayList<String>(), new HashMap<Integer,String>()); }
-	public char[] assemble(String s, ArrayList<String> out_messages, HashMap<Integer,String> debugsymbols)
+	public char[] assemble(String s, ArrayList<String> out_messages, HashMap<Integer,String> debugSymbols)
 	{
 		source = s;
 		sourceIndex = 0;
-		
+		StringBuilder debugBuilder = new StringBuilder();
+		int lastInstruction = 0;
 		
 		String line = null;
 		for (;;)
 		{
+			// Maybe write a debug symbol if anything changed!
+			if (lastInstruction != machinecode.size())
+			{
+				debugSymbols.put(Integer.valueOf(lastInstruction), debugBuilder.toString());
+				debugBuilder.setLength(0);
+				lastInstruction = machinecode.size();
+			}
+			
 			// Read next chunk, unless there was some left over from last loop
 			if (line == null)
 			{
 				line = readLine();
 				if (line == null)
 					break; // That's all, folks!
+				
+				debugBuilder.append(line);
 			}
 			
 			// Get rid of whitespace and ignore blank lines
@@ -91,18 +102,18 @@ public class Assembler
 		int lf = source.indexOf('\n', sourceIndex);
 		
 		if (cr == -1)
-			cr = source.length();
+			cr = source.length()-1;
 		if (lf == -1)
-			lf = source.length();
+			lf = source.length()-1;
 		
 		// Skip CRLF
 		if (lf == cr+1)
 			cr = lf;
 		
-		int to =  Math.min(cr,lf);
+		int to =  Math.min(cr,lf) + 1;
 		String ret = source.substring(sourceIndex, to);
 		
-		sourceIndex = to+1;
+		sourceIndex = to;
 		return ret;
 	}
 	

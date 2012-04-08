@@ -142,10 +142,12 @@ public class MainActivity extends Activity
 		0x9037, 0x61c1, 0x7dc1, 0x001a, 0x0000, 0x0000, 0x0000, 0x0000,
 	};
 	
+	char[] assembled = notchs_example_assembled;
+	
 	private void log(String s)
 	{
 		log.append(s+'\n');
-		Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+		//Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
 	}
 	
 	private void testMyAssembler()
@@ -186,7 +188,7 @@ public class MainActivity extends Activity
     	
 
     	
-    	System.arraycopy(notchs_example_assembled, 0, cpu.RAM, 0, notchs_example_assembled.length);
+    	System.arraycopy(assembled, 0, cpu.RAM, 0, assembled.length);
     	
     	updateInfo();
     }
@@ -248,7 +250,7 @@ public class MainActivity extends Activity
     	
     	ArrayList<String> messages = new ArrayList<String>();
 		HashMap<Integer,String> debugSymbols = new HashMap<Integer,String>();
-    	char[] assembled = new Assembler().assemble(asmInput.getText().toString(), messages, debugSymbols);
+    	assembled = new Assembler().assemble(asmInput.getText().toString(), messages, debugSymbols);
     	
     	for (int i = 0; i < messages.size(); i++)
     	{
@@ -269,10 +271,38 @@ public class MainActivity extends Activity
     		}
     		sb.append('\n');
     	}
+    	
+    	sb.append('\n');
+    	
+    	int words = 0;
+    	for (int i = 0; i < assembled.length; i++)
+    	{
+    		Integer intobj = Integer.valueOf(i);
+    		if (debugSymbols.containsKey(intobj))
+    		{
+    			sb.append("\n\n").append(debugSymbols.get(intobj)).append('\n');
+    			words = 0;
+    		}
+    		
+    		if (words == 0)
+    			sb.append(String.format("%04x: ", i));
+    		else
+    			sb.append(' ');
+    		
+    		sb.append(String.format("%04x", (int)assembled[i]));
+    		words++;
+    		if (words == 4 || (i > 0 && ((i%4) == 0)))
+    		{
+    			sb.append('\n');
+    			words = 0;
+    		}
+    	}
+    	
     	asmOutput.append(sb);
     	
     	System.arraycopy(assembled, 0, cpu.RAM, 0, assembled.length);
     	log("");
+    	updateInfo();
     }
     
     public final static int CYCLES_PER_UPDATE = 20;
