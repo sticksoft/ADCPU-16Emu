@@ -19,7 +19,13 @@ This version successfully assembles and runs the example found at http://0x10c.c
 
 CHANGELOG
 =========
+v0.11
+-----
+Changed to tabbed layout
+Added console display
+
 v0.10
+-----
 Added DAT support to assembler
 
 v0.09
