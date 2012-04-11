@@ -1,7 +1,7 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.10
+Version 0.11
 By Andrew "Stick" Boothroyd (@sticksoft)
 
 
@@ -14,7 +14,33 @@ If I ever meet you in person, a beer would be even more appreciated!
 
 README
 ======
+
+Overview
+--------
 This version successfully assembles and runs the example found at http://0x10c.com/doc/dcpu-16.txt
+
+Installation
+------------
+To install directly to an Android phone, download the raw .APK file in your phone's browser.  Open the file, and you should be prompted to install it.
+Note: You may need to allow applications from unknown sources on your phone.  Simply go to Settings -> Applications and check the "Unknown sources" box.
+I will attempt to get a version on the Android Market / Google Play today.
+
+Usage
+-----
+The first tab shown on app startup is the Control tab, containing the RAM viewer (box at the top) and controls for starting / resetting the emulator.
+
+The second tab is the Assembly view.  Here, you can load / save an assembly file from disk (press the Menu key for options) and assemble a program.
+Pressing "Assemble" will reset the emulator, assemble your program, output the assembled binary and an assembly -> binary view for debugging, and load the binary data into the emulator's memory.
+Return to the first tab to start it and view changes to the memory.
+
+The third tab displays the text console.  This is a work-in-progress and, as such, colours may not be displayed the same as other emulators.
+Keyboard input has not yet been implemented for the console (I'm tidying up and adding other features at the moment) - drop me a line at @sticksoft on Twitter if you're desparate for it!      
+
+Known Issues
+------------
+Doesn't ask for confirmation before saving over files - be careful! I just lost a program :( Keep backups!
+No keyboard input yet
+Should auto-assemble and reset on startup (doesn't yet)
 
 
 CHANGELOG
