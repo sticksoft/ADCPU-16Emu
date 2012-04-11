@@ -1,7 +1,7 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.11
+Version 0.13
 By Andrew "Stick" Boothroyd (@sticksoft)
 
 
@@ -45,6 +45,14 @@ Should auto-assemble and reset on startup (doesn't yet)
 
 CHANGELOG
 =========
+v0.13
+Fixed a crash issue with ICS
+
+v0.12
+-----
+Added an icon
+Released on Google Play (Android Market)
+
 v0.11
 -----
 Changed to tabbed layout

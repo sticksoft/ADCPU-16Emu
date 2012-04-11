@@ -90,11 +90,12 @@ public class Matrix
 		return this;
 	}
 	
+	/*
 	public Matrix lookAt(Vector3 origin, Vector3 target, Vector3 up)
 	{
 		android.opengl.Matrix.setLookAtM(m, 0, origin.v[0], origin.v[1], origin.v[2], target.v[0], target.v[1], target.v[2], up.v[0], up.v[1], up.v[2]);
 		return this;
-	}
+	}*/
 	
 	public Matrix frustum(float left, float right, float bottom, float top, float near, float far)
 	{

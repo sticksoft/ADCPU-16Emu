@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,7 +43,7 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
 
 		// This is NOT the way you're meant to make tabs
-		TabHost tabHost = new TabHost(this);
+		TabHost tabHost = new TabHost(this, null);
 		LinearLayout tablyt = new LinearLayout(this);
 		tablyt.setOrientation(LinearLayout.VERTICAL);
 		TabWidget tw = new TabWidget(this);
@@ -107,8 +108,10 @@ public class MainActivity extends Activity
         // Make console tab
         addTab(tabHost, "Console", new Console(this, cpu));
         
+        /*
         // Make ship tab
         addTab(tabHost, "Ship", new ShipView2D(this, cpu));
+        */
         
         // Prepare to start
         reset();
@@ -127,7 +130,7 @@ public class MainActivity extends Activity
 				return view;
 			}
 		});
-		ts.setIndicator(name, new BitmapDrawable(Bitmap.createBitmap(16, 16, Config.ARGB_8888)));
+		ts.setIndicator(name, getResources().getDrawable(R.drawable.clear));
 		
 		tabHost.addTab(ts);
     }

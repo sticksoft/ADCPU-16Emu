@@ -1,7 +1,11 @@
 package uk.co.sticksoft.adce;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,31 +43,91 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 	
 	private void navigateTo(String path)
 	{
-		files.clear();
-		names.clear();
-		
-		if (path == null)
-	    	path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "ADCPU";
-	    
-		currentDirectory = new File(path);
-	    if (!currentDirectory.exists())
-	    	currentDirectory.mkdir();
-	    
-	    File parent = currentDirectory.getParentFile();
-	    if (parent != null)
-	    	addFile(parent, "..");
-	    
-	    File[] files = currentDirectory.listFiles();
-	    for (int i = 0; i < files.length; i++)
-	    	addFile(files[i], files[i].getName());
-	    
-	    addFile(null, "New File...");
-	    addFile(null, "New Directory...");
-	    
-	    setListAdapter(this);
-	    
-	    for (DataSetObserver dso : observers)
-	    	dso.onChanged();
+		try
+		{
+			files.clear();
+			names.clear();
+			
+			boolean nullpath;
+			if (nullpath = (path == null))
+		    	path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "ADCPU";
+		    
+			currentDirectory = new File(path);
+		    if (!currentDirectory.exists())
+		    	currentDirectory.mkdir();
+		    
+		    // Bit of a hack here - copy default scripts if not found
+		    if (nullpath)
+		    {
+		    	try
+		    	{
+		    		File[] files = currentDirectory.listFiles();
+		    		
+		    		int[] ids = { R.raw.pong };
+		    		String[] filenames = { "pong.dasm" };
+		    		
+		    		for (int i = 0; i < filenames.length; i++)
+		    		{
+		    			boolean found = false;
+		    			for (int j = 0; j < files.length; j++)
+		    			{
+		    				if (files[j].getName().equals(filenames[i]))
+		    				{
+		    					found = true;
+		    					break;
+		    				}
+		    			}
+		    			if (!found)
+		    			{
+		    				// Based on http://stackoverflow.com/questions/8664468/copying-raw-file-into-sdcard
+		    				File f = new File(currentDirectory, filenames[i]);
+		    				FileOutputStream fos = new FileOutputStream(f);
+		    				InputStream is = getResources().openRawResource(ids[i]);
+		    				byte[] buffer = new byte[1024];
+		    				int read = 0;
+		    				
+		    				try
+		    				{
+			    				while ((read = is.read(buffer)) > 0)
+			    				{
+			    					fos.write(buffer, 0, read);
+			    				}
+		    				}
+		    				finally
+		    				{
+		    					fos.close();
+		    					is.close();
+		    				}
+		    				
+		    			}
+		    		}
+		    	}
+		    	catch (Exception ex)
+		    	{
+		    		
+		    	}
+		    }
+		    
+		    File parent = currentDirectory.getParentFile();
+		    if (parent != null)
+		    	addFile(parent, "..");
+		    
+		    File[] files = currentDirectory.listFiles();
+		    for (int i = 0; i < files.length; i++)
+		    	addFile(files[i], files[i].getName());
+		    
+		    addFile(null, "New File...");
+		    addFile(null, "New Directory...");
+		    
+		    setListAdapter(this);
+		    
+		    for (DataSetObserver dso : observers)
+		    	dso.onChanged();
+		}
+		catch (Exception ex)
+		{
+			finish();
+		}
 	}
 	
 	@Override
