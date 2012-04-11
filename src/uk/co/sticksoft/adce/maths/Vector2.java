@@ -30,6 +30,28 @@ public class Vector2 extends Vector3
 	// Mutators
 	///////////////////////////////////////////////////////////////////////////
 	
+	// Set
+	public Vector2 set(float f)
+	{
+		v[0] = f;
+		v[1] = f;
+		return this;
+	}
+	
+	public Vector2 set(float x, float y)
+	{
+		v[0] = x;
+		v[1] = y;
+		return this;
+	}
+	
+	public Vector2 set(Vector2 vector)
+	{
+		this.v[0] = vector.v[0];
+		this.v[1] = vector.v[1];
+		return this;
+	}
+	
 	// Add
 	public Vector2 add(float f)
 	{

@@ -29,7 +29,7 @@ public class Star
 		while (position.x() > ship.position.x() + boxSize)
 			position.sub(boxSize*2, 0);
 		
-		while (position.y() < -ship.position.y() - boxSize)
+		while (position.y() < ship.position.y() - boxSize)
 			position.add(0, boxSize*2);
 		while (position.y() > ship.position.y() + boxSize)
 			position.sub(0, boxSize*2);

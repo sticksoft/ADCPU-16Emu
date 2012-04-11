@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import uk.co.sticksoft.adce.cpu.CPU;
+import uk.co.sticksoft.adce.cpu.CPU.Observer;
 import uk.co.sticksoft.adce.maths.Vector2;
 import uk.co.sticksoft.adce.ship2d.PlayerShip;
 import uk.co.sticksoft.adce.ship2d.Star;
@@ -13,7 +14,7 @@ import android.graphics.Color;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class ShipView2D extends View
+public class ShipView2D extends View implements Observer
 {
 	PlayerShip player;
 	float starBoxSize = 900;
@@ -31,6 +32,8 @@ public class ShipView2D extends View
 					new Vector2((rand.nextFloat()-0.5f) * starBoxSize * 2.0f, (rand.nextFloat()-0.5f) * starBoxSize * 2.0f),
 					Color.argb(128 + rand.nextInt(127), 240 + rand.nextInt(15), 240 + rand.nextInt(15), 240 + rand.nextInt(15)),
 					rand.nextFloat() + 0.5f));
+		
+		cpu.addObserver(this);
 	}
 	
 	private boolean rendering = false;
@@ -70,7 +73,7 @@ public class ShipView2D extends View
 		
 		canvas.restore();
 		
-		player.position.v[0] += 4;
+		player.update(1.0f / 30.0f);
 		
 		if (rendering)
 			postInvalidateDelayed(30);
@@ -85,5 +88,11 @@ public class ShipView2D extends View
 		this.setMeasuredDimension(parentWidth, parentHeight);
 		this.setLayoutParams(new FrameLayout.LayoutParams(parentWidth,parentHeight));
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+	}
+
+	@Override
+	public void onCpuExecution(CPU cpu)
+	{
+		postInvalidate();
 	}
 }

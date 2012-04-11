@@ -108,10 +108,10 @@ public class MainActivity extends Activity
         // Make console tab
         addTab(tabHost, "Console", new Console(this, cpu));
         
-        /*
+        
         // Make ship tab
         addTab(tabHost, "Ship", new ShipView2D(this, cpu));
-        */
+        
         
         // Prepare to start
         reset();
