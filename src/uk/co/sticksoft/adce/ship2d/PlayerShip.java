@@ -1,8 +1,10 @@
 package uk.co.sticksoft.adce.ship2d;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Random;
 
+import uk.co.sticksoft.adce.ShipView2D;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU.Observer;
 import uk.co.sticksoft.adce.maths.Vector2;
@@ -13,7 +15,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
-import android.graphics.Path.FillType;
 import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
@@ -31,10 +32,12 @@ public class PlayerShip implements Observer
 	
 	private Random rand = new Random();
 	
+	private ShipView2D controller;
 	
-	public PlayerShip(Context context, CPU cpu)
+	public PlayerShip(Context context, ShipView2D shipView, CPU cpu)
 	{
 		this.cpu = cpu;
+		this.controller = shipView;
 		this.position = new Vector2();
 		this.velocity = new Vector2();
 		
@@ -155,12 +158,27 @@ public class PlayerShip implements Observer
 		paint.setStyle(Style.FILL_AND_STROKE);
 		canvas.drawPath(flamePath, yawThrusterPaint);
 	}
+	
+	// Integration with the DCPU
+	// VERY rough draft
 
 	public final int NAVI_START = 0xAD00;
 	public final int NAVI_THROTTLE = 	NAVI_START + 0;
 	public final int NAVI_PITCH = 		NAVI_START + 1;
 	public final int NAVI_YAW = 		NAVI_START + 2;
 	public final int NAVI_ROLL = 		NAVI_START + 3;
+	
+	public final int SENS_START = 0xAD10;
+	public final int SENS_CONTROL = 	SENS_START + 0;
+	public final int SENS_INDEX = 		SENS_START + 1;
+	public final int SENS_X = 			SENS_START + 2;
+	public final int SENS_Y = 			SENS_START + 3;
+	public final int SENS_TYPE = 		SENS_START + 4;
+	public final int SENS_SIZE = 		SENS_START + 5;
+	public final int SENS_IFF = 		SENS_START + 6;
+	
+	public final int SHLD_START = 0xAD20;
+	public final int SHLD_ONOFF =		SHLD_START + 0;
 
 	private static int unsignedToSigned(char c)
 	{
@@ -178,10 +196,33 @@ public class PlayerShip implements Observer
 			return (float)(-0x10000 + (int)c + 1) / (float)0x7fff;
 	}
 	
+	private ArrayList<Asteroid> blips;
+	
+	private final static float RADAR_RANGE = 100.0f;
+	
 	@Override
 	public void onCpuExecution(CPU cpu)
 	{
 		throttleControl = unsignedToScalar(cpu.RAM[NAVI_THROTTLE]);
 		yawControl = unsignedToScalar(cpu.RAM[NAVI_YAW]);
+		
+		int control = cpu.RAM[SENS_CONTROL];
+		if (control == 0xFFFF)
+		{
+			blips = new ArrayList<Asteroid>();
+			for (Asteroid a : controller.getAsteroids())
+			{
+				if (position.sub(temp, a.position).length() < RADAR_RANGE)
+					blips.add(a);
+			}
+					
+			cpu.RAM[SENS_INDEX] = (char)blips.size();
+		}
+		else if (control > 0 && control <= blips.size())
+		{
+			Asteroid blip = blips.get(control-1);
+			blip.position.sub(temp, position);
+			
+		}
 	}
 }

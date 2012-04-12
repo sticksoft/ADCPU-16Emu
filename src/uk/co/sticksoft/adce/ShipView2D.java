@@ -30,7 +30,7 @@ public class ShipView2D extends View implements Observer
 	public ShipView2D(Context context, CPU cpu)
 	{
 		super(context);
-		player = new PlayerShip(context, cpu);
+		player = new PlayerShip(context, this, cpu);
 		
 		stars = new HashSet<Star>();
 		for (int i = 0; i < 200; i++)
@@ -49,6 +49,11 @@ public class ShipView2D extends View implements Observer
 					rand.nextFloat() + 0.5f));
 		
 		cpu.addObserver(this);
+	}
+	
+	public HashSet<Asteroid> getAsteroids()
+	{
+		return asteroids;
 	}
 	
 	private static Bitmap loadBitmapAsset(Context context, String name)
