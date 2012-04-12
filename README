@@ -30,6 +30,7 @@ Note: You may need to allow applications from unknown sources on your phone.  Si
 Usage
 -----
 The first tab shown on app startup is the Control tab, containing the RAM viewer (box at the top) and controls for starting / resetting the emulator.
+This won't do much until you assemble a program!
 
 The second tab is the Assembly view.  Here, you can load / save an assembly file from disk (press the Menu key for options) and assemble a program.
 Pressing "Assemble" will reset the emulator, assemble your program, output the assembled binary and an assembly -> binary view for debugging, and load the binary data into the emulator's memory.
@@ -43,7 +44,7 @@ Values for these registers are interpreted as signed 2's complement integers; e.
 
 Known Issues
 ------------
-Doesn't ask for confirmation before saving over files - be careful! I just lost a program :( Keep backups!
+Doesn't ask for confirmation before saving over files :( Keep backups!
 No keyboard input yet
 Should auto-assemble and reset on startup (doesn't yet)
 
