@@ -1,0 +1,25 @@
+:forward
+set [0xad00], 0x1000
+
+set I, 500
+:loop1
+sub I, 1
+ifg I, 0
+set pc, loop1
+
+set [0xad00], 0
+set [0xad02], 0xd000
+
+
+ set I, 200
+:loop2
+sub I, 1
+ifg I, 0
+set pc, loop2
+
+set [0xad02], 0
+
+set pc, forward
+
+:crash
+set pc, crash
