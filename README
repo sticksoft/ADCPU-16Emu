@@ -1,8 +1,9 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.13
+Version 0.14
 By Andrew "Stick" Boothroyd (@sticksoft)
+Latest stable version: https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce
 
 
 LICENSE
@@ -17,7 +18,8 @@ README
 
 Overview
 --------
-This version successfully assembles and runs the example found at http://0x10c.com/doc/dcpu-16.txt
+This version successfully assembles and runs the example found at http://0x10c.com/doc/dcpu-16.txt.
+Supported features include emulator, assembler, console output and virtual ship (2D).
 
 Installation
 ------------
@@ -34,7 +36,10 @@ Pressing "Assemble" will reset the emulator, assemble your program, output the a
 Return to the first tab to start it and view changes to the memory.
 
 The third tab displays the text console.  This is a work-in-progress and, as such, colours may not be displayed the same as other emulators.
-Keyboard input has not yet been implemented for the console (I'm tidying up and adding other features at the moment) - drop me a line at @sticksoft on Twitter if you're desparate for it!      
+Keyboard input has not yet been implemented for the console (I'm tidying up and adding other features at the moment) - drop me a line at @sticksoft on Twitter if you're desparate for it!
+
+The fourth tab displays a virtual ship!  Control it by writing to AD00 (throttle) and AD02 (yaw starboard / port); sample code is included that does this (move.dasm).
+Values for these registers are interpreted as signed 2's complement integers; e.g. 0x7fff = all ahead full, 0x8000 = full reverse, 0x0000 = all stop.  
 
 Known Issues
 ------------
@@ -45,8 +50,13 @@ Should auto-assemble and reset on startup (doesn't yet)
 
 CHANGELOG
 =========
+v0.14
+-----
+Added virtual ship tab!
+
 v0.13
-Fixed a crash issue with ICS
+-----
+Fixed a crash issue with ICS (Thanks, Jareb!)
 
 v0.12
 -----

@@ -1,6 +1,7 @@
 package uk.co.sticksoft.adce.ship2d;
 
 import java.io.InputStream;
+import java.util.Random;
 
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU.Observer;
@@ -10,11 +11,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.graphics.Path.FillType;
+import android.graphics.Path;
 import android.graphics.RadialGradient;
 import android.graphics.Shader;
-import android.graphics.drawable.GradientDrawable;
 
 public class PlayerShip implements Observer
 {
@@ -25,6 +27,10 @@ public class PlayerShip implements Observer
 	
 	private Bitmap bmp;
 	private Paint shieldPaint;
+	private Paint mainThrusterPaint, yawThrusterPaint;
+	
+	private Random rand = new Random();
+	
 	
 	public PlayerShip(Context context, CPU cpu)
 	{
@@ -59,6 +65,12 @@ public class PlayerShip implements Observer
 		shieldPaint = new Paint();
 		//shieldPaint.setColor(Color.argb(64, 128, 128, 255));
 		shieldPaint.setShader(new RadialGradient(0, 0, 70, Color.argb(0, 0, 128, 255), Color.argb(32, 128, 230, 255), Shader.TileMode.MIRROR));
+		
+		mainThrusterPaint = new Paint();
+		mainThrusterPaint.setShader(new RadialGradient(0, 0, 70, Color.argb(0, 0, 128, 255), Color.argb(192, 128, 255, 255), Shader.TileMode.MIRROR));
+		
+		yawThrusterPaint = new Paint();
+		yawThrusterPaint.setShader(new RadialGradient(bmp.getWidth() / 2, 0, 30, Color.argb(0, 0, 128, 255), Color.argb(192, 128, 255, 255), Shader.TileMode.MIRROR));
 	}
 	
 	private float throttleControl, yawControl;
@@ -70,7 +82,7 @@ public class PlayerShip implements Observer
 		
 		rotation += yawControl * seconds;
 		
-		float speed = 1000.0f;
+		float speed = 100.0f;
 		
 		float target_xv = (float)Math.cos(rotation) * speed, target_yv = (float)Math.sin(rotation) * speed;
 		float current_xv = velocity.v[0], current_yv = velocity.v[1];
@@ -82,13 +94,66 @@ public class PlayerShip implements Observer
 	}
 	
 	
+	
 	public void render(Canvas canvas)
 	{
 		canvas.save();
 		canvas.rotate((float)Math.toDegrees(rotation));
-		canvas.drawBitmap(bmp, -bmp.getWidth()/2, -bmp.getHeight()/2, null);
-		canvas.drawCircle(0, 0, Math.max(bmp.getWidth(), bmp.getHeight()), shieldPaint);
+		
+		float w = bmp.getWidth(), h = bmp.getHeight();
+		
+		drawMainThruster(canvas, w, h);
+		drawYawThrusters(canvas, w, h);
+		
+		canvas.drawBitmap(bmp, -w/2, -h/2, null);
+		canvas.drawCircle(0, 0, Math.max(w, h), shieldPaint);
+		
 		canvas.restore();
+	}
+	
+	private Path flamePath = new Path();
+	private void drawMainThruster(Canvas canvas, float w, float h)
+	{
+		if (throttleControl <= 0)
+			return;
+		
+		flamePath.reset();
+		flamePath.moveTo(-w * 0.4f, -h * 0.12f);
+		flamePath.lineTo(-w * (0.6f + (2.0f + 2.0f * rand.nextFloat()) * throttleControl), 0);
+		flamePath.lineTo(-w * 0.4f, h * 0.13f);
+		flamePath.close();
+		
+		Paint paint = new Paint();
+		paint.setColor(Color.BLUE);
+		paint.setStyle(Style.FILL_AND_STROKE);
+		canvas.drawPath(flamePath, mainThrusterPaint);
+	}
+	
+	private void drawYawThrusters(Canvas canvas, float w, float h)
+	{
+		if (yawControl == 0)
+			return;
+		
+		if (yawControl > 0)
+		{
+			flamePath.reset();
+			flamePath.moveTo(w * 0.3f,   h * -0.1f);
+			flamePath.lineTo(w * 0.35f, h * -(0.3f + (0.3f + 0.3f * rand.nextFloat()) * yawControl));
+			flamePath.lineTo(w * 0.4f,  h * -0.1f);
+			flamePath.close();
+		}
+		else
+		{
+			flamePath.reset();
+			flamePath.moveTo(w * 0.3f,   h *  0.1f);
+			flamePath.lineTo(w * 0.35f, h * (0.3f + (0.3f + 0.3f * rand.nextFloat()) * -yawControl));
+			flamePath.lineTo(w * 0.4f,  h *  0.1f);
+			flamePath.close();
+		}
+		Paint paint = new Paint();
+		paint.setColor(Color.BLUE);
+		paint.setStyle(Style.FILL_AND_STROKE);
+		canvas.drawPath(flamePath, yawThrusterPaint);
 	}
 
 	public final int NAVI_START = 0xAD00;

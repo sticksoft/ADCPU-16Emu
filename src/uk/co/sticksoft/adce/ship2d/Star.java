@@ -19,7 +19,7 @@ public class Star
 		
 		paint = new Paint();
 		paint.setColor(colour);
-		paint.setStrokeWidth(size);
+		paint.setStrokeWidth(size*2);
 	}
 	
 	public void update(float seconds, PlayerShip ship, float boxSize)
