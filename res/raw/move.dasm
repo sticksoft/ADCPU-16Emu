@@ -1,25 +1,37 @@
 :forward
-set [0xad00], 0x1000
+			set [0xad00], 0x1000	; Set throttle to 0x1000 / 0x7fff
 
-set I, 500
+			set I, 500				; Begin loop of 500 iterations 
 :loop1
-sub I, 1
-ifg I, 0
-set pc, loop1
-
-set [0xad00], 0
-set [0xad02], 0xd000
+			sub I, 1				; Decrement I
+			ifg I, 0				; Check for loop end
+				set pc, loop1		; Back to loop start
 
 
- set I, 200
+			set [0xad00], 0			; Set throttle all stop
+			set [0xad02], 0xd000	; Start turning to port (fire starboard thruster)
+
+
+ 			set I, 200				; Begin loop of 200 iterations
 :loop2
-sub I, 1
-ifg I, 0
-set pc, loop2
+			sub I, 1				; Decrement I
+			ifg I, 0				; Check for loop end
+				set pc, loop2		; Back to loop start 
 
-set [0xad02], 0
 
-set pc, forward
+			set [0xad02], 0x3000	; Start turning to starboard (fire port thruster)
+
+
+ 			set I, 200				; Begin loop of 200 iterations
+:loop3
+			sub I, 1				; Decrement I
+			ifg I, 0				; Check for loop end
+				set pc, loop3		; Back to loop start 
+
+			set [0xad02], 0			; Stop turning at all
+			
+
+			set pc, forward			; Rinse and repeat!
 
 :crash
-set pc, crash
+			set pc, crash

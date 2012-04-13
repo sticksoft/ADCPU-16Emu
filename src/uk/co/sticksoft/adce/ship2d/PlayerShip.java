@@ -24,7 +24,6 @@ public class PlayerShip implements Observer
 	public Vector2 position, velocity;
 	public float rotation, angularMomentum;
 	public float hull, shields;
-	public float yawFiring;
 	public CPU cpu;
 	
 	private Bitmap bmp;
@@ -90,6 +89,7 @@ public class PlayerShip implements Observer
 		final float maxYawChange = 1.0f; // per second
 		
 		// These are all scalar values between -1 and 1 inclusive
+		/*
 		yawFiring = yawControl - angularMomentum;
 		if (yawFiring > maxYawChange) yawFiring = maxYawChange;
 		else if (yawFiring < -maxYawChange) yawFiring = -maxYawChange;
@@ -99,10 +99,13 @@ public class PlayerShip implements Observer
 			angularMomentum = yawControl;
 		else
 			angularMomentum += yawFiring * seconds;
+		*/
+		
+		angularMomentum += yawControl * seconds;
 		
 		rotation += angularMomentum * seconds;
 		
-		angularMomentum *= 0.99f - (0.05f * seconds);
+		//angularMomentum *= 0.99f - (0.05f * seconds);
 		
 		float speed = 100.0f;
 		
@@ -153,14 +156,14 @@ public class PlayerShip implements Observer
 	
 	private void drawYawThrusters(Canvas canvas, float w, float h)
 	{
-		if (yawFiring == 0)
+		if (yawControl == 0)
 			return;
 		
-		if (yawFiring > 0)
+		if (yawControl > 0)
 		{
 			flamePath.reset();
 			flamePath.moveTo(w * 0.3f,   h * -0.1f);
-			flamePath.lineTo(w * 0.35f, h * -(0.3f + (0.3f + 0.3f * rand.nextFloat()) * yawFiring));
+			flamePath.lineTo(w * 0.35f, h * -(0.3f + (0.3f + 0.3f * rand.nextFloat()) * yawControl));
 			flamePath.lineTo(w * 0.4f,  h * -0.1f);
 			flamePath.close();
 		}
@@ -168,7 +171,7 @@ public class PlayerShip implements Observer
 		{
 			flamePath.reset();
 			flamePath.moveTo(w * 0.3f,   h *  0.1f);
-			flamePath.lineTo(w * 0.35f, h * (0.3f + (0.3f + 0.3f * rand.nextFloat()) * -yawFiring));
+			flamePath.lineTo(w * 0.35f, h * (0.3f + (0.3f + 0.3f * rand.nextFloat()) * -yawControl));
 			flamePath.lineTo(w * 0.4f,  h *  0.1f);
 			flamePath.close();
 		}
@@ -186,6 +189,10 @@ public class PlayerShip implements Observer
 	public final int NAVI_PITCH = 		NAVI_START + 1;
 	public final int NAVI_YAW = 		NAVI_START + 2;
 	public final int NAVI_ROLL = 		NAVI_START + 3;
+	
+	public final int NAVI_PITCH_GYRO =	NAVI_START + 4;
+	public final int NAVI_YAW_GYRO = 	NAVI_START + 5;
+	public final int NAVI_ROLL_GYRO = 	NAVI_START + 6;
 	
 	public final int SENS_START = 0xAD10;
 	public final int SENS_CONTROL = 	SENS_START + 0;
@@ -215,6 +222,14 @@ public class PlayerShip implements Observer
 			return (float)(-0x10000 + (int)c + 1) / (float)0x7fff;
 	}
 	
+	private static char scalarToUnsigned(float f)
+	{
+		if (f >= 0)
+			return (char)(0x7fff * Math.min(f,1.0f));
+		else
+			return (char)(0xffff + 0x7ffff * Math.max(f,-1.0f));
+	}
+	
 	private ArrayList<Asteroid> blips;
 	
 	private final static float RADAR_RANGE = 100.0f;
@@ -222,9 +237,12 @@ public class PlayerShip implements Observer
 	@Override
 	public void onCpuExecution(CPU cpu)
 	{
+		// Navigation
 		throttleControl = unsignedToScalar(cpu.RAM[NAVI_THROTTLE]);
 		yawControl = unsignedToScalar(cpu.RAM[NAVI_YAW]);
+		cpu.RAM[NAVI_YAW_GYRO] = scalarToUnsigned(angularMomentum);
 		
+		// Sensors
 		int control = cpu.RAM[SENS_CONTROL];
 		if (control == 0xFFFF)
 		{
@@ -242,6 +260,7 @@ public class PlayerShip implements Observer
 			Asteroid blip = blips.get(control-1);
 			blip.position.sub(temp, position);
 			
+			// Write blip data into memory
 		}
 	}
 }
