@@ -24,6 +24,7 @@ public class PlayerShip implements Observer
 	public Vector2 position, velocity;
 	public float rotation, angularMomentum;
 	public float hull, shields;
+	public float yawFiring;
 	public CPU cpu;
 	
 	private Bitmap bmp;
@@ -83,7 +84,25 @@ public class PlayerShip implements Observer
 	{
 		position.add(velocity.mul(temp, seconds));
 		
-		rotation += yawControl * seconds;
+		// Too many hackish values right now, someone help me clear up this mess...
+		// Also, accelerations should use SUVAT to cope with variable seconds
+		
+		final float maxYawChange = 1.0f; // per second
+		
+		// These are all scalar values between -1 and 1 inclusive
+		yawFiring = yawControl - angularMomentum;
+		if (yawFiring > maxYawChange) yawFiring = maxYawChange;
+		else if (yawFiring < -maxYawChange) yawFiring = -maxYawChange;
+		
+		// Allow brisk stop
+		if (yawFiring < maxYawChange * seconds && yawFiring > -maxYawChange * seconds)
+			angularMomentum = yawControl;
+		else
+			angularMomentum += yawFiring * seconds;
+		
+		rotation += angularMomentum * seconds;
+		
+		angularMomentum *= 0.99f - (0.05f * seconds);
 		
 		float speed = 100.0f;
 		
@@ -134,14 +153,14 @@ public class PlayerShip implements Observer
 	
 	private void drawYawThrusters(Canvas canvas, float w, float h)
 	{
-		if (yawControl == 0)
+		if (yawFiring == 0)
 			return;
 		
-		if (yawControl > 0)
+		if (yawFiring > 0)
 		{
 			flamePath.reset();
 			flamePath.moveTo(w * 0.3f,   h * -0.1f);
-			flamePath.lineTo(w * 0.35f, h * -(0.3f + (0.3f + 0.3f * rand.nextFloat()) * yawControl));
+			flamePath.lineTo(w * 0.35f, h * -(0.3f + (0.3f + 0.3f * rand.nextFloat()) * yawFiring));
 			flamePath.lineTo(w * 0.4f,  h * -0.1f);
 			flamePath.close();
 		}
@@ -149,7 +168,7 @@ public class PlayerShip implements Observer
 		{
 			flamePath.reset();
 			flamePath.moveTo(w * 0.3f,   h *  0.1f);
-			flamePath.lineTo(w * 0.35f, h * (0.3f + (0.3f + 0.3f * rand.nextFloat()) * -yawControl));
+			flamePath.lineTo(w * 0.35f, h * (0.3f + (0.3f + 0.3f * rand.nextFloat()) * -yawFiring));
 			flamePath.lineTo(w * 0.4f,  h *  0.1f);
 			flamePath.close();
 		}
