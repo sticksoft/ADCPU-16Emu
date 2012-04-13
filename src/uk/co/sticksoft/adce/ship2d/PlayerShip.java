@@ -227,7 +227,12 @@ public class PlayerShip implements Observer
 		if (f >= 0)
 			return (char)(0x7fff * Math.min(f,1.0f));
 		else
-			return (char)(0xffff + 0x7ffff * Math.max(f,-1.0f));
+		{
+			float unsigned_f = (float)0xffff + (float)0x7fff * Math.max(f,-1.0f);
+			int unsigned_i = (int)unsigned_f;
+			char unsigned_c = (char)unsigned_i;
+			return unsigned_c;
+		}
 	}
 	
 	private ArrayList<Asteroid> blips;
@@ -240,7 +245,8 @@ public class PlayerShip implements Observer
 		// Navigation
 		throttleControl = unsignedToScalar(cpu.RAM[NAVI_THROTTLE]);
 		yawControl = unsignedToScalar(cpu.RAM[NAVI_YAW]);
-		cpu.RAM[NAVI_YAW_GYRO] = scalarToUnsigned(angularMomentum);
+		char unsigned = scalarToUnsigned(angularMomentum);
+		cpu.RAM[NAVI_YAW_GYRO] = unsigned;
 		
 		// Sensors
 		int control = cpu.RAM[SENS_CONTROL];
