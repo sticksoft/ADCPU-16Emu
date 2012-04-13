@@ -1,7 +1,7 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.14
+Version 0.15
 By Andrew "Stick" Boothroyd (@sticksoft)
 Latest stable version: https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce
 
@@ -51,6 +51,10 @@ Should auto-assemble and reset on startup (doesn't yet)
 
 CHANGELOG
 =========
+v0.15
+Added asteroids
+Altered yaw to use angular velocity (Thanks, icarroll!)
+
 v0.14
 -----
 Added virtual ship tab!
