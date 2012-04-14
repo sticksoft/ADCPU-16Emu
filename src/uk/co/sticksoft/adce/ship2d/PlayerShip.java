@@ -29,6 +29,7 @@ public class PlayerShip implements Observer
 	private Bitmap bmp;
 	private Paint shieldPaint;
 	private Paint mainThrusterPaint, yawThrusterPaint;
+	public float mainThrusterLength;
 	
 	private Random rand = new Random();
 	
@@ -116,6 +117,8 @@ public class PlayerShip implements Observer
 		
 		velocity.v[0] = current_xv + (target_xv - current_xv) * change;
 		velocity.v[1] = current_yv + (target_yv - current_yv) * change;
+		
+		mainThrusterLength = mainThrusterLength + (throttleControl - mainThrusterLength) * 0.1f;
 	}
 	
 	
@@ -139,12 +142,12 @@ public class PlayerShip implements Observer
 	private Path flamePath = new Path();
 	private void drawMainThruster(Canvas canvas, float w, float h)
 	{
-		if (throttleControl <= 0)
+		if (mainThrusterLength <= 0)
 			return;
 		
 		flamePath.reset();
 		flamePath.moveTo(-w * 0.4f, -h * 0.12f);
-		flamePath.lineTo(-w * (0.6f + (2.0f + 2.0f * rand.nextFloat()) * throttleControl), 0);
+		flamePath.lineTo(-w * (0.4f + (2.0f + 2.0f * rand.nextFloat()) * mainThrusterLength), 0);
 		flamePath.lineTo(-w * 0.4f, h * 0.13f);
 		flamePath.close();
 		
@@ -184,27 +187,28 @@ public class PlayerShip implements Observer
 	// Integration with the DCPU
 	// VERY rough draft
 
-	public final int NAVI_START = 0xAD00;
-	public final int NAVI_THROTTLE = 	NAVI_START + 0;
-	public final int NAVI_PITCH = 		NAVI_START + 1;
-	public final int NAVI_YAW = 		NAVI_START + 2;
-	public final int NAVI_ROLL = 		NAVI_START + 3;
+	public final static int NAVI_START = 0xAD00;
+	public final static int NAVI_THROTTLE = 	NAVI_START + 0;
+	public final static int NAVI_PITCH = 		NAVI_START + 1;
+	public final static int NAVI_YAW = 		NAVI_START + 2;
+	public final static int NAVI_ROLL = 		NAVI_START + 3;
 	
-	public final int NAVI_PITCH_GYRO =	NAVI_START + 4;
-	public final int NAVI_YAW_GYRO = 	NAVI_START + 5;
-	public final int NAVI_ROLL_GYRO = 	NAVI_START + 6;
+	public final static int NAVI_PITCH_GYRO =	NAVI_START + 4;
+	public final static int NAVI_YAW_GYRO = 	NAVI_START + 5;
+	public final static int NAVI_ROLL_GYRO = 	NAVI_START + 6;
 	
-	public final int SENS_START = 0xAD10;
-	public final int SENS_CONTROL = 	SENS_START + 0;
-	public final int SENS_INDEX = 		SENS_START + 1;
-	public final int SENS_X = 			SENS_START + 2;
-	public final int SENS_Y = 			SENS_START + 3;
-	public final int SENS_TYPE = 		SENS_START + 4;
-	public final int SENS_SIZE = 		SENS_START + 5;
-	public final int SENS_IFF = 		SENS_START + 6;
+	public final static int SENS_START = 0xAD10;
+	public final static int SENS_CONTROL = 	SENS_START + 0;
+	public final static int SENS_INDEX = 		SENS_START + 1;
+	public final static int SENS_X = 			SENS_START + 2;
+	public final static int SENS_Y = 			SENS_START + 3;
+	public final static int SENS_Z =           SENS_START + 4;
+	public final static int SENS_TYPE = 		SENS_START + 5;
+	public final static int SENS_SIZE = 		SENS_START + 6;
+	public final static int SENS_IFF = 		SENS_START + 7;
 	
-	public final int SHLD_START = 0xAD20;
-	public final int SHLD_ONOFF =		SHLD_START + 0;
+	public final static int SHLD_START = 0xAD20;
+	public final static int SHLD_ONOFF =		SHLD_START + 0;
 
 	private static int unsignedToSigned(char c)
 	{
@@ -264,9 +268,11 @@ public class PlayerShip implements Observer
 		else if (control > 0 && control <= blips.size())
 		{
 			Asteroid blip = blips.get(control-1);
-			blip.position.sub(temp, position);
+			blip.position.sub(temp, position).div(RADAR_RANGE);
 			
 			// Write blip data into memory
+			cpu.RAM[SENS_X] = scalarToUnsigned(temp.x());
+			cpu.RAM[SENS_Z] = scalarToUnsigned(temp.y());
 		}
 	}
 }
