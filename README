@@ -1,10 +1,10 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.15
+Version 0.16
 By Andrew "Stick" Boothroyd (@sticksoft)
 Latest stable version: https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce
-
+Don't forget you can post issues / feature requests on GitHub :)
 
 LICENSE
 =======
@@ -37,7 +37,7 @@ Pressing "Assemble" will reset the emulator, assemble your program, output the a
 Return to the first tab to start it and view changes to the memory.
 
 The third tab displays the text console.  This is a work-in-progress and, as such, colours may not be displayed the same as other emulators.
-Keyboard input has not yet been implemented for the console (I'm tidying up and adding other features at the moment) - drop me a line at @sticksoft on Twitter if you're desparate for it!
+Keyboard input has not yet been implemented for the console (I'm tidying up and adding other features at the moment) - drop me a line at @sticksoft or file a feature request if you're desparate for it!
 
 The fourth tab displays a virtual ship!  Control it by writing to 0xAD00 (throttle) and 0xAD02 (yaw starboard / port); sample code is included that does this (move.dasm).
 Values for these registers are interpreted as signed 2's complement integers; e.g. 0x7FFF = all ahead full, 0x8000 = full reverse, 0x0000 = all stop.
@@ -75,9 +75,11 @@ The asteroids are offset slightly on the radar
 CHANGELOG
 =========
 v0.16
+-----
 Added a sample radar assembly file
 
 v0.15
+-----
 Added asteroids
 Altered yaw to use angular velocity and a gyro (Thanks, icarroll!)
 

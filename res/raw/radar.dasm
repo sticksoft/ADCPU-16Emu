@@ -3,10 +3,9 @@
 ; Instead of clearing the screen, the old positions are compared with the new positions, and any
 ; unused ones are removed.  This is smoother and faster than doing a fill of 0s each refresh.
 
-set [0xad00], 100
-set [whichbuffer], 0
-set b, 0x7000
-set c, 0x7100
+set [0xad00], 100	; Move the ship forwards gently
+set b, 0x7000		; First position buffer
+set c, 0x7100		; Second position buffer
 
 
 :start
@@ -17,30 +16,33 @@ set [0x80e8], 0xf078
 ; Check for radar contacts
 set [0xAD10], 0xffff
 
-; Get count
-set I, [0xAD11]
-
 ; Swap buffers
 xor b, c
 xor c, b
 xor b, c
 set [b], 0
 
-:loop1
-ife 0, I
-set pc, cleanup
+; Get contact count
+set I, [0xAD11]
 
+:loop1
+
+; If there are 0 contacts left, goto cleanup
+ife 0, I
+    set pc, cleanup
+
+; Ask radar about this contact number (index starts at 1; 0 is no-op)
 set [0xAD10], I
 sub I, 1
 
 ; Map x to 0 - 15
-set x, [0xAD12]
+set x, [0xAD12] ; Get contact's x position
 shr x, 12
 add x, 8
 and x, 15
 
 ; Map y to 0 - 15, multiply by screen width (32)
-set y, [0xAD14]
+set y, [0xAD14] ; Get contact's z position
 shr y, 12
 add y, 8
 and y, 15 
@@ -60,7 +62,7 @@ set [a], x
 ; Write the blip to the screen
 set [x+0x8000], 0xf041
 
-set pc, loop1 ; continue loop
+set pc, loop1 ; Continue loop
 
 :cleanup
 
@@ -91,14 +93,13 @@ ife I, c
     set pc, break2
 
 set a, [I]
-set x, [0x7200+a]
-ife x, 0
-   set [0x8000+a], 0
+ife [0x7200+a], 0     ; If the backbuffer from b is empty at this position... 
+   set [0x8000+a], 0  ; ...then clear it from the main buffer as well.
 
 sub I, 1
 set pc, loop3
 
-; Delete the new markers from the 0x7200 buffer
+; Delete the new markers from the 0x7200 buffer, making it ready for next time
 :break2
 set I, [b]
 add I, b
@@ -117,7 +118,5 @@ set pc, loop4
 
 :end
 set pc, end
-
-:whichbuffer dat 0x0
 
 
