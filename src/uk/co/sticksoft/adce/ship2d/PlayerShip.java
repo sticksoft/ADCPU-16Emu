@@ -241,7 +241,7 @@ public class PlayerShip implements Observer
 	
 	private ArrayList<Asteroid> blips;
 	
-	private final static float RADAR_RANGE = 100.0f;
+	private final static float RADAR_RANGE = 1000.0f;
 	
 	@Override
 	public void onCpuExecution(CPU cpu)
