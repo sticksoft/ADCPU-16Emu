@@ -26,6 +26,7 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TabHost.TabSpec;
 import android.widget.TabWidget;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity
 {
@@ -117,6 +118,7 @@ public class MainActivity extends Activity
         reset();
         
         //testMyAssembler();
+        checkVersion();
     }
     
     private void addTab(TabHost tabHost, String name, final View view)
@@ -133,6 +135,68 @@ public class MainActivity extends Activity
 		ts.setIndicator(name, getResources().getDrawable(R.drawable.clear));
 		
 		tabHost.addTab(ts);
+    }
+    
+    private void checkVersion()
+    {
+    	final String currentVersion = "0.16";
+    	final String currentMessage = "NEW: Check out radar.dasm for radar info!";
+    	
+    	FileInputStream fis = null;
+    	boolean up_to_date = false;
+    	try
+    	{
+    		fis = openFileInput("version");
+    		byte[] buffer = new byte[(int) fis.getChannel().size()];
+			fis.read(buffer);
+			if (currentVersion.equals(new String(buffer)))
+				up_to_date = true;
+    	}
+    	catch (Exception ex)
+    	{
+    		// Don't worry
+    	}
+    	finally
+    	{
+    		if (fis != null)
+    		{
+    			try
+    			{
+    				fis.close();
+    			}
+    			catch (Exception ex)
+    			{
+    				// Not much we can do here
+    			}
+    		}
+    	}
+    	
+    	if (!up_to_date)
+    	{
+    		Toast.makeText(this, currentMessage, Toast.LENGTH_LONG).show();
+    		
+    		FileOutputStream fos = null;
+    		try
+    		{
+    			fos = openFileOutput("version", 0);
+    			fos.write(currentVersion.getBytes());
+    		}
+    		catch (Exception ex)
+    		{
+    			// Don't panic!
+    		}
+    		finally
+    		{
+    			try
+    			{
+    				fos.close();
+    			}
+    			catch (Exception e)
+    			{
+    				// Not much we can do here
+    			}
+    		}
+    	}
     }
     
 

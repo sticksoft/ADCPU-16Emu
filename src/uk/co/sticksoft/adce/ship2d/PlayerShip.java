@@ -198,14 +198,14 @@ public class PlayerShip implements Observer
 	public final static int NAVI_ROLL_GYRO = 	NAVI_START + 6;
 	
 	public final static int SENS_START = 0xAD10;
-	public final static int SENS_CONTROL = 	SENS_START + 0;
+	public final static int SENS_CONTROL = 		SENS_START + 0;
 	public final static int SENS_INDEX = 		SENS_START + 1;
 	public final static int SENS_X = 			SENS_START + 2;
 	public final static int SENS_Y = 			SENS_START + 3;
-	public final static int SENS_Z =           SENS_START + 4;
+	public final static int SENS_Z =           	SENS_START + 4;
 	public final static int SENS_TYPE = 		SENS_START + 5;
 	public final static int SENS_SIZE = 		SENS_START + 6;
-	public final static int SENS_IFF = 		SENS_START + 7;
+	public final static int SENS_IFF = 			SENS_START + 7;
 	
 	public final static int SHLD_START = 0xAD20;
 	public final static int SHLD_ONOFF =		SHLD_START + 0;

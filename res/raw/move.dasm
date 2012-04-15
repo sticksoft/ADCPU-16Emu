@@ -23,9 +23,9 @@
 ; Cancel-out yaw
 
 :loop3
-			ifg 0x0010, [0xad05]
+			ifg 0x0010, [0xad05]	; Check for yaw < small +ve value
 				set pc, forward		; Back to beginning
-			ifg [0xad05], 0xff00
+			ifg [0xad05], 0xff00	; Check for yaw > small -ve value
 				set pc, forward		; Back to beginning 
 				
 			ifg 0x8000, [0xad05] 	; If the ship is turning to starboard 

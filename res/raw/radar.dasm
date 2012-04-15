@@ -1,0 +1,123 @@
+; Sample radar program
+; To avoid flickering, drawn positions are cached in one of 2 buffers (0x7000... and 0x7100...)
+; Instead of clearing the screen, the old positions are compared with the new positions, and any
+; unused ones are removed.  This is smoother and faster than doing a fill of 0s each refresh.
+
+set [0xad00], 100
+set [whichbuffer], 0
+set b, 0x7000
+set c, 0x7100
+
+
+:start
+
+; Write centre point
+set [0x80e8], 0xf078
+
+; Check for radar contacts
+set [0xAD10], 0xffff
+
+; Get count
+set I, [0xAD11]
+
+; Swap buffers
+xor b, c
+xor c, b
+xor b, c
+set [b], 0
+
+:loop1
+ife 0, I
+set pc, cleanup
+
+set [0xAD10], I
+sub I, 1
+
+; Map x to 0 - 15
+set x, [0xAD12]
+shr x, 12
+add x, 8
+and x, 15
+
+; Map y to 0 - 15, multiply by screen width (32)
+set y, [0xAD14]
+shr y, 12
+add y, 8
+and y, 15 
+mul y, 32
+
+; Put screen position offset in X
+add x, y
+
+; Set A to position within the current buffer
+add [b], 1 ; increment buffer index
+set a, [b]
+add a, b
+
+; Write this blip to buffer
+set [a], x
+
+; Write the blip to the screen
+set [x+0x8000], 0xf041
+
+set pc, loop1 ; continue loop
+
+:cleanup
+
+
+
+; Write markers from b into another buffer (0x7200)
+set I, [b]
+add I, b
+
+:loop2
+ife I, b
+    set pc, break1
+
+set a, [I]
+set [0x7200+a], 1
+sub I, 1
+set pc, loop2
+
+
+; Check old markers, if they don't clash with new ones, erase them
+:break1
+
+set I, [c]
+add I, c
+
+:loop3
+ife I, c
+    set pc, break2
+
+set a, [I]
+set x, [0x7200+a]
+ife x, 0
+   set [0x8000+a], 0
+
+sub I, 1
+set pc, loop3
+
+; Delete the new markers from the 0x7200 buffer
+:break2
+set I, [b]
+add I, b
+
+:loop4
+ife I, b
+    set pc, start
+
+set a, [I]
+set [0x7200+a], 0
+sub I, 1
+set pc, loop4
+
+
+
+
+:end
+set pc, end
+
+:whichbuffer dat 0x0
+
+

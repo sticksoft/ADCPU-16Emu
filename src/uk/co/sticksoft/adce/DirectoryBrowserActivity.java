@@ -56,57 +56,9 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 		    if (!currentDirectory.exists())
 		    	currentDirectory.mkdir();
 		    
-		    // Bit of a hack here - copy default scripts if not found
+		    // Bit of a hack here - copy default files if not found
 		    if (nullpath)
-		    {
-		    	try
-		    	{
-		    		File[] files = currentDirectory.listFiles();
-		    		
-		    		int[] ids = { R.raw.pong, R.raw.move };
-		    		String[] filenames = { "pong.dasm", "move.dasm" };
-		    		
-		    		for (int i = 0; i < filenames.length; i++)
-		    		{
-		    			boolean found = false;
-		    			for (int j = 0; j < files.length; j++)
-		    			{
-		    				if (files[j].getName().equals(filenames[i]))
-		    				{
-		    					found = true;
-		    					break;
-		    				}
-		    			}
-		    			if (!found)
-		    			{
-		    				// Based on http://stackoverflow.com/questions/8664468/copying-raw-file-into-sdcard
-		    				File f = new File(currentDirectory, filenames[i]);
-		    				FileOutputStream fos = new FileOutputStream(f);
-		    				InputStream is = getResources().openRawResource(ids[i]);
-		    				byte[] buffer = new byte[1024];
-		    				int read = 0;
-		    				
-		    				try
-		    				{
-			    				while ((read = is.read(buffer)) > 0)
-			    				{
-			    					fos.write(buffer, 0, read);
-			    				}
-		    				}
-		    				finally
-		    				{
-		    					fos.close();
-		    					is.close();
-		    				}
-		    				
-		    			}
-		    		}
-		    	}
-		    	catch (Exception ex)
-		    	{
-		    		
-		    	}
-		    }
+		    	copyDefaultAsmFiles();
 		    
 		    File parent = currentDirectory.getParentFile();
 		    if (parent != null)
@@ -128,6 +80,57 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 		{
 			finish();
 		}
+	}
+	
+	private void copyDefaultAsmFiles()
+	{
+		try
+    	{
+    		File[] files = currentDirectory.listFiles();
+    		
+    		int[] ids = { R.raw.pong, R.raw.move, R.raw.radar };
+    		String[] filenames = { "pong.dasm", "move.dasm", "radar.dasm" };
+    		
+    		for (int i = 0; i < filenames.length; i++)
+    		{
+    			boolean found = false;
+    			for (int j = 0; j < files.length; j++)
+    			{
+    				if (files[j].getName().equals(filenames[i]))
+    				{
+    					found = true;
+    					break;
+    				}
+    			}
+    			if (!found)
+    			{
+    				// Based on http://stackoverflow.com/questions/8664468/copying-raw-file-into-sdcard
+    				File f = new File(currentDirectory, filenames[i]);
+    				FileOutputStream fos = new FileOutputStream(f);
+    				InputStream is = getResources().openRawResource(ids[i]);
+    				byte[] buffer = new byte[1024];
+    				int read = 0;
+    				
+    				try
+    				{
+	    				while ((read = is.read(buffer)) > 0)
+	    				{
+	    					fos.write(buffer, 0, read);
+	    				}
+    				}
+    				finally
+    				{
+    					fos.close();
+    					is.close();
+    				}
+    				
+    			}
+    		}
+    	}
+    	catch (Exception ex)
+    	{
+    		
+    	}
 	}
 	
 	@Override
