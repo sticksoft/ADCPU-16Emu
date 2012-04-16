@@ -66,7 +66,6 @@ These are subject to change at any time.
 
 Known Issues
 ------------
-Doesn't ask for confirmation before saving over files :( Keep backups!
 No keyboard input yet
 Should auto-assemble and reset on startup (doesn't yet)
 The asteroids are offset slightly on the radar
@@ -74,6 +73,10 @@ The asteroids are offset slightly on the radar
 
 CHANGELOG
 =========
+v0.17
+-----
+Added the file overwrite check.
+ 
 v0.16
 -----
 Added a sample radar assembly file

@@ -347,6 +347,7 @@ public class MainActivity extends Activity
 			{
 				loading = false;
 				Intent intent = new Intent(this, DirectoryBrowserActivity.class);
+				intent.putExtra("saving", true);
 				startActivityForResult(intent, 2);
 				break;
 			}

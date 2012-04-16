@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -27,8 +25,9 @@ import android.widget.TextView;
 
 public class DirectoryBrowserActivity extends ListActivity implements ListAdapter
 {
-	ArrayList<File> files = new ArrayList<File>();
-	ArrayList<String> names = new ArrayList<String>();
+	private ArrayList<File> files = new ArrayList<File>();
+	private ArrayList<String> names = new ArrayList<String>();
+	private boolean saving = false; 
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -36,6 +35,7 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 	    super.onCreate(savedInstanceState);
 	    
 	    String path = getIntent().getStringExtra("path");
+	    saving = getIntent().getBooleanExtra("saving", false);
 	    navigateTo(path);
 	}
 	
@@ -139,15 +139,33 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 		super.onListItemClick(l, v, position, id);
 		if (position < files.size() - 2)
 		{
-			File f = files.get(position);
+			final File f = files.get(position);
 			if (f.isDirectory())
 				navigateTo(f.getAbsolutePath());
 			else
 			{
-				Intent data = new Intent();
-				data.putExtra("path", f.getAbsolutePath());
-				setResult(RESULT_OK, data);
-				finish();
+				if (saving && f.length() > 5) // Why 5?  Well, if your code is that short you can retype it :P (and it takes care of off-by-one errors)
+				{
+					// Show confirm dialog
+					new AlertDialog.Builder(this).setTitle("Overwrite?").setPositiveButton("Yes", new OnClickListener()
+					{
+						@Override
+						public void onClick(DialogInterface dialog, int which)
+						{
+							Intent data = new Intent();
+							data.putExtra("path", f.getAbsolutePath());
+							setResult(RESULT_OK, data);
+							finish();
+						}
+					}).setNegativeButton("No", null).show();
+				}
+				else
+				{
+					Intent data = new Intent();
+					data.putExtra("path", f.getAbsolutePath());
+					setResult(RESULT_OK, data);
+					finish();
+				}
 			}
 		}
 		else if (position == files.size() - 2)
