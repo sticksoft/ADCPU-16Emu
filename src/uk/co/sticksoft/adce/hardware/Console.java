@@ -22,6 +22,8 @@ public class Console extends View implements CPU.Observer
 	public final static int DISPLAY_W = 32, DISPLAY_H = 16;
 	public final static int CHARACTER_W = 4, CHARACTER_H = 8;
 	
+	private long lastUpdate;
+	
 	public Console(Context context, CPU cpu)
 	{
 		super(context);
@@ -29,6 +31,8 @@ public class Console extends View implements CPU.Observer
 		this.cpu = cpu;
 		
 		cpu.addObserver(this);
+		
+		lastUpdate = System.currentTimeMillis();
 	}
 	
 	private int decodeColour(int col)
@@ -173,6 +177,11 @@ public class Console extends View implements CPU.Observer
 	@Override
 	public void onCpuExecution(CPU cpu)
 	{
-		postInvalidate();
+		long time = System.currentTimeMillis();
+		if (time < lastUpdate + 20)
+		{
+			lastUpdate = time;
+			postInvalidate();
+		}
 	}
 }

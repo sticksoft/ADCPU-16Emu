@@ -33,12 +33,12 @@ public class PlayerShip implements Observer
 	
 	private Random rand = new Random();
 	
-	private ShipView2D controller;
+	private Ship2DEnvironment env;
 	
-	public PlayerShip(Context context, ShipView2D shipView, CPU cpu)
+	public PlayerShip(Context context, Ship2DEnvironment env, CPU cpu)
 	{
 		this.cpu = cpu;
-		this.controller = shipView;
+		this.env = env;
 		this.position = new Vector2();
 		this.velocity = new Vector2();
 		
@@ -257,7 +257,7 @@ public class PlayerShip implements Observer
 		if (control == 0xFFFF)
 		{
 			blips = new ArrayList<Asteroid>();
-			for (Asteroid a : controller.getAsteroids())
+			for (Asteroid a : env.asteroids)
 			{
 				if (position.sub(temp, a.position).length() < RADAR_RANGE)
 					blips.add(a);
