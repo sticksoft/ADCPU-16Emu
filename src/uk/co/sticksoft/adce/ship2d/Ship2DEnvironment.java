@@ -19,7 +19,7 @@ public class Ship2DEnvironment implements Environment
 	{
 		this.cpu = cpu;
 		
-		player = new PlayerShip(context, null, cpu);
+		player = new PlayerShip(context, this, cpu);
 		
 		Bitmap aster = loadBitmapAsset(context, "asteroid.png");
 		asteroids = new HashSet<Asteroid>();

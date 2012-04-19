@@ -100,17 +100,20 @@ public class Console extends View implements CPU.Observer
 			}
 		
 		this.backbuffer = Bitmap.createBitmap(CHARACTER_W * DISPLAY_W, CHARACTER_H * DISPLAY_H, Config.ARGB_8888);
+		this.backbufferCanvas = new Canvas(backbuffer);
 	}
 	
 	private Bitmap backbuffer;
+	private Canvas backbufferCanvas;
 	
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
 		//super.onDraw(canvas);
-		
+		/*
 		Paint p = new Paint(); p.setColor(Color.CYAN);
 		canvas.drawRect(0, 0, DISPLAY_W * CHARACTER_W * 4, DISPLAY_H * CHARACTER_H * 4, p);
+		*/
 		
 		if (charmap == null)
 			loadFont();
@@ -123,23 +126,26 @@ public class Console extends View implements CPU.Observer
 		canvas.restore();
 	}
 	
+	Paint bgpaint = new Paint();
+	Paint fgpaint = new Paint();
+	
 	private void drawToBackbuffer()
 	{
-		Canvas canvas = new Canvas(backbuffer);
+		//Canvas canvas = new Canvas(backbuffer);
+		
+		backbufferCanvas = new Canvas(backbuffer);
 		
 		int fgcol = Color.WHITE, bgcol = Color.BLACK;
 		int canvas_x = 0, canvas_y = 0, dataIndex = KEYBOARD_MEM_ADDRESS;
 		
-		Paint bgpaint = new Paint();
-		bgpaint.setColor(bgcol);
 		
-		Paint fgpaint = new Paint();
+		bgpaint.setColor(bgcol);
 		fgpaint.setColor(fgcol);
 
 		int debug_c = 0;
 		for (int y = DISPLAY_H; y-->0;)
 		{
-			canvas.save();
+			backbufferCanvas.save();
 			for (int x = DISPLAY_W; x-->0;)
 			{
 				char character = cpu.RAM[dataIndex++];
@@ -148,7 +154,7 @@ public class Console extends View implements CPU.Observer
 				
 				//bgpaint.setColor(Color.argb(255, 0, (debug_c * 32) % 256, (debug_c * 2) % 256));// decodeColour(bgcolour));
 				bgpaint.setColor(decodeColour(bgcolour));
-				canvas.drawRect(canvas_x, canvas_y, canvas_x + CHARACTER_W, canvas_y + CHARACTER_H, bgpaint);
+				backbufferCanvas.drawRect(canvas_x, canvas_y, canvas_x + CHARACTER_W, canvas_y + CHARACTER_H, bgpaint);
 				
 				debug_c++;//c = debug_c++;
 				
@@ -156,15 +162,15 @@ public class Console extends View implements CPU.Observer
 				{
 					fgpaint.setColor(decodeColour(fgcolour));
 					//fgpaint.setStrokeWidth(0.9f);
-					canvas.drawPoints(charmap[c], fgpaint);
+					backbufferCanvas.drawPoints(charmap[c], fgpaint);
 					
 					//canvas.drawBitmap(bmpChars[c], 0, 0, null);
 				}
 				
-				canvas.translate(CHARACTER_W, 0);
+				backbufferCanvas.translate(CHARACTER_W, 0);
 			}
-			canvas.restore();
-			canvas.translate(0, CHARACTER_H);
+			backbufferCanvas.restore();
+			backbufferCanvas.translate(0, CHARACTER_H);
 		}
 	}
 	
@@ -178,7 +184,7 @@ public class Console extends View implements CPU.Observer
 	public void onCpuExecution(CPU cpu)
 	{
 		long time = System.currentTimeMillis();
-		if (time < lastUpdate + 20)
+		if (time > lastUpdate + 50)
 		{
 			lastUpdate = time;
 			postInvalidate();

@@ -151,9 +151,10 @@ public class PlayerShip implements Observer
 		flamePath.lineTo(-w * 0.4f, h * 0.13f);
 		flamePath.close();
 		
+		/*
 		Paint paint = new Paint();
 		paint.setColor(Color.BLUE);
-		paint.setStyle(Style.FILL_AND_STROKE);
+		paint.setStyle(Style.FILL_AND_STROKE);*/
 		canvas.drawPath(flamePath, mainThrusterPaint);
 	}
 	
@@ -178,9 +179,10 @@ public class PlayerShip implements Observer
 			flamePath.lineTo(w * 0.4f,  h *  0.1f);
 			flamePath.close();
 		}
+		/*
 		Paint paint = new Paint();
 		paint.setColor(Color.BLUE);
-		paint.setStyle(Style.FILL_AND_STROKE);
+		paint.setStyle(Style.FILL_AND_STROKE);*/
 		canvas.drawPath(flamePath, yawThrusterPaint);
 	}
 	
@@ -229,17 +231,27 @@ public class PlayerShip implements Observer
 	private static char scalarToUnsigned(float f)
 	{
 		if (f >= 0)
-			return (char)(0x7fff * Math.min(f,1.0f));
+		{
+			if (f >= 1)
+				return (char)(0x7fff);
+			else
+				return (char)(0x7fff * f);
+		}
 		else
 		{
-			float unsigned_f = (float)0xffff + (float)0x7fff * Math.max(f,-1.0f);
-			int unsigned_i = (int)unsigned_f;
-			char unsigned_c = (char)unsigned_i;
-			return unsigned_c;
+			if (f <= -1)
+				return (char)0xffff - 0x7fff;
+			else
+			{
+				float unsigned_f = (float)0xffff + (float)0x7fff * f;
+				int unsigned_i = (int)unsigned_f;
+				char unsigned_c = (char)unsigned_i;
+				return unsigned_c;
+			}
 		}
 	}
 	
-	private ArrayList<Asteroid> blips;
+	private ArrayList<Asteroid> blips = new ArrayList<Asteroid>();
 	
 	private final static float RADAR_RANGE = 1000.0f;
 	
@@ -256,7 +268,7 @@ public class PlayerShip implements Observer
 		int control = cpu.RAM[SENS_CONTROL];
 		if (control == 0xFFFF)
 		{
-			blips = new ArrayList<Asteroid>();
+			blips.clear();
 			for (Asteroid a : env.asteroids)
 			{
 				if (position.sub(temp, a.position).length() < RADAR_RANGE)

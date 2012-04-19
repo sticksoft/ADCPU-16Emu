@@ -8,6 +8,7 @@ import java.util.HashMap;
 import uk.co.sticksoft.adce.asm.Assembler;
 import uk.co.sticksoft.adce.cpu.CPU;
 import android.content.Context;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,6 +33,8 @@ public class AssemblyEditorTab extends ScrollView
 		lyt.setOrientation(LinearLayout.VERTICAL);
 		
 		asmInput = new EditText(context);
+		asmInput.setRawInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+		//asmInput.setMaxLines(65536);
         asmInput.setTextSize(12);
         autoload();
         lyt.addView(asmInput);

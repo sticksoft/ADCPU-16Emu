@@ -28,7 +28,7 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity
+public class MainActivity extends Activity implements CPU.Observer
 {
 	private CPU cpu = new CPU();
 	private RAMViz ramviz;
@@ -37,6 +37,7 @@ public class MainActivity extends Activity
 	private boolean running;
 	private TextView log;
 	private AssemblyEditorTab asmEditor;
+	private long lastUpdateTime;
 	
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -68,7 +69,7 @@ public class MainActivity extends Activity
         
         lyt.addView(ramviz = new RAMViz(this, cpu.RAM));
         
-        statusLabels = new TextView[4];
+        statusLabels = new TextView[5];
         for (int i = 0; i < statusLabels.length; i++)
         {
         	TextView tv = new TextView(this);
@@ -119,6 +120,9 @@ public class MainActivity extends Activity
         
         //testMyAssembler();
         checkVersion();
+        
+        lastUpdateTime = System.currentTimeMillis();
+        cpu.addObserver(this);
     }
     
     private void addTab(TabHost tabHost, String name, final View view)
@@ -260,13 +264,44 @@ public class MainActivity extends Activity
     	
     	updateInfo();
     }
-    
+
+    private static int CYCLES_PER_SECOND = 100 * 1000;
+    private static int CYCLES_PER_MILLI = CYCLES_PER_SECOND / 1000;
+    private Thread cpuThread = null;
     public void start()
     {
     	log("Starting...\n");
     	startButton.setText("Pause");
     	running = true;
-    	update();
+
+
+    	cpuThread = new Thread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				while (running)
+				{
+					int millis_per_loop = 10;
+					long time = System.currentTimeMillis();
+					for (int i = millis_per_loop; i-->0;)
+					{
+						for (int j = CYCLES_PER_MILLI; j-->0;) // Yes, this doesn't actually measure cycles at the moment
+							cpu.execute();
+						
+						Thread.yield(); // Be nice
+					}
+					
+					while (System.currentTimeMillis() < time + millis_per_loop) // If we're running too fast, wait a bit.
+					{
+						try { Thread.sleep(1); } catch (Exception e) { return; }
+					}
+				}
+			}
+		}, "CPU Thread");
+    	
+    	//cpuThread.setPriority(Thread.MIN_PRIORITY);
+    	cpuThread.start();
     }
     
     public void stop()
@@ -275,28 +310,8 @@ public class MainActivity extends Activity
     	startButton.setText("Start");
     }
     
-    
-    public final static int CYCLES_PER_UPDATE = 20;
-    private void update()
-    {
-    	if (!running)
-    		return;
-    	
-    	for (int i = 0; i < CYCLES_PER_UPDATE; i++)
-    		cpu.execute();
-    	
-    	updateInfo();
-    	
-    	if (running)
-	    	startButton.postDelayed(new Runnable()
-			{
-				public void run()
-				{
-					update();
-				}
-			}, 50);
-    }
-    
+    private long lastActualUpdate = System.currentTimeMillis(), lastCycleCount = 0;
+    private String lastSpeed = "(unknown)";
     public void updateInfo()
     {
     	statusLabels[0].setText(
@@ -317,6 +332,34 @@ public class MainActivity extends Activity
     			" PC:"+String.format("%04x", (int)cpu.PC) +
     			" SP:"+String.format("%04x", (int)cpu.SP) +
     			" O:"+String.format("%04x", (int)cpu.O));
+    	
+    	String speed = "(unknown)";
+    	long cyclesElapsed = cpu.cycleCount - lastCycleCount;
+    	long time = System.currentTimeMillis();
+    	long millisElapsed = time - lastActualUpdate;
+    	if (millisElapsed > 0)
+    	{
+    		float hz = (float)cyclesElapsed * 1000.0f / (float)millisElapsed;
+    		
+    		if (hz < 1000)
+    			speed = String.format("%.0fHz", hz);
+    		else if (hz < 1000 * 1000)
+    			speed = String.format("%.1fkHz", hz / 1000.0f);
+    		else if (hz < 1000 * 1000 * 1000)
+    			speed = String.format("%.2fMHz", hz / (1000.0f * 1000.0f));
+    		else
+    			speed = String.format("%.2fGHz", hz / (1000.0f * 1000.0f * 1000.0f));
+    		
+    		// I'm not going above GHz, don't be silly
+    	}
+    	else
+    		speed = lastSpeed + " (est)";
+    	
+    	lastActualUpdate = time;
+    	lastCycleCount = cpu.cycleCount;
+    	
+    	statusLabels[4].setText(
+    			" Cycles: "+cpu.cycleCount+" Speed: "+speed);
     	
     	ramviz.updateBuffer();
     }
@@ -401,4 +444,31 @@ public class MainActivity extends Activity
     	}
     	
     }
+    
+    private Runnable updateRunnable = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			updateInfo();
+		}
+	};
+
+	@Override
+	public void onCpuExecution(CPU cpu)
+	{
+		long time = System.currentTimeMillis();
+		if (time > lastUpdateTime + 50)
+		{
+			lastUpdateTime = time;
+			runOnUiThread(updateRunnable);
+		}
+	}
+	
+	@Override
+	protected void onPause()
+	{
+		super.onPause();
+		running = false;
+	}
 }

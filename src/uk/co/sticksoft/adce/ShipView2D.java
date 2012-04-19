@@ -8,7 +8,7 @@ import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU.Observer;
 import uk.co.sticksoft.adce.maths.Vector2;
 import uk.co.sticksoft.adce.ship2d.Asteroid;
-import uk.co.sticksoft.adce.ship2d.PlayerShip;
+import uk.co.sticksoft.adce.ship2d.Ship2DEnvironment;
 import uk.co.sticksoft.adce.ship2d.Star;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -17,7 +17,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.view.View;
 import android.widget.FrameLayout;
-import uk.co.sticksoft.adce.ship2d.*;
 
 public class ShipView2D extends View implements Observer
 {
@@ -161,7 +160,7 @@ public class ShipView2D extends View implements Observer
 			lastUpdate = time;
 			if (rendering)
 			    postInvalidate();
-			env.update((float)elapsed);
+			env.update((float)elapsed / 1000.0f);
 		}
 	}
 }

@@ -7,6 +7,7 @@ public class CPU
 	public char[] RAM = new char[0x10000];
 	public char[] register = new char[8];
 	public char PC,SP,O;
+	public long cycleCount = 0;
 	
 	public enum Value
 	{
@@ -63,6 +64,7 @@ public class CPU
 		for (int i = 0; i < 0x10000; i++)
 			RAM[i] = 0;
 		PC = SP = O = 0;
+		cycleCount = 0;
 	}
 	
 	private AddressType addressType(char value)
@@ -168,6 +170,8 @@ public class CPU
 	
 	public void execute()
 	{
+		cycleCount++; // TODO: work out correct cycle counts
+		
 		char instruction = RAM[PC];
 		
 		int op = instruction & 0x0f;
@@ -314,8 +318,18 @@ public class CPU
 	{
 		observers.remove(ob);
 	}
+	
+	private int notifyCounter = 0;
 	public void notifyObservers()
 	{
+		if (notifyCounter > 0)
+		{
+			notifyCounter--;
+			return;
+		}
+		else
+			notifyCounter = 100;
+		
 		for (Observer o : observers)
 			o.onCpuExecution(this);
 	}
