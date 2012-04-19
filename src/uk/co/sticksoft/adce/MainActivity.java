@@ -369,6 +369,8 @@ public class MainActivity extends Activity implements CPU.Observer
 	{
 		menu.add(Menu.NONE, 1, Menu.NONE, "Load...");
 		menu.add(Menu.NONE, 2, Menu.NONE, "Save...");
+		menu.add(Menu.NONE, 3, Menu.NONE, "Assemble");
+		menu.add(Menu.NONE, 4, Menu.NONE, "Start/stop");
 		return super.onCreateOptionsMenu(menu);
 	}
     
@@ -394,6 +396,15 @@ public class MainActivity extends Activity implements CPU.Observer
 				startActivityForResult(intent, 2);
 				break;
 			}
+			case 3:
+			    asmEditor.assemble();
+			    break;
+		    case 4:
+				if (running)
+					stop();
+			    else
+				    start();
+				break;
 		}
 		
 		return super.onOptionsItemSelected(item);

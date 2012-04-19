@@ -98,7 +98,7 @@ public class AssemblyEditorTab extends ScrollView
 		}
     }
     
-    private void assemble()
+    public void assemble()
     {
     	main.stop();
     	autosave();
