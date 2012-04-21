@@ -1,0 +1,49 @@
+<h1>DASM Quick Reference</h1>
+The following information is copied / paraphrased from <a href="http://0x10c.com/doc/dcpu-16.txt">http://0x10c.com/doc/dcpu-16.txt</a>. <br/><br/><br/>
+
+In this document, anything within [brackets] is shorthand for "the value of the RAM at the location of the value inside the brackets". <br/>
+For example, SP means stack pointer, but [SP] means the value of the RAM at the location the stack pointer is pointing at. <br/> <br/>
+
+Whenever the CPU needs to read a word, it reads [PC], then increases PC by one. Shorthand for this is [PC++]. <br/>
+In some cases, the CPU will modify a value before reading it, in this case the shorthand is [++PC]. <br/> <br/><br/>
+
+Basic opcodes: (4 bits) <br/><br/>
+    0x0: non-basic instruction - see below <br/><br/>
+    0x1: SET a, b - sets a to b <br/><br/>
+    0x2: ADD a, b - sets a to a+b, sets O to 0x0001 if there's an overflow, 0x0 otherwise <br/><br/>
+    0x3: SUB a, b - sets a to a-b, sets O to 0xffff if there's an underflow, 0x0 otherwise <br/><br/>
+    0x4: MUL a, b - sets a to a*b, sets O to ((a*b)&gt;&gt;16)&amp;0xffff <br/><br/>
+    0x5: DIV a, b - sets a to a/b, sets O to ((a&lt;&lt;16)/b)&amp;0xffff. if b==0, sets a and O to 0 instead. <br/><br/>
+    0x6: MOD a, b - sets a to a%b. if b==0, sets a to 0 instead. <br/><br/>
+    0x7: SHL a, b - sets a to a&lt;&lt;b, sets O to ((a&lt;&lt;b)&gt;&gt;16)&0xffff <br/><br/>
+    0x8: SHR a, b - sets a to a>>b, sets O to ((a&lt;&lt;16)&gt;&gt;b)&0xffff <br/><br/>
+    0x9: AND a, b - sets a to a&amp;b <br/><br/>
+    0xa: BOR a, b - sets a to a|b <br/><br/>
+    0xb: XOR a, b - sets a to a^b <br/><br/>
+    0xc: IFE a, b - performs next instruction only if a==b <br/><br/>
+    0xd: IFN a, b - performs next instruction only if a!=b <br/><br/>
+    0xe: IFG a, b - performs next instruction only if a&gt;b <br/><br/>
+    0xf: IFB a, b - performs next instruction only if (a&amp;b)!=0 <br/><br/>
+
+<br/>
+
+Values: (6 bits) <br/><br/>
+    0x00-0x07: register (A, B, C, X, Y, Z, I or J, in that order) <br/><br/>
+    0x08-0x0f: [register] <br/><br/>
+    0x10-0x17: [next word + register] <br/><br/>
+         0x18: POP / [SP++] <br/><br/>
+         0x19: PEEK / [SP] <br/><br/>
+         0x1a: PUSH / [--SP] <br/><br/>
+         0x1b: SP <br/><br/>
+         0x1c: PC <br/><br/>
+         0x1d: O <br/><br/>
+         0x1e: [next word] <br/><br/>
+         0x1f: next word (literal) <br/><br/>
+    0x20-0x3f: literal value 0x00-0x1f (literal) <br/><br/> <br/>
+
+Non-basic opcodes: (6 bits) <br/><br/>
+         0x00: reserved for future expansion <br/><br/>
+         0x01: JSR a - pushes the address of the next instruction to the stack, then sets PC to a <br/><br/>
+    0x02-0x3f: reserved <br/><br/>
+
+</pre>

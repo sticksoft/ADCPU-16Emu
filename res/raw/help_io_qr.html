@@ -1,0 +1,35 @@
+<h1>I/O Quick Reference</h1>
+Currently, I/O consists of writing to the console (somewhat standardised), and interfacing with the ship (non-standard).
+
+<h2>Console</h2>
+Write to 0x8000 - 0x81FF for 7-bit ASCII output to 32x16 screen. <br/><br/>
+Format (16 bits): ffffbbbbcaaaaaaa <br/><br/>
+ffff is 4-bit foreground colour <br/><br/>
+bbbb is 4-bit background colour <br/><br/>
+c is the blink bit (not implemented) <br/><br/>
+aaaaaaa is the 7-bit ASCII value <br/><br/>
+<br/>
+Colours are 4-bit values of format: hrgb <br/><br/>
+h is highlight on/off (use brighter colours or not)<br/><br/>
+r is red component <br/><br/>
+g is green component <br/><br/>
+b is blue component <br/><br/>
+
+<h2>Harcoded memory addresses</h2>
+These are subject to change at any time. <br/><br/>
+0xAD00 - Throttle control <br/><br/>
+0xAD01 - (reserved for pitch) <br/><br/>
+0xAD02 - Yaw <br/><br/>
+0xAD03 - (reserved for roll) <br/><br/>
+0xAD04 - (reserved for pitch gyro) <br/><br/> 
+0xAD05 - Yaw gyro <br/><br/>
+0xAD06 - (reserved for roll gyro) <br/><br/><br/>
+
+0xAD10 - Radar control. Set to 0xFFFF to get count, set to index number (starting at 1) for that contact's info. <br/><br/>
+0xAD11 - Radar contact count <br/><br/>
+0xAD12 - Current contact X <br/><br/>
+0xAD13 - (reserved for contact Y) <br/><br/>
+0xAD14 - Current contact Z <br/><br/>
+0xAD15 - (reserved for contact type) <br/><br/>
+0xAD16 - (reserved for contact size) <br/><br/>
+0xAD17 - (reserved for contact IFF code) <br/><br/>

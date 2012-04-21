@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.co.sticksoft.adce"
-    android:versionCode="7"
-    android:versionName="0.18" >
+    android:versionCode="8"
+    android:versionName="0.19" >
 
     <uses-sdk 
         android:minSdkVersion="4" 
@@ -22,6 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name="DirectoryBrowserActivity"></activity>
+        <activity android:name=".help.HelpActivity" android:label="Help"></activity>
+        <activity android:name=".help.TextActivity" android:label="Help"></activity>
     </application>
 
 </manifest>

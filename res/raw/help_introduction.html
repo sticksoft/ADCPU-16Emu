@@ -1,0 +1,39 @@
+<h1>Introduction</h1>
+<h2>What's 0x10c?</h2>
+0x10c is the name of a new game recently announced by Notch, the creator of Minecraft and founder of Mojang AB. <br/><br/>
+The game will involve space travel, in-depth engineering and programmable in-game computers.  For more info, see <a href="http://0x10c.com">0x10c.com</a>. <br/><br/>
+ 
+<h2>What is ADCPU-16Emu?</h2>
+In 0x10c, the central processing unit of the programmable computer is known as the DCPU. <br/><br/>
+ADCPU-16Emu (or just ADCPU) is an Android implementation of the DCPU. <br/><br/>
+ADCPU contains an emulator (that simulates the operation of the DCPU), an assembler (that converts human-readable programs written in DCPU Assembly (or "DASM") into machine-readable executable code), a console (that displays output from the emulator's memory) and some extras like the virtual ship. <br/><br/>
+
+<h2>What can it do?</h2>
+Hopefully, ADCPU should be able to assemble and run any DCPU program written by your fine self, or found on the 'net. <br/><br/>
+The majority of programs at this stage do little more than run some computations and provide output via the console. <br/><br/>
+Some programs also accept keyboard input - this has not yet been implemented in ADCPU. <br/><br/>
+Unlike most other emulators, ADCPU links to a "virtual ship", that can be controlled by reading from and writing to several memory addresses. <br/><br/>
+
+<h2>How do you use it?</h2>
+<h3>Assembling a program</h3>
+Before you can use the DCPU, you must give it a program to execute. <br/><br/>
+Go to the ASM tab, and hit the menu key on your phone.
+Tap "Load..." to load a program, and select "radar.dasm". <br/><br/>
+This loads the program into the text entry area on the ASM tab.
+To insert this program into the DCPU's memory, scroll down to below the text area and hit the "Assemble" button. <br/><br/>
+This will assemble the above program into its machine code form, which the DCPU can understand. <br/><br/>
+(This is displayed beneath the button after assembly. Don't worry if you don't understand what all the numbers mean! It's only displayed to help advanced users find glitches in my assembler.) <br/><br/>
+
+<h3>Running the program</h3>
+Once the program is assembled, go back to the Control tab and hit the "Start" button (if your phone has a small screen, you might need to scroll down to find it). <br/><br/>
+That's it! The program is now running. <br/><br/>
+The reddy-brown window at the top of that tab shows the contents of the DCPU's memory. <br/>
+The assembled program is that top line of green-and-blue dots. <br/><br/>
+(The colour is determined by the value in memory. As this is a 16-bit computer, the values range from 0x0000 to 0xFFFF. The first high 8 bits are used as the green component, the low 8 bits are used as the blue component, so 0xFF00 is green and 0x00FF is blue, and 0xFFFF is cyan).
+
+<h3>Ship and Console</h3>
+On the Ship tab and you'll see the virtual ship moving along! <br/><br/>
+You can't control it directly (yet); the program you just assembled controls it automatically. <br/><br/>
+Check out move.dasm for slightly more advanced movement! <br/><br/>
+On the Console tab, you'll see any output from the current program. <br/><br/>
+With the radar.dasm program, this should be a collection of 'A's moving round an 'x' - A for Asteroid, x for your ship <br/><br/>

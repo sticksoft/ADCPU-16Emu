@@ -1,0 +1,47 @@
+<h1>What's Assembly Language?</h1>
+
+<h2>What's a computer?</h2>
+A computer is a general-purpose device that performs calculations according to a program that it is given. <br><br>
+The 'brain' of a computer is its CPU - the Central Processing Unit.  Its short-term 'memory' is its RAM - Random Access Memory. <br><br>
+Its long-term memory is its hard disks, floppy disks, tapes, flash drives, and any other kind of permanent storage. <br><br>
+It communicates with the world through a variety of I/O (input / output) devices, including monitors and keyboards. <br><br>
+
+
+<h2>How's a computer controlled?</h2>
+Computers follow programs.  Programs contain a list of instructions, and some associated data. <br/><br/>
+Each instruction of a program is "fed into" the CPU to be executed. <br/><br/>
+In high-level programming languages (more human-readable, such as Java, C++, Haskell, COBOL, BASIC, etc), a single statement may result in the CPU performing several operations. <br/><br/>
+However, in lower-level languages (less human-readable, such as C, Assembly and machine code), a single statement usually results in the CPU only performing a single, matching operation. <br/><br/>
+ 
+
+<h2>What's machine code?</h2>
+Machine code is the lowest-level "language" that can be used to control a computer.  It is essentially a series of numbers that control the CPU directly. <br/><br/>
+Machine code consists of a list of instructions, which are executed one at a time, usually one after the other. <br/><br/>
+In the DCPU-16 architecture, instructions consist of an opcode (number identifying the operation to perform) and 0, 1 or 2 data values that immediately follow the opcode. <br/><br/>
+Unless you plan on writing your own emulator, you do not need to worry about how these opcodes work! <br/><br/>
+
+<h2>What's an operation?</h2>
+A single CPU operation will perform one calculation.  For instance, the SET operation stores a value into the computer's memory. <br/><br/>
+The value can either be a constant (any old number, that is the same every time the program is run), or may be copied from an existing location in memory (this is useful to copy data and to store intermediate values in large, complex calculations). <br/><br/>
+Other operations include ADD (adding one value to another), SUB (subtracting one value from another), MUL (multiplying one value by another) and more. <br/><br/>
+
+<h2>Where'd the values come from?</h2>
+The CPU can access the computer's RAM, which stores all its current data (including the program itself), but also has a set of 'registers'. <br/><br/>
+Registers are a small number of areas that hold single values for the CPU while it is working out calculations. <br/><br/>
+The DCPU has 8 general registers (called A, B, C, X, Y, Z, I and J), which can be used for whatever the programmer wants.  They are frequently used to store completely different things in different places in the program. <br/><br/>
+In a real CPU, accessing the registers is a lot faster than accessing the RAM (sometimes 40x faster!), so they are always being used for something. <br/><br/>
+The DCPU also has 3 special registers - PC, SP and O. <br/><br/>
+PC (program counter) is the location of the current machine-code instruction.  This goes up by one after each instruction, and can be written to in order to jump around in a program. <br/><br/>
+SP (stack pointer) is the current location of the top of the 'stack' (part of the RAM that's used to store temporary values when the registers are all used, and for passing data when jumping around). <br/><br/>
+O (overflow) is set to the remainder of the last instruction if its result was too big to fit in one value (or negative). <br/><br/>  
+
+<h2>What's assembly language?</h2>
+Assemply language is the second-lowest-level language used to control a computer. <br/><br/>
+It is the textual equivalent of machine code - instead of encoding operations in their opcode numbers, they are encoded in human-readble words and organised into rows. <br/><br/>
+Assembly language allows programmers to write machine code in an easier-to-manage form (no-one likes having to do 3 or more sums in their head every time they want to write an instruction!) <br/><br/>
+Higher-level languages are even easier to use, but give less fine-grained control over what the CPU actually does. <br/><br/>
+
+<h2>How's assembly language used?</h2>
+With the DCPU, assembly language is 'assembled' (converted to its machine-code equivalent) and inserted into the computer's memory. <br/><br/>
+The program counter (PC) is set to the location of the first instruction, and the CPU then proceeds to carry them out one by one. <br/><br/>
+It does this by understanding the numeric opcodes and carrying them out. <br/><br/>

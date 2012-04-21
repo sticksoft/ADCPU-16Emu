@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import uk.co.sticksoft.adce.asm.Assembler;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.hardware.Console;
+import uk.co.sticksoft.adce.help.HelpActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -143,8 +144,8 @@ public class MainActivity extends Activity implements CPU.Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.16";
-    	final String currentMessage = "NEW: Check out radar.dasm for radar info!";
+    	final String currentVersion = "0.19";
+    	final String currentMessage = "NEW: Help (press menu!)";
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;
@@ -371,6 +372,7 @@ public class MainActivity extends Activity implements CPU.Observer
 		menu.add(Menu.NONE, 2, Menu.NONE, "Save...");
 		menu.add(Menu.NONE, 3, Menu.NONE, "Assemble");
 		menu.add(Menu.NONE, 4, Menu.NONE, "Start/stop");
+		menu.add(Menu.NONE, 5, Menu.NONE, "Help");
 		return super.onCreateOptionsMenu(menu);
 	}
     
@@ -405,6 +407,11 @@ public class MainActivity extends Activity implements CPU.Observer
 			    else
 				    start();
 				break;
+		    case 5:
+		    {
+		    	Intent intent = new Intent(this, HelpActivity.class);
+		    	startActivity(intent);
+		    }
 		}
 		
 		return super.onOptionsItemSelected(item);
