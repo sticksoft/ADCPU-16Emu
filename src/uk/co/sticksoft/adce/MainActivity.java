@@ -14,6 +14,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -144,8 +145,8 @@ public class MainActivity extends Activity implements CPU.Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.19";
-    	final String currentMessage = "NEW: Help (press menu!)";
+    	final String currentVersion = "0.20";
+    	final String currentMessage = "NEW: Keyboard input!";
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;
@@ -488,5 +489,37 @@ public class MainActivity extends Activity implements CPU.Observer
 	{
 		super.onPause();
 		running = false;
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event)
+	{
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event)
+	{
+		char c = (char)(event.getUnicodeChar() & 0xFFFF);
+		if (c < 32 && c != 13 && c != 10)
+			return super.onKeyUp(keyCode, event);
+			
+		char next = cpu.RAM[0x9010];
+		if (next == 0)
+			next = 0x9000;
+		else
+		{
+			next++;
+			if (next >= 0x9010)
+				next = 0x9000;
+		}
+		
+		if (cpu.RAM[next] == 0)
+		{
+			cpu.RAM[next] = (char)(event.getUnicodeChar() & 0xFFFF);
+			cpu.RAM[0x9010] = next;
+		}
+		
+		return super.onKeyUp(keyCode, event);
 	}
 }

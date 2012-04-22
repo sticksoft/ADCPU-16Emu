@@ -1,5 +1,5 @@
 <h1>I/O Quick Reference</h1>
-Currently, I/O consists of writing to the console (somewhat standardised), and interfacing with the ship (non-standard).
+Currently, I/O consists of writing to the console (somewhat standardised), keyboard input (somewhat standard), and interfacing with the ship (non-standard).
 
 <h2>Console</h2>
 Write to 0x8000 - 0x81FF for 7-bit ASCII output to 32x16 screen. <br/><br/>
@@ -14,6 +14,13 @@ h is highlight on/off (use brighter colours or not)<br/><br/>
 r is red component <br/><br/>
 g is green component <br/><br/>
 b is blue component <br/><br/>
+
+<h2>Keyboard</h2>
+Keyboard input is written to a cyclic 16-word buffer, from 0x9000 to 0x900f. <br/><br/>
+The value written is the Unicode value of the key pressed, truncated to 16 bits. <br/><br/>
+Input is only written if the next space is free, so set key codes to 0 after reading them. <br/><br/>
+Most recent key location is written to 0x9010. <br/><br/> 
+
 
 <h2>Harcoded memory addresses</h2>
 These are subject to change at any time. <br/><br/>
