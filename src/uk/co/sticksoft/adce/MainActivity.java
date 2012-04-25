@@ -29,6 +29,7 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
+import uk.co.sticksoft.adce.asm2.*;
 
 public class MainActivity extends Activity implements CPU.Observer
 {
@@ -108,6 +109,14 @@ public class MainActivity extends Activity implements CPU.Observer
         
         // Make assembly editor tab
         addTab(tabHost, "ASM", asmEditor = new AssemblyEditorTab(this, this, cpu));
+		/*
+		// Add test of editor v2
+		FrameLayout tmpcon = new FrameLayout(this);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
+		tmpcon.setLayoutParams(lp);
+		tmpcon.addView(new BubbleView(this, tmpcon));
+		addTab(tabHost, "ASM2", tmpcon);
+		*/
         
         // Make console tab
         addTab(tabHost, "Console", new Console(this, cpu));
