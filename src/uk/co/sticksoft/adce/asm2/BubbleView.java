@@ -249,7 +249,7 @@ public class BubbleView extends View
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
-	{
+	{/*
 		if (event.getPointerCount() > 1)
 			multitouch = true;
 		
@@ -315,7 +315,7 @@ public class BubbleView extends View
 		}
 		
 		
-		
+		*/
 		return true;
 	}
 	
