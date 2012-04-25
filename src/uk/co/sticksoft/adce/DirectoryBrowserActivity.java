@@ -88,8 +88,8 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
     	{
     		File[] files = currentDirectory.listFiles();
     		
-    		int[] ids = { R.raw.pong, R.raw.move, R.raw.radar };
-    		String[] filenames = { "pong.dasm", "move.dasm", "radar.dasm" };
+    		int[] ids = { R.raw.pong, R.raw.move, R.raw.radar, R.raw.keyboard };
+    		String[] filenames = { "pong.dasm", "move.dasm", "radar.dasm", "keyboard.dasm" };
     		
     		for (int i = 0; i < filenames.length; i++)
     		{

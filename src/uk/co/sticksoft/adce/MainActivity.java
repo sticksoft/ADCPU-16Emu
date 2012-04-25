@@ -145,8 +145,8 @@ public class MainActivity extends Activity implements CPU.Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.20";
-    	final String currentMessage = "NEW: Keyboard input!";
+    	final String currentVersion = "0.21";
+    	final String currentMessage = "NEW: Added keyboard.dasm!";
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;

@@ -1,0 +1,41 @@
+; Sample keyboard program
+; (mostly written on the bus!)
+;
+; Outputs keys to console and maps
+; w,a,s,d to move ship
+; Note - hold "menu" key show/hide keyboard!
+
+set b, 0x8000 ; Initialise console pointer
+
+:start
+
+ife [0x9010], 0 ; Wait for first keystroke
+set pc, start
+
+set j, [0x9010] ; Get location of most recent key
+set c, [j]		; Get character value
+
+ife c, 0		; Ignore 0
+set pc, start
+
+set [j], 0		; Clear the key to indicate we're done with it 
+
+set a, c
+bor a, 0xf000	; Set white foreground colour
+set [b], a		; Write to console
+add b, 1
+ife b, 0x8100	; Ensure console wraps (TODO - newlines)
+set b, 0x8000
+
+ife c, 0x77				; Check for 'w'
+set [0xad00], 0x4000	; Main thruster turn on
+ife c, 0x73				; Check for 's'
+set [0xad00], 0			; Stop main thruster
+
+set [0xad02], 0			; Clear rotation by default
+ife c, 0x61				; Check for 'a'
+set [0xad02], 0xc000	; Rotate anticlockwise
+ife c, 0x64				; Check for 'd'
+set [0xad02], 0x4000	; Rotate clockwise
+
+set pc, start			; Back to start!

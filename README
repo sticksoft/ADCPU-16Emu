@@ -1,7 +1,7 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1) (http://0x10c.com)
-Version 0.20
+Version 0.21
 By Andrew "Stick" Boothroyd (@sticksoft)
 Latest stable version: https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce
 Don't forget you can post issues / feature requests on GitHub :)
@@ -66,16 +66,20 @@ These are subject to change at any time.
 
 Known Issues
 ------------
-No keyboard input yet
 Should auto-assemble and reset on startup (doesn't yet)
 The asteroids are offset slightly on the radar
 
 
 CHANGELOG
 =========
+v0.21
+-----
+Added keyboard.dasm (just for you, Don!)
+It outputs to console and moves ship with w,a,s,d.
+
 v0.20
 -----
-Added keyboard input (thanks for the reminder, William!)
+Added keyboard input (ask and you shall receive, William! :))
 
 v0.19
 -----
