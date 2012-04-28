@@ -9,17 +9,15 @@ import uk.co.sticksoft.adce.hardware.Console;
 import uk.co.sticksoft.adce.help.HelpActivity;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -29,7 +27,6 @@ import android.widget.TabHost.TabSpec;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
-import uk.co.sticksoft.adce.asm2.*;
 
 public class MainActivity extends Activity implements CPU.Observer
 {
@@ -41,6 +38,7 @@ public class MainActivity extends Activity implements CPU.Observer
 	private TextView log;
 	private AssemblyEditorTab asmEditor;
 	private long lastUpdateTime;
+	private View focus;
 	
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -59,6 +57,7 @@ public class MainActivity extends Activity implements CPU.Observer
 		tablyt.addView(fl);
 		tabHost.addView(tablyt);
 		tabHost.setup();
+		focus = fl;
         
 		// Make control tab
 		final ScrollView scroll = new ScrollView(this);
@@ -154,8 +153,8 @@ public class MainActivity extends Activity implements CPU.Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.21";
-    	final String currentMessage = "NEW: Added keyboard.dasm!";
+    	final String currentVersion = "0.22";
+    	final String currentMessage = "NEW: Added option to toggle keyboard! Added web-based chat!";
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;
@@ -383,6 +382,7 @@ public class MainActivity extends Activity implements CPU.Observer
 		menu.add(Menu.NONE, 3, Menu.NONE, "Assemble");
 		menu.add(Menu.NONE, 4, Menu.NONE, "Start/stop");
 		menu.add(Menu.NONE, 5, Menu.NONE, "Help");
+		menu.add(Menu.NONE, 6, Menu.NONE, "Toggle Keyboard");
 		return super.onCreateOptionsMenu(menu);
 	}
     
@@ -421,6 +421,13 @@ public class MainActivity extends Activity implements CPU.Observer
 		    {
 		    	Intent intent = new Intent(this, HelpActivity.class);
 		    	startActivity(intent);
+		    	break;
+		    }
+		    case 6:
+		    {
+		    	InputMethodManager imm = ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE));
+		    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+		    	break;
 		    }
 		}
 		
@@ -498,6 +505,22 @@ public class MainActivity extends Activity implements CPU.Observer
 	{
 		super.onPause();
 		running = false;
+		try
+		{
+			asmEditor.autosave();
+		}
+		catch (Exception ex) {}
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		try
+		{
+			asmEditor.autoload();
+		}
+		catch (Exception ex) {}
 	}
 	
 	@Override

@@ -4,10 +4,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import uk.co.sticksoft.adce.R;
-
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.DataSetObserver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +32,10 @@ public class HelpActivity extends ListActivity implements ListAdapter
 		"What's Assembly Language?",
 		"DASM Quick Reference",
 		"I/O Quick Reference",
-		"Links"
+		"Readme",
+		"Chat",
+		"Email Developer",
+		"Links",
 	};
 	
 	private void showTextRes(int resID)
@@ -62,6 +65,15 @@ public class HelpActivity extends ListActivity implements ListAdapter
 				showTextRes(R.raw.help_io_qr);
 				break;
 			case 4:
+				showTextRes(R.raw.help_readme);
+				break;
+			case 5:
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.sticksoft.co.uk/android/adcpuchat.html")));
+				break;
+			case 6:
+				startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("mailto:android@sticksoft.co.uk")));
+				break;
+			case 7:
 				showTextRes(R.raw.help_links);
 				break;
 			default:

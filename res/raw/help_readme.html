@@ -1,0 +1,165 @@
+<h1>ADCPU16</h1><br/>
+<pre><br/>
+ADCPU16Emu<br/>
+==========<br/>
+Android implementation of Notch's DCPU-16 (v1.1) (<a href="http://0x10c.com">http://0x10c.com</a>)<br/>
+Version 0.22<br/>
+By Andrew "Stick" Boothroyd (<a href="https://twitter.com/#!/sticksoft">@sticksoft</a>)<br/>
+Latest stable version: <a href="https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce">Google Play</a><br/>
+Source available at: <a href="https://github.com/sticksoft/ADCPU-16Emu">https://github.com/sticksoft/ADCPU-16Emu</a><br/>
+Don't forget to post issues / feature requests on GitHub :)<br/>
+<br/>
+<br/>
+LICENSE<br/>
+=======<br/>
+You may do whatever the fsck you want with this software, at your own risk. (<a href="http://en.wikipedia.org/wiki/WTFPL">http://en.wikipedia.org/wiki/WTFPL</a>)<br/>
+If you use it in a project, letting me know and putting a link to <a href="https://github.com/sticksoft/ADCPU-16Emu">https://github.com/sticksoft/ADCPU-16Emu</a> in would be appreciated.<br/>
+If I ever meet you in person, a beer would be even more appreciated!<br/>
+<br/>
+<br/>
+README<br/>
+======<br/>
+<br/>
+Overview<br/>
+--------<br/>
+This version successfully assembles and runs the example found at <a href="http://0x10c.com/doc/dcpu-16.txt">http://0x10c.com/doc/dcpu-16.txt</a> Supported features include emulator, assembler, console output and virtual ship (2D).<br/>
+Supported features include emulator, assembler, console output and virtual ship (2D).<br/>
+<br/>
+Installation<br/>
+------------<br/>
+Easiest method: Download from Google Play - <a href="https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce">https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce</a><br/>
+To install directly to an Android phone, download the raw .APK file in your phone's browser.  Open the file, and you should be prompted to install it.<br/>
+Note: You may need to allow applications from unknown sources on your phone.  Simply go to Settings -> Applications and check the "Unknown sources" box.<br/>
+<br/>
+Usage<br/>
+-----<br/>
+The first tab shown on app startup is the Control tab, containing the RAM viewer (box at the top) and controls for starting / resetting the emulator.<br/>
+This won't do much until you assemble a program!<br/>
+<br/>
+The second tab is the Assembly view.  Here, you can load / save an assembly file from disk (press the Menu key for options) and assemble a program.<br/>
+Pressing "Assemble" will reset the emulator, assemble your program, output the assembled binary and an assembly -> binary view for debugging, and load the binary data into the emulator's memory.<br/>
+Return to the first tab to start it and view changes to the memory.<br/>
+<br/>
+The third tab displays the text console.  This is a work-in-progress and, as such, colours may not be displayed the same as other emulators.<br/>
+<br/>
+The fourth tab displays a virtual ship!  Control it by writing to 0xAD00 (throttle) and 0xAD02 (yaw starboard / port); sample code is included that does this (move.dasm).<br/>
+Values for these registers are interpreted as signed 2's complement integers; e.g. 0x7FFF = all ahead full, 0x8000 = full reverse, 0x0000 = all stop.<br/>
+<br/>
+For current rotation speed, read from 0xAD05 - positive (&lt; 0x8000) values are clockwise (starboard) and negative values are anticlockwise.<br/>
+<br/>
+Harcoded memory addresses<br/>
+-------------------------<br/>
+These are subject to change at any time.<br/>
+0xAD00 - Throttle control<br/>
+0xAD01 - (reserved for pitch)<br/>
+0xAD02 - Yaw<br/>
+0xAD03 - (reserved for roll)<br/>
+0xAD04 - (reserved for pitch gyro) <br/>
+0xAD05 - Yaw gyro<br/>
+0xAD06 - (reserved for roll gyro)<br/>
+<br/>
+0xAD10 - Radar control. Set to 0xFFFF to get count, set to index number (starting at 1) for that contact's info.<br/>
+0xAD11 - Radar contact count<br/>
+0xAD12 - Current contact X<br/>
+0xAD13 - (reserved for contact Y)<br/>
+0xAD14 - Current contact Z<br/>
+0xAD15 - (reserved for contact type)<br/>
+0xAD16 - (reserved for contact size)<br/>
+0xAD17 - (reserved for contact IFF code)<br/>
+<br/>
+Known Issues<br/>
+------------<br/>
+Should auto-assemble and reset on startup (doesn't yet)<br/>
+The asteroids are offset slightly on the radar<br/>
+<br/>
+<br/>
+CHANGELOG<br/>
+=========<br/>
+v0.22<br/>
+-----<br/>
+Added option to toggle keyboard (let me know if this fixes it for you, drew!)<br/>
+Added web-based chat and email links to help menu<br/>
+<br/>
+v0.21<br/>
+-----<br/>
+Added keyboard.dasm (just for you, Don!)<br/>
+It outputs to console and moves ship with w,a,s,d.<br/>
+<br/>
+v0.20<br/>
+-----<br/>
+Added keyboard input (ask and you shall receive, William! :))<br/>
+<br/>
+v0.19<br/>
+-----<br/>
+Added rudimentary help files and useful links.<br/>
+<br/>
+v0.18<br/>
+-----<br/>
+Redone the CPU threading (should run about 5x faster now!)<br/>
+<br/>
+v0.17<br/>
+-----<br/>
+Added the file overwrite check.<br/>
+ <br/>
+v0.16<br/>
+-----<br/>
+Added a sample radar assembly file<br/>
+<br/>
+v0.15<br/>
+-----<br/>
+Added asteroids<br/>
+Altered yaw to use angular velocity and a gyro (Thanks, icarroll!)<br/>
+<br/>
+v0.14<br/>
+-----<br/>
+Added virtual ship tab!<br/>
+<br/>
+v0.13<br/>
+-----<br/>
+Fixed a crash issue with ICS (Thanks, Jareb!)<br/>
+<br/>
+v0.12<br/>
+-----<br/>
+Added an icon<br/>
+Released on Google Play (Android Market)<br/>
+<br/>
+v0.11<br/>
+-----<br/>
+Changed to tabbed layout<br/>
+Added console display<br/>
+<br/>
+v0.10<br/>
+-----<br/>
+Added DAT support to assembler<br/>
+<br/>
+v0.09<br/>
+-----<br/>
+Included binary APK<br/>
+Included a sample pong-like program<br/>
+Fixed label bug in assembler<br/>
+<br/>
+v0.08<br/>
+-----<br/>
+Added Load and Save commands for SD storage<br/>
+<br/>
+v0.07<br/>
+-----<br/>
+Added loading and saving of the ASM buffer<br/>
+<br/>
+v0.06<br/>
+-----<br/>
+Added text entry<br/>
+<br/>
+v0.05<br/>
+-----<br/>
+Added an assembler<br/>
+<br/>
+v0.03, v0.04<br/>
+------------<br/>
+Minor bugfixes<br/>
+<br/>
+v0.02<br/>
+-----<br/>
+Fixed a bug with the PC, first working version<br/>
+<br/>
+</pre>

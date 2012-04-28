@@ -48,6 +48,7 @@ public class TextActivity extends Activity
 			
 			String loadedText = new String(baos.toByteArray(), Charset.defaultCharset().name());
 		
+			text.setAutoLinkMask(Linkify.WEB_URLS);
 			text.setText(Html.fromHtml(loadedText));
 			text.setMovementMethod(LinkMovementMethod.getInstance());
 			text.setTextSize(20);

@@ -66,7 +66,7 @@ public class AssemblyEditorTab extends ScrollView
 		return asmInput.getText().toString();
 	}
 	
-    private void autosave()
+    public void autosave()
     {
     	try
 		{
@@ -81,7 +81,7 @@ public class AssemblyEditorTab extends ScrollView
 		}
     }
     
-    private void autoload()
+    public void autoload()
     {
     	try
 		{
