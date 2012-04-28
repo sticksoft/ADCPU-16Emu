@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 
 import uk.co.sticksoft.adce.asm.Assembler;
 import uk.co.sticksoft.adce.cpu.CPU;
+import uk.co.sticksoft.adce.cpu.CPU_1_1;
 import uk.co.sticksoft.adce.hardware.Console;
 import uk.co.sticksoft.adce.help.HelpActivity;
 import android.app.Activity;
@@ -30,9 +31,10 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity implements CPU.Observer
 {
-	private CPU cpu = new CPU();
+	private CPU cpu = new CPU_1_1();
 	private RAMViz ramviz;
-	private TextView[] statusLabels;
+	private TextView statusLabel;
+	private TextView cycleLabel;
 	private Button startButton, resetButton;
 	private boolean running;
 	private TextView log;
@@ -71,14 +73,13 @@ public class MainActivity extends Activity implements CPU.Observer
         
         lyt.addView(ramviz = new RAMViz(this, cpu.RAM));
         
-        statusLabels = new TextView[5];
-        for (int i = 0; i < statusLabels.length; i++)
-        {
-        	TextView tv = new TextView(this);
-        	tv.setText("...");
-        	lyt.addView(tv);
-        	statusLabels[i] = tv;
-        }
+        statusLabel = new TextView(this);
+        statusLabel.setText("...");
+    	lyt.addView(statusLabel);
+    	
+    	cycleLabel = new TextView(this);
+    	cycleLabel.setText(" ");
+    	lyt.addView(cycleLabel);
         
         startButton = new Button(this);
         startButton.setText("Start");
@@ -324,24 +325,7 @@ public class MainActivity extends Activity implements CPU.Observer
     private String lastSpeed = "(unknown)";
     public void updateInfo()
     {
-    	statusLabels[0].setText(
-    			" A:"+String.format("%04x", (int)cpu.register[0]) +
-    			" B:"+String.format("%04x", (int)cpu.register[1]) +
-    			" C:"+String.format("%04x", (int)cpu.register[2]));
-    	
-    	statusLabels[1].setText(
-    			" X:"+String.format("%04x", (int)cpu.register[3]) +
-    			" Y:"+String.format("%04x", (int)cpu.register[4]) +
-    			" Z:"+String.format("%04x", (int)cpu.register[5]));
-    	
-    	statusLabels[2].setText(
-    			" I:"+String.format("%04x", (int)cpu.register[6]) +
-    			" J:"+String.format("%04x", (int)cpu.register[7]));
-    	
-    	statusLabels[3].setText(
-    			" PC:"+String.format("%04x", (int)cpu.PC) +
-    			" SP:"+String.format("%04x", (int)cpu.SP) +
-    			" O:"+String.format("%04x", (int)cpu.O));
+    	statusLabel.setText(cpu.getStatusText());
     	
     	String speed = "(unknown)";
     	long cyclesElapsed = cpu.cycleCount - lastCycleCount;
@@ -368,8 +352,7 @@ public class MainActivity extends Activity implements CPU.Observer
     	lastActualUpdate = time;
     	lastCycleCount = cpu.cycleCount;
     	
-    	statusLabels[4].setText(
-    			" Cycles: "+cpu.cycleCount+" Speed: "+speed);
+    	cycleLabel.setText(" Cycles: "+cpu.cycleCount+" Speed: "+speed);
     	
     	ramviz.updateBuffer();
     }
@@ -434,10 +417,14 @@ public class MainActivity extends Activity implements CPU.Observer
 		return super.onOptionsItemSelected(item);
 	}
     
+    private boolean dont_autoload = false;
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
     	super.onActivityResult(requestCode, resultCode, data);
+    	
+    	dont_autoload = true;
     	
     	String path;
     	if (data == null || (path = data.getStringExtra("path")) == null || path.length() == 0)
@@ -516,11 +503,20 @@ public class MainActivity extends Activity implements CPU.Observer
 	protected void onResume()
 	{
 		super.onResume();
-		try
+		
+		if (dont_autoload)
 		{
-			asmEditor.autoload();
+			dont_autoload = false;
+			return;
 		}
-		catch (Exception ex) {}
+		else
+		{
+			try
+			{
+				asmEditor.autoload();
+			}
+			catch (Exception ex) {}
+		}
 	}
 	
 	@Override

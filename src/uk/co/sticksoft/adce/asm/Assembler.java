@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import uk.co.sticksoft.adce.cpu.CPU;
+import uk.co.sticksoft.adce.cpu.CPU_1_1;
 
 public class Assembler
 {
@@ -154,9 +155,9 @@ public class Assembler
 		int index = 0;
 		String opcode = line.substring(0, 3);
 		
-		for (int i = 1; i < CPU.Opcode.values().length; i++)
+		for (int i = 1; i < CPU_1_1.Opcode.values().length; i++)
 		{
-			if (opcode.equalsIgnoreCase(CPU.Opcode.values()[i].name()))
+			if (opcode.equalsIgnoreCase(CPU_1_1.Opcode.values()[i].name()))
 			{
 				// This is a basic instruction, and must have two comma-separated args
 				int comma = line.indexOf(',', 5);
@@ -373,7 +374,7 @@ public class Assembler
 					if (number < 0 || number > 0xFFFF)
 						return 0;
 					machinecode.add(Character.valueOf((char)number));
-					return CPU.Value._nextword.ordinal();
+					return CPU_1_1.Value._nextword.ordinal();
 				}
 				catch (NumberFormatException e)
 				{
@@ -382,7 +383,7 @@ public class Assembler
 					
 					// Leave a placeholder
 					machinecode.add(Character.valueOf((char)0));
-					return CPU.Value._nextword.ordinal();
+					return CPU_1_1.Value._nextword.ordinal();
 				}
 			}
 			else // Got a plus!
@@ -415,7 +416,7 @@ public class Assembler
 					if (number < 0 || number > 0xFFFF)
 						return 0;
 					machinecode.add(Character.valueOf((char)number));
-					return CPU.Value._nextwordA.ordinal() + rregister;
+					return CPU_1_1.Value._nextwordA.ordinal() + rregister;
 				}
 				catch (NumberFormatException e)
 				{
@@ -424,7 +425,7 @@ public class Assembler
 					
 					// Leave a placeholder
 					machinecode.add(Character.valueOf((char)0));
-					return CPU.Value._nextwordA.ordinal() + rregister;
+					return CPU_1_1.Value._nextwordA.ordinal() + rregister;
 				}
 				
 			}
@@ -438,10 +439,10 @@ public class Assembler
 					return 0;
 				
 				if (number < 0x20)
-					return CPU.Value.x00.ordinal() + number;
+					return CPU_1_1.Value.x00.ordinal() + number;
 				
 				machinecode.add(Character.valueOf((char)number));
-				return CPU.Value.nextword.ordinal();
+				return CPU_1_1.Value.nextword.ordinal();
 			}
 			catch (NumberFormatException e)
 			{
@@ -450,7 +451,7 @@ public class Assembler
 				
 				// Leave a placeholder
 				machinecode.add(Character.valueOf((char)0));
-				return CPU.Value.nextword.ordinal();
+				return CPU_1_1.Value.nextword.ordinal();
 			}
 		}
 	}
