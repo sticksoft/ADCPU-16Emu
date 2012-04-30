@@ -286,14 +286,20 @@ public class CPU_1_1 extends CPU
 			// TODO: Replace with something faster?
 			switch (_op)
 			{
-			case 0x00:
-				break;
-			case 0x01: // JSR a
-				// Push PC
-				RAM[--SP] = (char)(PC+1);
-				// Set PC to a
-				PC = read(addressType(_a), address(_a));
-				break;
+				case 0x00:
+					break;
+				case 0x01: // JSR a
+				{
+					// Get jump address
+					char jmp = read(addressType(_a), address(_a));
+					
+					// Push PC
+					RAM[--SP] = PC;
+					
+					// Set PC to jump address
+					PC = jmp;
+					break;
+				}
 			}
 		}
 		
@@ -302,27 +308,6 @@ public class CPU_1_1 extends CPU
 	
 	public String getStatusText()
 	{
-		/*
-    	statusLabels[0].setText(
-    			" A:"+String.format("%04x", (int)cpu.register[0]) +
-    			" B:"+String.format("%04x", (int)cpu.register[1]) +
-    			" C:"+String.format("%04x", (int)cpu.register[2]));
-    	
-    	statusLabels[1].setText(
-    			" X:"+String.format("%04x", (int)cpu.register[3]) +
-    			" Y:"+String.format("%04x", (int)cpu.register[4]) +
-    			" Z:"+String.format("%04x", (int)cpu.register[5]));
-    	
-    	statusLabels[2].setText(
-    			" I:"+String.format("%04x", (int)cpu.register[6]) +
-    			" J:"+String.format("%04x", (int)cpu.register[7]));
-    	
-    	statusLabels[3].setText(
-    			" PC:"+String.format("%04x", (int)cpu.PC) +
-    			" SP:"+String.format("%04x", (int)cpu.SP) +
-    			" O:"+String.format("%04x", (int)cpu.O));
-		 */
-		
 		return String.format(" A:%04x B:%04x C:%04x\n X:%04x Y:%04x Z:%04x\n I:%04x J:%04x\n PC:%04x SP:%04x O:%04x",
 				(int)register[0], (int)register[1], (int)register[2],
 				(int)register[3], (int)register[4], (int)register[5],

@@ -154,8 +154,8 @@ public class MainActivity extends Activity implements CPU.Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.22";
-    	final String currentMessage = "NEW: Added option to toggle keyboard! Added web-based chat!";
+    	final String currentVersion = "0.24";
+    	final String currentMessage = "NEW: Fixed bug with JSR!";
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;
