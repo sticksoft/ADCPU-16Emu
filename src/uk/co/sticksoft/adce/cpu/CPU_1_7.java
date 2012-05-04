@@ -164,6 +164,11 @@ public class CPU_1_7 extends CPU
 			// What yo playin' at?!
 		}
 	}
+	
+	private static int unsignedCharAsSignedInt(char c)
+	{
+		return c < 0x8000 ? c : c - 0x10000;
+	}
 
 	@Override
 	public void execute()
@@ -198,23 +203,28 @@ public class CPU_1_7 extends CPU
 					res = aVal;
 					break;
 				case 0x02: // ADD
-					res = aVal + bVal;
+					res = bVal + aVal;
 					EX = (res < 0xffff) ? (char)0 : (char)1;
 					break;
 				case 0x03: // SUB
+					res = bVal - aVal;
+					EX = (res > 0) ? 0 : (char)0xffff;
 					break;
 				case 0x04: // MUL
+					res = bVal * aVal;
+					EX = (char)(res >> 16);
 					break;
 				case 0x05: // MLI
+					res = unsignedCharAsSignedInt(bVal) * unsignedCharAsSignedInt(aVal);
+					EX = (char)(res >> 16);
 					break;
 					// TODO: Finish this
 			}
 			
-			write(bType, bAddr, (char)res);
+			write(bType, bAddr, (char)(res & 0xffff));
 		}
 		else
 		{
-			
 		}
 	}
 
