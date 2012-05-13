@@ -5,7 +5,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import uk.co.sticksoft.adce.asm.Assembler;
+import uk.co.sticksoft.adce.asm.Assembler_1_1;
 import uk.co.sticksoft.adce.cpu.CPU;
 import android.content.Context;
 import android.text.InputType;
@@ -109,7 +109,7 @@ public class AssemblyEditorTab extends ScrollView
     	
     	ArrayList<String> messages = new ArrayList<String>();
 		HashMap<Integer,String> debugSymbols = new HashMap<Integer,String>();
-    	char[] assembled = new Assembler().assemble(asmInput.getText().toString(), messages, debugSymbols);
+    	char[] assembled = new Assembler_1_1().assemble(asmInput.getText().toString(), messages, debugSymbols);
     	
     	for (int i = 0; i < messages.size(); i++)
     	{

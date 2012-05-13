@@ -6,9 +6,9 @@ import java.util.HashMap;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_1;
 
-public class Assembler
+public class Assembler_1_1
 {
-	public Assembler() {}
+	public Assembler_1_1() {}
 	
 	private String source;
 	private int sourceIndex;
