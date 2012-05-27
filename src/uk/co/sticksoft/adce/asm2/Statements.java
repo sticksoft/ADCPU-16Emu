@@ -95,7 +95,7 @@ public class Statements
 						public BubbleNode addNode(BubbleNode node, String text)
 						{
 							BubbleNode b = new BubbleNode();
-							b.text = text;
+							b.text(text);
 							node.addChild(b);
 							return b;
 						}
@@ -103,7 +103,7 @@ public class Statements
 						public BubbleNode addProperty(BubbleNode node, String text)
 						{
 							BubbleNode b = new BubbleNode();
-							b.text = text;
+							b.text(text);
 							node.addProperty(b);
 							return b;
 						}

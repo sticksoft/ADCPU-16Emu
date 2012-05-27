@@ -10,18 +10,15 @@ import android.content.Context;
 
 public class BubbleNodeActions
 {
-	private static BubbleNode clipboard = null;
+	public static BubbleNode clipboard = null;
+	
+	public final static String[] basicOpcodes = new String[] { "set", "add", "sub", "mul", "div", "mod", "shl", "shr", "and", "bor", "xor", "ife", "ifn", "ifg", "ifb" };
 	
 	public static void collectActions(ArrayList<BubbleNode.NodeAction> list, BubbleNode node)
 	{
 		// Replacements
-		collectGenericReplacements(list, node, new String[] { "public", "private", "protected" });
-		collectGenericReplacements(list, node, new String[] { "==", "!=", "<", ">", "<=", ">=" });
-		collectGenericReplacements(list, node, new String[] { "&&", "||", "^^" });
-		collectGenericReplacements(list, node, new String[] { "+", "-", "*", "/", "&", "|", "^", "%" });
-		collectGenericReplacements(list, node, new String[] { "=", "+=", "-=", "*=", "/=", "&=", "|=", "^=" });
-		collectGenericReplacements(list, node, new String[] { "++", "--" });
-		
+		collectReplacementsMatchCase(list, node, basicOpcodes);
+		/*
 		// Prefixes and suffixes
 		if (!"//".equals(node.text) && node.relation != NodeRelation.Property)
 			list.add(new NamedNodeAction("//")
@@ -91,8 +88,9 @@ public class BubbleNodeActions
 					});
 			}
 		}
-		
+		*/
 		// Generic actions
+		/*
 		list.add(new NamedNodeAction("Add Child")
 		{
 			@Override
@@ -104,8 +102,9 @@ public class BubbleNodeActions
 				view.layoutBubbles();
 			}
 		});
+		*/
 		
-		list.add(new NamedNodeAction("Add Property")
+		list.add(new NamedNodeAction("Append")
 		{
 			@Override
 			public void performAction(Context context, BubbleView view, BubbleNode node)
@@ -148,22 +147,24 @@ public class BubbleNodeActions
 		
 		if (clipboard != null)
 		{
-			list.add(new NamedNodeAction("Paste Sibling")
+			list.add(new NamedNodeAction("Paste Above")
 			{
 				@Override
 				public void performAction(Context context, BubbleView view, BubbleNode node)
 				{
-					node.addProperty(new BubbleNode(clipboard));
+					int index = view.getRoots().indexOf(node);
+					view.getRoots().add(index, new BubbleNode(clipboard));
 					view.layoutBubbles();
 				}
 			});
 			
-			list.add(new NamedNodeAction("Paste Child")
+			list.add(new NamedNodeAction("Paste Below")
 			{
 				@Override
 				public void performAction(Context context, BubbleView view, BubbleNode node)
 				{
-					node.addChild(new BubbleNode(clipboard));
+					int index = view.getRoots().indexOf(node);
+					view.getRoots().add(index + 1, new BubbleNode(clipboard));
 					view.layoutBubbles();
 				}
 			});
@@ -181,13 +182,14 @@ public class BubbleNodeActions
 	
 	private static void collectGenericReplacements(ArrayList<NodeAction> list, BubbleNode node, final String[] reps)
 	{
-		if (node.text == null || node.text.length() == 0)
+		String text = node.text();
+		if (text == null || text.length() == 0)
 			return;
 		
 		int index = -1;
 		for (int i = 0; i < reps.length; i++)
 		{
-			if (node.text.equals(reps[i]))
+			if (text.equals(reps[i]))
 			{
 				index = i;
 				break;
@@ -207,9 +209,55 @@ public class BubbleNodeActions
 				@Override
 				public void performAction(Context context, BubbleView view, BubbleNode node)
 				{
-					node.text = reps[j];
+					node.text(reps[j]);
 				}
 			});
+		}
+	}
+	
+	private static void collectReplacementsMatchCase(ArrayList<NodeAction> list, BubbleNode node, final String[] reps)
+	{
+		String text = node.text();
+		if (text == null || text.length() == 0)
+			return;
+
+		int index = -1;
+		for (int i = 0; i < reps.length; i++)
+		{
+			if (text.equalsIgnoreCase(reps[i]))
+			{
+				index = i;
+				break;
+			}
+		}
+		if (index == -1)
+			return;
+
+		for (int i = 0; i < reps.length; i++)
+		{
+			if (index == i)
+				continue;
+				
+			StringBuilder sb = new StringBuilder();
+			String src = text, dst = reps[i];
+			boolean upper = true;
+			
+			for (int j = 0; j < dst.length(); j++)
+			{
+				if (j < src.length())
+					upper = Character.isUpperCase(src.charAt(j));
+					sb.append(Character.toUpperCase(dst.charAt(j)));
+			}
+			
+			final String name = sb.toString();
+			list.add(new NamedNodeAction(name)
+				{
+					@Override
+					public void performAction(Context context, BubbleView view, BubbleNode node)
+					{
+						node.text(name);
+					}
+				});
 		}
 	}
 }

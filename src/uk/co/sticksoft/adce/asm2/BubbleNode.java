@@ -18,8 +18,8 @@ public class BubbleNode
 		Child
 	};
 	
-	public ArrayList<BubbleNode> children = new ArrayList<BubbleNode>();
-	public ArrayList<BubbleNode> properties = new ArrayList<BubbleNode>();
+	protected ArrayList<BubbleNode> children = new ArrayList<BubbleNode>();
+	protected ArrayList<BubbleNode> properties = new ArrayList<BubbleNode>();
 	
 	public float width = 16, height = 16;
 	public float x,y;
@@ -27,13 +27,18 @@ public class BubbleNode
 	public BubbleNode parent;
 	public NodeRelation relation;
 	
-	public String text = "";
+	protected String text = "";
 	
 	public int normalColour = Color.rgb(0, 138, 0), selectedColour = Color.rgb(0, 0, 138);
 	public int normalTextColour = Color.LTGRAY, selectedTextColour = Color.WHITE;
 	
 	public BubbleNode()
 	{
+	}
+	
+	public BubbleNode(String text)
+	{
+		this.text = text;
 	}
 	
 	public BubbleNode(BubbleNode original)
@@ -47,6 +52,16 @@ public class BubbleNode
 		height = original.height;
 		text = original.text;
 		setColours(original.normalColour, original.selectedColour, original.normalTextColour, original.selectedTextColour);
+	}
+	
+	public void text(String s)
+	{
+		text = s;
+	}
+	
+	public String text()
+	{
+		return text;
 	}
 	
 	public void addChild(BubbleNode node)
@@ -97,6 +112,16 @@ public class BubbleNode
 		properties.remove(node);
 		if (node.parent == this)
 			node.parent = null;
+	}
+	
+	public ArrayList<BubbleNode> children()
+	{
+		return children;
+	}
+	
+	public ArrayList<BubbleNode> properties()
+	{
+		return properties;
 	}
 	
 	public float getChildrenHeight()
@@ -189,6 +214,7 @@ public class BubbleNode
 			public void onClick(DialogInterface dialog, int which)
 			{
 				text = txt_edit.getText().toString();
+				view.layoutBubbles();
 				view.invalidate();
 			}
 		}).show();
@@ -210,6 +236,8 @@ public class BubbleNode
 	{
 		if (this.parent != null)
 			this.parent.removeChild(this);
+		else
+		    view.getRoots().remove(this);
 		view.invalidate();
 	}
 	
@@ -264,5 +292,15 @@ public class BubbleNode
 			if (node != null && node.text != null && node.text.contains(text))
 				return true;
 		return false;
+	}
+	
+	private static long lastUpdateTime;
+	public static void changed()
+	{
+		lastUpdateTime = System.currentTimeMillis();
+	}
+	public static long getLastUpdateTime()
+	{
+		return lastUpdateTime;
 	}
 }

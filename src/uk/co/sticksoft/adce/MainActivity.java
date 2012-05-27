@@ -39,6 +39,7 @@ public class MainActivity extends Activity implements CPU.Observer
 	private boolean running;
 	private TextView log;
 	private AssemblyEditorTab asmEditor;
+	private BubbleView bubbleView;
 	private long lastUpdateTime;
 	private View focus;
 	
@@ -46,6 +47,17 @@ public class MainActivity extends Activity implements CPU.Observer
     public void onCreate(Bundle savedInstanceState)
 	{
         super.onCreate(savedInstanceState);
+		/*
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+
+				public void uncaughtException(Thread p1, Throwable e)
+				{
+					ErrorHandling.handle(getApplicationContext(), e);
+				}
+			});
+			*/
+			
+		ErrorHandling.handle(this, null);
 
 		// This is NOT the way you're meant to make tabs
 		TabHost tabHost = new TabHost(this, null);
@@ -109,14 +121,14 @@ public class MainActivity extends Activity implements CPU.Observer
         
         // Make assembly editor tab
         addTab(tabHost, "ASM", asmEditor = new AssemblyEditorTab(this, this, cpu));
-		/*
+		
 		// Add test of editor v2
 		FrameLayout tmpcon = new FrameLayout(this);
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 		tmpcon.setLayoutParams(lp);
-		tmpcon.addView(new BubbleView(this, tmpcon));
+		tmpcon.addView(bubbleView = new BubbleView(this, tmpcon, asmEditor.getEditor()));
 		addTab(tabHost, "ASM2", tmpcon);
-		*/
+		
         
         // Make console tab
         addTab(tabHost, "Console", new Console(this, cpu));
@@ -442,7 +454,10 @@ public class MainActivity extends Activity implements CPU.Observer
     			byte[] buffer = new byte[(int) fis.getChannel().size()];
     			fis.read(buffer);
     			fis.close();
-    			asmEditor.setAsm(new String(buffer));
+				String source = new String(buffer);
+    			asmEditor.setAsm(source);
+				if (bubbleView != null)
+					BubbleParser.parse(source, bubbleView);
     		}
     		catch (Exception ex)
     		{
