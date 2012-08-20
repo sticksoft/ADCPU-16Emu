@@ -12,7 +12,7 @@ import uk.co.sticksoft.adce.asm._1_7.Label;
 import uk.co.sticksoft.adce.asm._1_7.Token;
 
 
-public class Assembler_1_7
+public class Assembler_1_7 implements Assembler
 {
 	public Assembler_1_7() {}
 	

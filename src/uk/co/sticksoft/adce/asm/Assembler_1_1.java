@@ -6,7 +6,7 @@ import java.util.HashMap;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_1;
 
-public class Assembler_1_1
+public class Assembler_1_1 implements Assembler
 {
 	public Assembler_1_1() {}
 	
