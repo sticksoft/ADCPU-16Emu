@@ -3,7 +3,7 @@ package uk.co.sticksoft.adce;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import uk.co.sticksoft.adce.asm.Assembler;
+import uk.co.sticksoft.adce.asm.Assembler_1_1;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_1;
 import uk.co.sticksoft.adce.hardware.Console;
@@ -247,7 +247,7 @@ public class MainActivity extends Activity implements CPU.Observer
 	
 	private void testMyAssembler()
 	{
-		char[] output = new Assembler().assemble(SampleASM.notchs_example_asm);
+		char[] output = new Assembler_1_1().assemble(SampleASM.notchs_example_asm);
 		
 		if (output == null)
 		{
