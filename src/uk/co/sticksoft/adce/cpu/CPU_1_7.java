@@ -285,7 +285,7 @@ public class CPU_1_7 extends CPU
 					break;
 				case 0x0f: // SHL
 					res = bVal << a;
-					EX = (char)(((bVal << aVal) >> 16) & 0xfff);
+					EX = (char)(((bVal << aVal) >> 16) & 0xffff);
 					break;
 				case 0x10: // IFB
 					skipping = (bVal & aVal) != 0;
