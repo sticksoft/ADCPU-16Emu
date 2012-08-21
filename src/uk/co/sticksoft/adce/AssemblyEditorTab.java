@@ -113,7 +113,7 @@ public class AssemblyEditorTab extends ScrollView
     	
     	ArrayList<String> messages = new ArrayList<String>();
 		HashMap<Integer,String> debugSymbols = new HashMap<Integer,String>();
-    	char[] assembled = new Assembler_1_1().assemble(asmInput.getText().toString(), messages, debugSymbols);
+    	char[] assembled = Options.getAssembler().assemble(asmInput.getText().toString(), messages, debugSymbols);
     	
     	for (int i = 0; i < messages.size(); i++)
     	{

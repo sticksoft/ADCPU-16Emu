@@ -16,7 +16,7 @@ public class ControlTab extends ScrollView implements CPU.Observer, Options.Obse
 	private RAMViz ramviz;
 	private TextView statusLabel;
 	private TextView cycleLabel;
-	private Button startButton, resetButton;
+	private Button startButton, stepButton, resetButton;
 	private boolean running;
 	private TextView log;
 	private CPU cpu;
@@ -58,6 +58,17 @@ public class ControlTab extends ScrollView implements CPU.Observer, Options.Obse
 			}
 		});
         lyt.addView(startButton);
+		
+		stepButton = new Button(context);
+        stepButton.setText("Step");
+        stepButton.setOnClickListener(new OnClickListener()
+			{
+				public void onClick(View v)
+				{
+					cpu.execute();
+				}
+			});
+        lyt.addView(stepButton);
         
         resetButton = new Button(context);
         resetButton.setText("Reset");

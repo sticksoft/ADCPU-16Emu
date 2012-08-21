@@ -2,6 +2,7 @@ package uk.co.sticksoft.adce.cpu;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import uk.co.sticksoft.adce.asm._1_7.*;
 
 /*
  * Half-baked 1.7 version of the CPU
@@ -449,11 +450,11 @@ public class CPU_1_7 extends CPU
 	@Override
 	public String getStatusText()
 	{
-		return String.format(" A:%04x B:%04x C:%04x\n X:%04x Y:%04x Z:%04x\n I:%04x J:%04x\n PC:%04x SP:%04x EX:%04x IA:%04x",
+		return String.format(" A:%04x B:%04x C:%04x\n X:%04x Y:%04x Z:%04x\n I:%04x J:%04x\n PC:%04x SP:%04x EX:%04x IA:%04x\n%s",
 				(int)register[A], (int)register[B], (int)register[C],
 				(int)register[X], (int)register[Y], (int)register[Z],
 				(int)register[I], (int)register[J],
-				(int)PC, (int)SP, (int)EX, (int)IA);
+				(int)PC, (int)SP, (int)EX, (int)IA, Disasm.disasm(RAM, PC));
 	}
 
 }

@@ -6,6 +6,7 @@ public class Consts
 {
 	public static enum BasicOpcode
 	{
+		_0x00,
 		SET,
 		ADD,
 		SUB,
