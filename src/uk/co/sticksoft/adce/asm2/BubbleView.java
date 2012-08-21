@@ -308,7 +308,6 @@ public class BubbleView extends View implements TextWatcher
 		int d = 0;
 		try
 		{
-			event.getPointerCount();
 			d=1;
 			Method meth = event.getClass().getMethod("getPointerCount", new Class[0]);
 			d=2;

@@ -18,16 +18,14 @@ import android.widget.TextView;
 
 public class AssemblyEditorTab extends ScrollView
 {
-	private CPU cpu;
 	private TextView asmInput, asmOutput;
 	private MainActivity main;
 	
-	public AssemblyEditorTab(MainActivity main, Context context, CPU cpu)
+	public AssemblyEditorTab(MainActivity main, Context context)
 	{
 		super(context);
 		
 		this.main = main;
-		this.cpu = cpu;
 		
 		LinearLayout lyt = new LinearLayout(context);
 		lyt.setOrientation(LinearLayout.VERTICAL);
@@ -108,6 +106,7 @@ public class AssemblyEditorTab extends ScrollView
     	main.stop();
     	autosave();
     	main.log("Assembling...");
+    	CPU cpu = Options.GetCPU();
     	cpu.reset();
     	asmOutput.setText("");
     	

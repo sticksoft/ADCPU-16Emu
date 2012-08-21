@@ -18,7 +18,7 @@ import android.graphics.Color;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class ShipView2D extends View implements Observer
+public class ShipView2D extends View implements Observer, Options.Observer
 {
 	//public PlayerShip player;
 	public Ship2DEnvironment env;
@@ -28,10 +28,13 @@ public class ShipView2D extends View implements Observer
 	
 	Random rand = new Random();
 	private long lastUpdate;
+	private CPU cpu;
 	
-	public ShipView2D(Context context, CPU cpu)
+	public ShipView2D(Context context)
 	{
 		super(context);
+		
+		cpu = Options.GetCPU();
 		
 		env = new Ship2DEnvironment(context, cpu);
 		//player = new PlayerShip(context, env, cpu);
@@ -54,6 +57,7 @@ public class ShipView2D extends View implements Observer
 					rand.nextFloat() + 0.5f));
 		*/
 		cpu.addObserver(this);
+		Options.addObserver(this);
 		
 		lastUpdate = System.currentTimeMillis();
 	}
@@ -162,5 +166,13 @@ public class ShipView2D extends View implements Observer
 			    postInvalidate();
 			env.update((float)elapsed / 1000.0f);
 		}
+	}
+
+	@Override
+	public void optionsChanged()
+	{
+		cpu.removeObserver(this);
+		cpu = Options.GetCPU();
+		cpu.addObserver(this);
 	}
 }

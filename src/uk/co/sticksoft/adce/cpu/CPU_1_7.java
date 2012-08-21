@@ -184,6 +184,7 @@ public class CPU_1_7 extends CPU
 	@Override
 	public void execute()
 	{
+		cycleCount++;
 		tSP = SP;			// Cache SP
 		tPC = (char)(PC+1); // Pre-increment tPC
 		
@@ -441,6 +442,8 @@ public class CPU_1_7 extends CPU
 		
 		PC = tPC;
 		SP = tSP;
+		
+		notifyObservers();
 	}
 
 	@Override

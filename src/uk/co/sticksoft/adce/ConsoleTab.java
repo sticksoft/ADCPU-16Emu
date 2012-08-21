@@ -17,7 +17,7 @@ public class ConsoleTab extends ScrollView
 		LinearLayout lyt = new LinearLayout(context);
 		lyt.setOrientation(LinearLayout.VERTICAL);
 		
-		Console console = new Console(context, cpu);
+		Console console = new Console(context);
 		lyt.addView(console);
 		addView(lyt);
 	}

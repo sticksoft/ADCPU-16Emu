@@ -18,24 +18,25 @@ import uk.co.sticksoft.adce.help.*;
 import android.view.View.OnClickListener;
 import uk.co.sticksoft.adce.hardware.Console;
 
-public class MainActivity extends Activity implements CPU.Observer
+public class MainActivity extends Activity
 {
-	private CPU cpu = new CPU_1_1();
-	private RAMViz ramviz;
-	private TextView statusLabel;
-	private TextView cycleLabel;
-	private Button startButton, resetButton;
-	private boolean running;
-	private TextView log;
+	private CPU cpu;// = new CPU_1_1();
+	
+	public TabHost tabHost;
+	
+	private ControlTab controlTab;
 	private AssemblyEditorTab asmEditor;
 	private BubbleView bubbleView;
-	private long lastUpdateTime;
+	
 	private View focus;
 	
     @Override
     public void onCreate(Bundle savedInstanceState)
 	{
         super.onCreate(savedInstanceState);
+        
+        cpu = Options.GetCPU();
+        
 		/*
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 
@@ -46,10 +47,10 @@ public class MainActivity extends Activity implements CPU.Observer
 			});
 			*/
 			
-		ErrorHandling.handle(this, null);
+		//ErrorHandling.handle(this, null);
 
 		// This is NOT the way you're meant to make tabs
-		TabHost tabHost = new TabHost(this, null);
+		tabHost = new TabHost(this, null);
 		LinearLayout tablyt = new LinearLayout(this);
 		tablyt.setOrientation(LinearLayout.VERTICAL);
 		TabWidget tw = new TabWidget(this);
@@ -63,78 +64,40 @@ public class MainActivity extends Activity implements CPU.Observer
 		focus = fl;
         
 		// Make control tab
-		final ScrollView scroll = new ScrollView(this);
-        LinearLayout lyt = new LinearLayout(this);
-        lyt.setOrientation(LinearLayout.VERTICAL);
-		scroll.addView(lyt);
 		
-		addTab(tabHost, "Control", scroll);
-		
-		setContentView(tabHost);
-        
-        lyt.addView(ramviz = new RAMViz(this, cpu.RAM));
-        
-        statusLabel = new TextView(this);
-        statusLabel.setText("...");
-    	lyt.addView(statusLabel);
-    	
-    	cycleLabel = new TextView(this);
-    	cycleLabel.setText(" ");
-    	lyt.addView(cycleLabel);
-        
-        startButton = new Button(this);
-        startButton.setText("Start");
-        startButton.setOnClickListener(new OnClickListener()
-		{
-			public void onClick(View v)
-			{
-				if (!running) start(); else stop();
-			}
-		});
-        lyt.addView(startButton);
-        
-        resetButton = new Button(this);
-        resetButton.setText("Reset");
-        resetButton.setOnClickListener(new OnClickListener()
-		{
-			public void onClick(View v)
-			{
-				reset();
-			}
-		});
-        lyt.addView(resetButton);
-        
-        log = new TextView(this);
-        lyt.addView(log);
-        
+		addTab(tabHost, "Control", controlTab = new ControlTab(this));
+
         
         // Make assembly editor tab
-        addTab(tabHost, "ASM", asmEditor = new AssemblyEditorTab(this, this, cpu));
+        addTab(tabHost, "ASM", asmEditor = new AssemblyEditorTab(this, this));
 		
 		// Add test of editor v2
+        /*
 		FrameLayout tmpcon = new FrameLayout(this);
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 		tmpcon.setLayoutParams(lp);
 		tmpcon.addView(bubbleView = new BubbleView(this, tmpcon, asmEditor.getEditor()));
 		addTab(tabHost, "ASM2", tmpcon);
+		*/
 		
         
         // Make console tab
-        addTab(tabHost, "Console", new Console(this, cpu));
+        addTab(tabHost, "Console", new Console(this));
         
         
         // Make ship tab
-        addTab(tabHost, "Ship", new ShipView2D(this, cpu));
+        addTab(tabHost, "Ship", new ShipView2D(this));
+        
+        
+        setContentView(tabHost);
         
         
         // Prepare to start
-        reset();
+        controlTab.reset();
         
         //testMyAssembler();
         checkVersion();
         
-        lastUpdateTime = System.currentTimeMillis();
-        cpu.addObserver(this);
     }
     
     private void addTab(TabHost tabHost, String name, final View view)
@@ -230,7 +193,8 @@ public class MainActivity extends Activity implements CPU.Observer
 	
 	public void log(String s)
 	{
-		log.append(s+'\n');
+		controlTab.log(s);
+		//log.append(s+'\n');
 		//Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
 	}
 	
@@ -264,99 +228,8 @@ public class MainActivity extends Activity implements CPU.Observer
 		}
 		log("Assembled example: "+correct+" correct, "+incorrect+" incorrect.");
 	}
+
     
-    public void reset()
-    {
-		stop();
-    	cpu.reset();
-    	
-
-    	
-    	System.arraycopy(assembled, 0, cpu.RAM, 0, assembled.length);
-    	
-    	updateInfo();
-    }
-
-    private static int CYCLES_PER_SECOND = 100 * 1000;
-    private static int CYCLES_PER_MILLI = CYCLES_PER_SECOND / 1000;
-    private Thread cpuThread = null;
-    public void start()
-    {
-    	log("Starting...\n");
-    	startButton.setText("Pause");
-    	running = true;
-
-
-    	cpuThread = new Thread(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				while (running)
-				{
-					int millis_per_loop = 10;
-					long time = System.currentTimeMillis();
-					for (int i = millis_per_loop; i-->0;)
-					{
-						for (int j = CYCLES_PER_MILLI; j-->0;) // Yes, this doesn't actually measure cycles at the moment
-							cpu.execute();
-						
-						Thread.yield(); // Be nice
-					}
-					
-					while (System.currentTimeMillis() < time + millis_per_loop) // If we're running too fast, wait a bit.
-					{
-						try { Thread.sleep(1); } catch (Exception e) { return; }
-					}
-				}
-			}
-		}, "CPU Thread");
-    	
-    	//cpuThread.setPriority(Thread.MIN_PRIORITY);
-    	cpuThread.start();
-    }
-    
-    public void stop()
-    {
-    	running = false;
-    	startButton.setText("Start");
-    }
-    
-    private long lastActualUpdate = System.currentTimeMillis(), lastCycleCount = 0;
-    private String lastSpeed = "(unknown)";
-    public void updateInfo()
-    {
-    	statusLabel.setText(cpu.getStatusText());
-    	
-    	String speed = "(unknown)";
-    	long cyclesElapsed = cpu.cycleCount - lastCycleCount;
-    	long time = System.currentTimeMillis();
-    	long millisElapsed = time - lastActualUpdate;
-    	if (millisElapsed > 0)
-    	{
-    		float hz = (float)cyclesElapsed * 1000.0f / (float)millisElapsed;
-    		
-    		if (hz < 1000)
-    			speed = String.format("%.0fHz", hz);
-    		else if (hz < 1000 * 1000)
-    			speed = String.format("%.1fkHz", hz / 1000.0f);
-    		else if (hz < 1000 * 1000 * 1000)
-    			speed = String.format("%.2fMHz", hz / (1000.0f * 1000.0f));
-    		else
-    			speed = String.format("%.2fGHz", hz / (1000.0f * 1000.0f * 1000.0f));
-    		
-    		// I'm not going above GHz, don't be silly
-    	}
-    	else
-    		speed = lastSpeed + " (est)";
-    	
-    	lastActualUpdate = time;
-    	lastCycleCount = cpu.cycleCount;
-    	
-    	cycleLabel.setText(" Cycles: "+cpu.cycleCount+" Speed: "+speed);
-    	
-    	ramviz.updateBuffer();
-    }
     
     @Override
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -396,10 +269,7 @@ public class MainActivity extends Activity implements CPU.Observer
 			    asmEditor.assemble();
 			    break;
 		    case 4:
-				if (running)
-					stop();
-			    else
-				    start();
+				controlTab.toggleRunning();
 				break;
 		    case 5:
 		    {
@@ -470,37 +340,28 @@ public class MainActivity extends Activity implements CPU.Observer
     	}
     	
     }
-    
-    private Runnable updateRunnable = new Runnable()
-	{
-		@Override
-		public void run()
-		{
-			updateInfo();
-		}
-	};
 
-	@Override
-	public void onCpuExecution(CPU cpu)
-	{
-		long time = System.currentTimeMillis();
-		if (time > lastUpdateTime + 50)
-		{
-			lastUpdateTime = time;
-			runOnUiThread(updateRunnable);
-		}
-	}
 	
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
-		running = false;
+		controlTab.stop();
 		try
 		{
 			asmEditor.autosave();
 		}
 		catch (Exception ex) {}
+	}
+	
+	public void stop()
+	{
+		controlTab.stop();
+	}
+	
+	public void updateInfo()
+	{
+		controlTab.updateInfo();
 	}
 	
 	@Override
@@ -554,4 +415,5 @@ public class MainActivity extends Activity implements CPU.Observer
 		
 		return super.onKeyUp(keyCode, event);
 	}
+
 }
