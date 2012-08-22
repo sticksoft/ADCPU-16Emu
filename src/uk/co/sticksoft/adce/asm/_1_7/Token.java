@@ -14,4 +14,7 @@ public interface Token
 	void substituteLabels(Map<String, Character> labelMap);
 	
 	void setOrigin(char origin);
+	
+	@Override
+	public String toString();
 }

@@ -25,11 +25,13 @@ public class Disasm
 			
 			if (opcode != 0)
 			{
+				String aName = GetValueName(a, true);
+				String bName = GetValueName(b, false);
 				builder.append(String.format("%04x %s %s, %s",
 				    PC-1,
 					Consts.BasicOpcode.values()[opcode].toString(),
-					GetValueName(b, false),
-					GetValueName(a, true)));
+					bName,
+					aName));
 			}
 			else
 			{

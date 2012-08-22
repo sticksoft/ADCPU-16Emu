@@ -42,5 +42,11 @@ public class Label implements Token
 	{
 		this.location = origin;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Label: "+name;
+	}
 
 }

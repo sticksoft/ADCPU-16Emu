@@ -42,5 +42,11 @@ public class Dat implements Token
 	public void setOrigin(char origin)
 	{
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Dat length "+data.length;
+	}
 
 }

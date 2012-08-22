@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.util.Log;
+
 import uk.co.sticksoft.adce.asm._1_7.Consts;
 import uk.co.sticksoft.adce.asm._1_7.Dat;
 import uk.co.sticksoft.adce.asm._1_7.DebugToken;
@@ -14,6 +16,15 @@ import uk.co.sticksoft.adce.asm._1_7.Token;
 
 public class Assembler_1_7 implements Assembler
 {
+	private final static String TAG = "ADCPU";
+	private final static boolean VERBOSE_DEBUG = true;
+	
+	private final static void verbose(String s)
+	{
+		if (VERBOSE_DEBUG)
+			Log.i(TAG, s);
+	}
+	
 	public Assembler_1_7() {}
 	
 	public char[] assemble(String source, ArrayList<String> out_message, HashMap<Integer, String> out_debugSymbols)
@@ -28,6 +39,9 @@ public class Assembler_1_7 implements Assembler
 		parseToStructre();
 		
 		handleLabels();
+		
+		for (Token t : structure)
+			Log.i(TAG, t.toString());
 		
 		handleDebugSymbols();
 		
@@ -73,15 +87,28 @@ public class Assembler_1_7 implements Assembler
 	{
 		char c = readNextCharacter();
 		if (Character.isWhitespace(c))
+		{
+			//verbose(""+sourceIndex+": Whitespace");
 			return;
+		}
 		else if (c == ';')
+		{
+			verbose(""+sourceIndex+": Start of comment");
 			readComment();
+			verbose(""+sourceIndex+": Finished comment");
+		}
 		else if (c == ':')
+		{
+			verbose(""+sourceIndex+": Start of label");
 			readLabel();
+			verbose(""+sourceIndex+": Finished label");
+		}
 		else
 		{
+			verbose(""+sourceIndex+": Presumable start of instruction? '"+c+"'");
 			sourceIndex--; // Optimisation - go back a character and use a substring instead of building the string again
 			readInstruction();
+			verbose(""+sourceIndex+": Finished instruction");
 		}
 	}
 	
@@ -101,25 +128,29 @@ public class Assembler_1_7 implements Assembler
 		int start = sourceIndex;
 		while (sourceIndex < sourceLength)
 		{
-			if (!Character.isWhitespace(readNextCharacter()))
+			if (Character.isWhitespace(readNextCharacter()))
 				break;
 		}
 		
 		if (start < sourceLength && sourceIndex - start > 1)
 		{
-			Label label = new Label(source.substring(start, sourceIndex));
+			String labelName = source.substring(start, sourceIndex).trim();
+			verbose("Found label: '"+labelName+"'");
+			Label label = new Label(labelName);
 			structure.add(label);
-			labels.put(label.getName(), label);
+			labels.put(labelName, label);
 		}
 	}
 	
 	public void error(String text)
 	{
+		Log.e(TAG, text);
 		messages.add(String.valueOf(currentLine)+": error: "+text);
 	}
 	
 	public void warning(String text)
 	{
+		Log.w(TAG, text);
 		messages.add(String.valueOf(currentLine)+": warning: "+text);
 	}
 	
@@ -134,6 +165,7 @@ public class Assembler_1_7 implements Assembler
 		}
 		
 		String mneumonic = source.substring(sourceIndex, sourceIndex + 3);
+		verbose("Mneumonic: "+mneumonic);
 		sourceIndex += 3;
 		
 		DebugToken debugToken = new DebugToken();
@@ -142,11 +174,24 @@ public class Assembler_1_7 implements Assembler
 		
 		char opcode;
 		if ((opcode = Consts.getBasicOpcode(mneumonic)) != 0)
+		{
+			verbose("Basic instruction (opcode: "+(int)opcode+")");
 			readBasicInstruction(opcode);
+		}
 		else if ((opcode = Consts.getAdvancedOpcode(mneumonic)) != 0)
+		{
+			verbose("Advanced instruction (opcode: "+(int)opcode+")");
 			readAdvancedInstruction(opcode);
+		}
 		else if (mneumonic.equalsIgnoreCase("DAT"))
+		{
+			verbose("Dat.");
 			readDat();
+		}
+		else
+		{
+			error("Unknown instruction: "+mneumonic);
+		}
 		
 		
 		debugToken.setToken(source.substring(debugTokenIndex, sourceIndex));
@@ -192,7 +237,9 @@ public class Assembler_1_7 implements Assembler
 			if (!foundOpenBracket)
 			{
 				if (c == ',' || Character.isWhitespace(c))
+				{
 					break;
+				}
 			}
 			else
 			{
@@ -204,7 +251,7 @@ public class Assembler_1_7 implements Assembler
 			}
 		}
 		
-		return source.substring(start, sourceIndex);
+		return source.substring(start, sourceIndex++);
 	}
 	
 	protected void readBasicInstruction(char opcode)
@@ -215,11 +262,19 @@ public class Assembler_1_7 implements Assembler
 			error("Unable to read b-value.");
 			return;
 		}
+		else
+		{
+			verbose("Read bString: "+bString);
+		}
 		String aString = readValue();
 		if (aString == null)
 		{
 			error("Unable to read a-value.");
 			return;
+		}
+		else
+		{
+			verbose("Read aString: "+aString);
 		}
 		
 		structure.add(new Instruction(opcode, bString, aString, this));
@@ -227,12 +282,14 @@ public class Assembler_1_7 implements Assembler
 	
 	protected void readAdvancedInstruction(char opcode)
 	{
-		String bString = readValue();
-		if (bString == null)
+		String aString = readValue();
+		if (aString == null)
 		{
-			error("Unable to read b-value.");
+			error("Unable to read a-value.");
 			return;
 		}
+		
+		structure.add(new Instruction(opcode, aString, this));
 	}
 	
 	private static final char INVALID_ESCAPE = 'x';

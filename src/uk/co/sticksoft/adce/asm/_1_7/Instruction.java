@@ -14,11 +14,36 @@ public class Instruction implements Token
 	
 	private final static int LABEL_VALUE_NUMBER = -2;
 	
+	private String debugString;
+	
 	public Instruction(char opcode, String b, String a, Assembler_1_7 assembler)
 	{
 		this.opcode = opcode;
 		this.aValue = translateValue(a, true, assembler);
 		this.bValue = translateValue(b, false, assembler);
+		try
+		{
+			this.debugString = Consts.BasicOpcode.values()[opcode].toString() + " " + b + " " + a;
+		}
+		catch (Exception e)
+		{
+			this.debugString = "Instruction, opcode: "+opcode+" b:"+b+" a:"+a;
+		}
+	}
+	
+	public Instruction(char opcode, String a, Assembler_1_7 assembler)
+	{
+		this.opcode = 0;
+		this.bValue = new Value(opcode);
+		this.aValue = translateValue(a, true, assembler);
+		try
+		{
+			this.debugString = Consts.AdvancedOpcode.values()[opcode].toString() + " " + a;
+		}
+		catch (Exception e)
+		{
+			this.debugString = "Instruction, opcode: "+opcode+" a:"+a;
+		}
 	}
 	
 	private static final String[] valcodes =
@@ -38,7 +63,16 @@ public class Instruction implements Token
 		public String label = null;
 		public Value(int val) { valcode = (char)val; }
 		public Value(int val, int extra) { valcode = (char)val; extraWord = (char)extra; hasExtra = true; }
-		public Value(int val, String label) { valcode = (char)val; hasExtra = true; this.label = label; } 
+		public Value(int val, String label) { valcode = (char)val; hasExtra = true; this.label = label; }
+		
+		@Override
+		public String toString()
+		{
+			return "("+(int)valcode
+					+ ((valcode < Consts.ValueCode.values().length) ? " \"" + Consts.ValueCode.values()[valcode] + "\"" : "")
+					+ (hasExtra ? (", "+(label!=null?"'"+label+"', " : "")+(int)extraWord) : "")
+					+")";
+		}
 	}
 	
 	public int integerValue(String decHexOrLabel, boolean canBeMinus1, Assembler_1_7 assembler)
@@ -197,7 +231,7 @@ public class Instruction implements Token
 	{
 		char b = bValue != null ? ((char)(bValue.valcode & 0x1f)) : 0;
 		char a = aValue != null ? ((char)(aValue.valcode & 0x3f)) : 0; 
-		cs.add((char)(opcode + b << 5 + a << 10));
+		cs.add((char)(opcode + (b << 5) + (a << 10)));
 		
 		if (aValue != null && aValue.hasExtra)
 			cs.add(aValue.extraWord);
@@ -207,7 +241,7 @@ public class Instruction implements Token
 	
 	public int getCharCount()
 	{
-		return 3 + ((aValue != null && aValue.hasExtra)?1:0) + ((bValue != null && bValue.hasExtra)?1:0);
+		return 1 + ((aValue != null && aValue.hasExtra)?1:0) + ((bValue != null && bValue.hasExtra)?1:0);
 	}
 	
 	public void substituteLabels(Map<String, Character> labelMap)
@@ -288,5 +322,11 @@ public class Instruction implements Token
 	public void setOrigin(char origin)
 	{
 		// Don't need to know, really.
+	}
+	
+	@Override
+	public String toString()
+	{
+		return "Instruction: "+debugString + " => " + (int)opcode + " " + bValue.toString() + " " + aValue.toString();
 	}
 }

@@ -42,5 +42,11 @@ public class DebugToken implements Token
 	{
 		this.origin = origin;
 	}
+	
+	@Override
+	public String toString()
+	{
+		return "Debug token";//+token;
+	}
 
 }
