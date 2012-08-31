@@ -19,10 +19,11 @@ public class Assembler_1_7 implements Assembler
 	private final static String TAG = "ADCPU";
 	private final static boolean VERBOSE_DEBUG = true;
 	
-	private final static void verbose(String s)
+	private void verbose(String s)
 	{
 		if (VERBOSE_DEBUG)
 			Log.i(TAG, s);
+		messages.add(s);
 	}
 	
 	public Assembler_1_7() {}
@@ -41,7 +42,7 @@ public class Assembler_1_7 implements Assembler
 		handleLabels();
 		
 		for (Token t : structure)
-			Log.i(TAG, t.toString());
+			verbose(t.toString());
 		
 		handleDebugSymbols();
 		
