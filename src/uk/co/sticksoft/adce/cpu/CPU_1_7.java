@@ -164,10 +164,10 @@ public class CPU_1_7 extends CPU
 			RAM[address] = word;
 			break;
 		case PC:
-			PC = word;
+			tPC = word;
 			break;
 		case SP:
-			SP = word;
+			tSP = word;
 			break;
 		case EX:
 			EX = word;
@@ -213,135 +213,137 @@ public class CPU_1_7 extends CPU
 				
 				if (opcode < 0x10 || opcode > 0x17) // Keep skipping over conditionals
 					skipping = false;
-				return;
 			}
-			
-			// Work out address type and location before instruction
-			// These will only modify tSP or tPC, not the actual SP or PC
-			// until after the instruction completes. 
-			AddressType aType = addressType(a), bType = addressType(b);
-			char aAddr = addressA(a), bAddr = addressB(b);
-		
-			// Grab the actual values
-			char aVal = read(aType, aAddr), bVal = read(bType, bAddr);
-			
-			int res = 0; // Result
-			
-			switch (opcode)
+			else
 			{
-				case 0x01: // SET
-					res = aVal;
-					break;
-				case 0x02: // ADD
-					res = bVal + aVal;
-					EX = (res < 0xffff) ? (char)0 : (char)1;
-					break;
-				case 0x03: // SUB
-					res = bVal - aVal;
-					EX = (res > 0) ? 0 : (char)0xffff;
-					break;
-				case 0x04: // MUL
-					res = bVal * aVal;
-					EX = (char)(res >> 16);
-					break;
-				case 0x05: // MLI
-					res = unsignedCharAsSignedInt(bVal) * unsignedCharAsSignedInt(aVal);
-					EX = (char)(res >> 16);
-					break;
-				case 0x06: // DIV
-					res = bVal / aVal;
-					EX = (char)(((bVal << 16) / aVal) & 0xffff);
-					break;
-				case 0x07: // DVI
-					res = unsignedCharAsSignedInt(bVal) / unsignedCharAsSignedInt(aVal);
-					EX = (char)(((unsignedCharAsSignedInt(bVal) << 16) / unsignedCharAsSignedInt(aVal)) & 0xffff);
-					break;
-				case 0x08: // MOD
-					if (aVal == 0)
-						res = 0;
-					else
-						res = bVal % aVal;
-					break;
-				case 0x09: // MDI
-					if (aVal == 0)
-						res = 0;
-					else
-						res = unsignedCharAsSignedInt(bVal) % unsignedCharAsSignedInt(aVal);
-					break;
-				case 0x0a: // AND
-					res = bVal & aVal;
-					break;
-				case 0x0b: // BOR
-					res = bVal | aVal;
-					break;
-				case 0x0c: // XOR
-					res = bVal ^ aVal;
-					break;
-				case 0x0d: // SHR
-					res = bVal >>> a;
-					EX = (char)(((bVal << 16) >>> a) & 0xffff);
-					break;
-				case 0x0e: // ASR
-					res = bVal >> a;
-					EX = (char)(((bVal << 16) >> a) & 0xffff);
-					break;
-				case 0x0f: // SHL
-					res = bVal << a;
-					EX = (char)(((bVal << aVal) >> 16) & 0xffff);
-					break;
-				case 0x10: // IFB
-					skipping = (bVal & aVal) != 0;
-					break;
-				case 0x11: // IFC
-					skipping = (bVal & aVal) == 0;
-					break;
-				case 0x12: // IFE
-					skipping = (bVal == aVal);
-					break;
-				case 0x13: // IFN
-					skipping = (bVal != aVal);
-					break;
-				case 0x14: // IFG
-					skipping = (bVal > aVal);
-					break;
-				case 0x15: // IFA
-					skipping = (unsignedCharAsSignedInt(bVal) > unsignedCharAsSignedInt(aVal));
-					break;
-				case 0x16: // IFL
-					skipping = (bVal < aVal);
-					break;
-				case 0x17: // IFU
-					skipping = (unsignedCharAsSignedInt(bVal) < unsignedCharAsSignedInt(bVal));
-					break;
-				case 0x18: // -
-				case 0x19: // -
-					error = true;
-					break;
-				case 0x1a: // ADX
-					res = bVal + aVal + EX;
-					EX = (char)((res < 0) ? 0 : 1);
-					break;
-				case 0x1b: // SBX
-					res = bVal - aVal - EX;
-					EX = (char)((res > 0) ? 0 : 1);
-					break;
-				case 0x1c: // -
-				case 0x1d: // -
-					error = true;
-					break;
-				case 0x1e: // STI
-					res = aVal;
-					register[I]++;
-					register[J]++;
-					break;
-				case 0x1f: // STD
-					res = aVal;
-					register[I]--;
-					register[J]--;
-					break;
-			}
+				// Work out address type and location before instruction
+				// These will only modify tSP or tPC, not the actual SP or PC
+				// until after the instruction completes. 
+				AddressType aType = addressType(a), bType = addressType(b);
+				char aAddr = addressA(a), bAddr = addressB(b);
 			
-			write(bType, bAddr, (char)(res & 0xffff));
+				// Grab the actual values
+				char aVal = read(aType, aAddr), bVal = read(bType, bAddr);
+				
+				int res = 0; // Result
+				
+				switch (opcode)
+				{
+					case 0x01: // SET
+						res = aVal;
+						break;
+					case 0x02: // ADD
+						res = bVal + aVal;
+						EX = (res < 0xffff) ? (char)0 : (char)1;
+						break;
+					case 0x03: // SUB
+						res = bVal - aVal;
+						EX = (res > 0) ? 0 : (char)0xffff;
+						break;
+					case 0x04: // MUL
+						res = bVal * aVal;
+						EX = (char)(res >> 16);
+						break;
+					case 0x05: // MLI
+						res = unsignedCharAsSignedInt(bVal) * unsignedCharAsSignedInt(aVal);
+						EX = (char)(res >> 16);
+						break;
+					case 0x06: // DIV
+						res = bVal / aVal;
+						EX = (char)(((bVal << 16) / aVal) & 0xffff);
+						break;
+					case 0x07: // DVI
+						res = unsignedCharAsSignedInt(bVal) / unsignedCharAsSignedInt(aVal);
+						EX = (char)(((unsignedCharAsSignedInt(bVal) << 16) / unsignedCharAsSignedInt(aVal)) & 0xffff);
+						break;
+					case 0x08: // MOD
+						if (aVal == 0)
+							res = 0;
+						else
+							res = bVal % aVal;
+						break;
+					case 0x09: // MDI
+						if (aVal == 0)
+							res = 0;
+						else
+							res = unsignedCharAsSignedInt(bVal) % unsignedCharAsSignedInt(aVal);
+						break;
+					case 0x0a: // AND
+						res = bVal & aVal;
+						break;
+					case 0x0b: // BOR
+						res = bVal | aVal;
+						break;
+					case 0x0c: // XOR
+						res = bVal ^ aVal;
+						break;
+					case 0x0d: // SHR
+						res = bVal >>> aVal;
+						EX = (char)(((bVal << 16) >>> a) & 0xffff);
+						break;
+					case 0x0e: // ASR
+						res = bVal >> aVal;
+						EX = (char)(((bVal << 16) >> a) & 0xffff);
+						break;
+					case 0x0f: // SHL
+						res = bVal << aVal;
+						EX = (char)(((bVal << aVal) >> 16) & 0xffff);
+						break;
+					case 0x10: // IFB
+						skipping = (bVal & aVal) == 0;
+						break;
+					case 0x11: // IFC
+						skipping = (bVal & aVal) != 0;
+						break;
+					case 0x12: // IFE
+						skipping = (bVal != aVal);
+						break;
+					case 0x13: // IFN
+						skipping = (bVal == aVal);
+						break;
+					case 0x14: // IFG
+						skipping = (bVal <= aVal);
+						break;
+					case 0x15: // IFA
+						skipping = (unsignedCharAsSignedInt(bVal) <= unsignedCharAsSignedInt(aVal));
+						break;
+					case 0x16: // IFL
+						skipping = (bVal >= aVal);
+						break;
+					case 0x17: // IFU
+						skipping = (unsignedCharAsSignedInt(bVal) >= unsignedCharAsSignedInt(bVal));
+						break;
+					case 0x18: // -
+					case 0x19: // -
+						error = true;
+						break;
+					case 0x1a: // ADX
+						res = bVal + aVal + EX;
+						EX = (char)((res < 0) ? 0 : 1);
+						break;
+					case 0x1b: // SBX
+						res = bVal - aVal - EX;
+						EX = (char)((res > 0) ? 0 : 1);
+						break;
+					case 0x1c: // -
+					case 0x1d: // -
+						error = true;
+						break;
+					case 0x1e: // STI
+						res = aVal;
+						register[I]++;
+						register[J]++;
+						break;
+					case 0x1f: // STD
+						res = aVal;
+						register[I]--;
+						register[J]--;
+						break;
+				}
+				
+				if (opcode < 0x10 || opcode > 0x17)
+					write(bType, bAddr, (char)(res & 0xffff));
+			}
 		}
 		else
 		{
@@ -354,85 +356,88 @@ public class CPU_1_7 extends CPU
 				skipping = false;
 				PC = tPC;
 			}
-			
-			switch (b) // b becomes the special opcode
+			else
 			{
-			case 0x00: // Reserved
-				error = true;
-				break;
-			case 0x01: // JSR
-				// Get jump address
-				char jmp = read(addressType(a), addressA(a));
-				
-				// Push PC
-				RAM[--tSP] = tPC;
-				
-				// Set PC to jump address (after increment)
-				tPC = jmp;
-				break;
-			case 0x02: // -
-			case 0x03: // -
-			case 0x04: // -
-			case 0x05: // -
-			case 0x06: // -
-			case 0x07: // -
-				error = true;
-				break;
-			case 0x08: // INT
-				char interrupt = read(addressType(a), addressA(a));
-				if (interruptQueueing)
-					interruptQueue.add(Character.valueOf(interrupt));
-				else if (IA != 0)
+			
+				switch (b) // b becomes the special opcode
 				{
-					interruptQueueing = true;
+				case 0x00: // Reserved
+					error = true;
+					break;
+				case 0x01: // JSR
+					// Get jump address
+					char jmp = read(addressType(a), addressA(a));
+					
+					// Push PC
 					RAM[--tSP] = tPC;
-					RAM[--tSP] = register[A];
-					tPC = IA;
-					register[A] = interrupt;
+					
+					// Set PC to jump address (after increment)
+					tPC = jmp;
+					break;
+				case 0x02: // -
+				case 0x03: // -
+				case 0x04: // -
+				case 0x05: // -
+				case 0x06: // -
+				case 0x07: // -
+					error = true;
+					break;
+				case 0x08: // INT
+					char interrupt = read(addressType(a), addressA(a));
+					if (interruptQueueing)
+						interruptQueue.add(Character.valueOf(interrupt));
+					else if (IA != 0)
+					{
+						interruptQueueing = true;
+						RAM[--tSP] = tPC;
+						RAM[--tSP] = register[A];
+						tPC = IA;
+						register[A] = interrupt;
+					}
+					break;
+				case 0x09: // IAG
+					write(addressType(a), addressA(a), IA);
+					break;
+				case 0x0a: // IAS
+					IA = read(addressType(a), addressA(a));
+					break;
+				case 0x0b: // RFI
+					interruptQueueing = false;
+					register[A] = RAM[tSP++];
+					tPC = RAM[tSP++];
+					break;
+				case 0x0c: // IAQ
+					interruptQueueing = (read(addressType(a), addressA(a)) == 0);
+					break;
+				case 0x0d: // -
+				case 0x0e: // -
+				case 0x0f: // -
+					error = true;
+					break;
+				case 0x10: // HWN
+				case 0x11: // HWQ
+				case 0x12: // HWI
+					break;
+				case 0x13: // -
+				case 0x14: // -
+				case 0x15: // -
+				case 0x16: // -
+				case 0x17: // -
+				case 0x18: // -
+				case 0x19: // -
+				case 0x1a: // -
+				case 0x1b: // -
+				case 0x1c: // -
+				case 0x1d: // -
+				case 0x1e: // -
+				case 0x1f: // -
+					error = true;
+					break;
 				}
-				break;
-			case 0x09: // IAG
-				write(addressType(a), addressA(a), IA);
-				break;
-			case 0x0a: // IAS
-				IA = read(addressType(a), addressA(a));
-				break;
-			case 0x0b: // RFI
-				interruptQueueing = false;
-				register[A] = RAM[tSP++];
-				tPC = RAM[tSP++];
-				break;
-			case 0x0c: // IAQ
-				interruptQueueing = (read(addressType(a), addressA(a)) == 0);
-				break;
-			case 0x0d: // -
-			case 0x0e: // -
-			case 0x0f: // -
-				error = true;
-				break;
-			case 0x10: // HWN
-			case 0x11: // HWQ
-			case 0x12: // HWI
-				break;
-			case 0x13: // -
-			case 0x14: // -
-			case 0x15: // -
-			case 0x16: // -
-			case 0x17: // -
-			case 0x18: // -
-			case 0x19: // -
-			case 0x1a: // -
-			case 0x1b: // -
-			case 0x1c: // -
-			case 0x1d: // -
-			case 0x1e: // -
-			case 0x1f: // -
-				error = true;
-				break;
 			}
 		}
 		
-		if (!interruptQueueing && !interruptQueue.isEmpty())
+		if (!skipping && !interruptQueueing && !interruptQueue.isEmpty())
 		{
 			interruptQueueing = true;
 			RAM[tSP--] = tPC;
@@ -450,11 +455,13 @@ public class CPU_1_7 extends CPU
 	@Override
 	public String getStatusText()
 	{
-		return String.format(" A:%04x B:%04x C:%04x\n X:%04x Y:%04x Z:%04x\n I:%04x J:%04x\n PC:%04x SP:%04x EX:%04x IA:%04x\n%s",
+		return String.format(" A:%04x B:%04x C:%04x\n X:%04x Y:%04x Z:%04x\n I:%04x J:%04x\n PC:%04x SP:%04x EX:%04x IA:%04x\n%s\n%s",
 				(int)register[A], (int)register[B], (int)register[C],
 				(int)register[X], (int)register[Y], (int)register[Z],
 				(int)register[I], (int)register[J],
-				(int)PC, (int)SP, (int)EX, (int)IA, Disasm.disasm(RAM, PC));
+				(int)PC, (int)SP, (int)EX, (int)IA,
+				skipping ? "SKIPPING" : "",
+				Disasm.disasm(RAM, PC));
 	}
 
 }
