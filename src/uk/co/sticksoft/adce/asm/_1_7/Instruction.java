@@ -70,7 +70,7 @@ public class Instruction implements Token
 		{
 			return "("+(int)valcode
 					+ ((valcode < Consts.ValueCode.values().length) ? " \"" + Consts.ValueCode.values()[valcode] + "\"" : "")
-					+ (hasExtra ? (", "+(label!=null?"'"+label+"', " : "")+(int)extraWord) : "")
+					+ (hasExtra ? (", "+(label!=null?"'"+label+"', " : "")+String.format("%04x", (int)extraWord)) : "")
 					+")";
 		}
 	}
