@@ -30,10 +30,14 @@ public class MainActivity extends Activity
 	
 	private View focus;
 	
+	public static MainActivity me;
+	
     @Override
     public void onCreate(Bundle savedInstanceState)
 	{
         super.onCreate(savedInstanceState);
+        
+        me = this;
         
         cpu = Options.GetCPU();
         
@@ -72,17 +76,17 @@ public class MainActivity extends Activity
         addTab(tabHost, "ASM", asmEditor = new AssemblyEditorTab(this, this));
 		
 		// Add test of editor v2
-        /*
+        
 		FrameLayout tmpcon = new FrameLayout(this);
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
 		tmpcon.setLayoutParams(lp);
 		tmpcon.addView(bubbleView = new BubbleView(this, tmpcon, asmEditor.getEditor()));
 		addTab(tabHost, "ASM2", tmpcon);
-		*/
+		
 		
         
         // Make console tab
-        addTab(tabHost, "Console", new Console(this));
+        addTab(tabHost, "Console", Options.getConsoleView(this));
         
         
         // Make ship tab

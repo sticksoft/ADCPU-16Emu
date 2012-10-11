@@ -3,13 +3,15 @@ package uk.co.sticksoft.adce.cpu;
 import java.util.LinkedList;
 import java.util.Queue;
 import uk.co.sticksoft.adce.asm._1_7.*;
+import uk.co.sticksoft.adce.hardware.Device;
+import uk.co.sticksoft.adce.hardware.HardwareManager;
 
 /*
  * Half-baked 1.7 version of the CPU
  */
 public class CPU_1_7 extends CPU
 {
-	public int A = 0, B = 1, C = 2, X = 3, Y = 4, Z = 5, I = 6, J = 7;
+	public static final int A = 0, B = 1, C = 2, X = 3, Y = 4, Z = 5, I = 6, J = 7;
 	public char[] register = new char[J+1];	
 	public char PC, SP, EX, IA;
 	
@@ -415,9 +417,24 @@ public class CPU_1_7 extends CPU
 					error = true;
 					break;
 				case 0x10: // HWN
-				case 0x11: // HWQ
-				case 0x12: // HWI
+					write(addressType(a), addressA(a), (char)HardwareManager.instance().getCount());
 					break;
+				case 0x11: // HWQ
+				{
+					Device device = HardwareManager.instance().getDevice(read(addressType(a), addressA(a)));
+					register[A] = device.GetIDLo();
+					register[B] = device.GetIDHi();
+					register[C] = device.GetVersion();
+					register[X] = device.GetManuLo();
+					register[Y] = device.GetManuHi();
+					break;
+				}
+				case 0x12: // HWI
+				{
+					Device device = HardwareManager.instance().getDevice(read(addressType(a), addressA(a)));
+					device.HWI_1_7(this);
+					break;
+				}
 				case 0x13: // -
 				case 0x14: // -
 				case 0x15: // -

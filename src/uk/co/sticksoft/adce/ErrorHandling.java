@@ -9,22 +9,27 @@ public class ErrorHandling
 	{
 		handle(null, e);
 	}
-    public static void handle(Context c, Throwable e)
+    public static void handle(Context c, final Throwable e)
 	{
-		if (c != null)
-			context = c;
+		context = MainActivity.me;
 		
-		if (context != null)
+		MainActivity.me.runOnUiThread(new Runnable()
 		{
 			
-			StringBuilder builder = new StringBuilder();
-			
-			//builder.append(e.getMessage()).append(" at\n");
-			for (StackTraceElement el : e.getStackTrace())
-			    builder.append(el.toString()).append("\n");
-			new AlertDialog.Builder(context).setTitle("Exception").setMessage(builder).show();
-	
-	//new AlertDialog.Builder(context).setTitle("Exception").setMessage("doh").setPositiveButton("OK", null).show();
+			@Override
+			public void run()
+			{
+				StringBuilder builder = new StringBuilder();
+				
+				//builder.append(e.getMessage()).append(" at\n");
+				for (StackTraceElement el : e.getStackTrace())
+				    builder.append(el.toString()).append("\n");
+				new AlertDialog.Builder(context).setTitle("Exception").setMessage(builder).show();
+		
+				//new AlertDialog.Builder(context).setTitle("Exception").setMessage("doh").setPositiveButton("OK", null).show();
+			}
+		});
 	}
-	}
+    
+    
 }

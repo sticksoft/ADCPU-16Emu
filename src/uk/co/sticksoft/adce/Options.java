@@ -9,6 +9,11 @@ import uk.co.sticksoft.adce.asm.Assembler_1_7;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_1;
 import uk.co.sticksoft.adce.cpu.CPU_1_7;
+import uk.co.sticksoft.adce.hardware.Console;
+import uk.co.sticksoft.adce.hardware.HardwareManager;
+import uk.co.sticksoft.adce.hardware.LEM1802;
+import android.content.Context;
+import android.view.View;
 
 public class Options
 {
@@ -53,6 +58,26 @@ public class Options
 			return new Assembler_1_1();
 		case _1_7:
 			return new Assembler_1_7();
+		}
+		
+		return null;
+	}
+	
+	
+	private static LEM1802 lem1802;
+	public static View getConsoleView(Context context)
+	{
+		switch (current_version)
+		{
+		case _1_1:
+			return new Console(context);
+		case _1_7:
+			if (lem1802 == null)
+			{
+				lem1802 = new LEM1802(context);
+				HardwareManager.instance().addDevice(lem1802);
+			}
+			return lem1802;
 		}
 		
 		return null;

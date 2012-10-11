@@ -49,6 +49,20 @@ public class Assembler_1_7 implements Assembler
 		return getMachineCodeFromStructure();
 	}
 	
+	public ArrayList<Token> assembleAsStructure(String source)
+	{
+		reset();
+		
+		this.source = source;
+		this.sourceLength = source.length();
+		this.messages = new ArrayList<String>();
+		this.debugSymbols = new HashMap<Integer, String>();
+		
+		parseToStructre();
+		
+		return structure;
+	}
+	
 	protected String source;
 	protected int sourceIndex;
 	protected int sourceLength;
@@ -332,6 +346,7 @@ public class Assembler_1_7 implements Assembler
 			}
 			else if (c == '\'')
 			{
+				verbose("Dat character: "+ret);
 				return ret;
 			}
 			else
@@ -355,7 +370,10 @@ public class Assembler_1_7 implements Assembler
 			if (!escaping)
 			{
 				if (c == '"')
+				{
+					verbose("Dat string: "+builder.toString());
 					return builder.toString();
+				}
 				else if (c == '\\')
 					escaping = true;
 				else
@@ -408,7 +426,10 @@ public class Assembler_1_7 implements Assembler
 			carryOn = false;
 			
 			if (!readToNextNonWhitespace())
+			{
+				error("Can't read to whitespace after DAT!");
 				return;
+			}
 			
 			char c = readNextCharacter();
 			if (c == '\'')
@@ -422,7 +443,7 @@ public class Assembler_1_7 implements Assembler
 				while (sourceIndex < sourceLength)
 				{
 					c = readNextCharacter();
-					if (!Character.isDigit(c) && c != 'x' && c != 'X' && c != 'b' && c != 'B')
+					if (!Character.isDigit(c) && !Character.isLetter(c)) //c != 'x' && c != 'X' && c != 'b' && c != 'B')
 					{
 						if (c == ',')
 							carryOn = true;
@@ -432,9 +453,12 @@ public class Assembler_1_7 implements Assembler
 						builder.append(c);
 				}
 				
+				verbose("Dat number: \""+builder.toString()+"\"");
 				structure.add(new Dat((char)readDatNumber(builder.toString())));
 			}
 		}
+		
+		verbose("End of dat.");
 	}
 	
 	protected void handleLabels()
