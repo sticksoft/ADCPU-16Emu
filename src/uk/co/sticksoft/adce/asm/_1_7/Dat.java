@@ -3,7 +3,10 @@ package uk.co.sticksoft.adce.asm._1_7;
 import java.util.List;
 import java.util.Map;
 
+import android.graphics.Color;
+
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
+import uk.co.sticksoft.adce.asm2.BubbleNode;
 
 public class Dat implements Token
 {
@@ -49,4 +52,22 @@ public class Dat implements Token
 		return "Dat length "+data.length;
 	}
 
+	@Override
+	public BubbleNode getBubble()
+	{
+		BubbleNode inst = new BubbleNode("DAT", Color.rgb(64,64,128));
+		if (data.length == 1)
+		{
+			if (data[0] >= 32 && data[0] < 127)
+				inst.addProperty(new BubbleNode("'"+data[0]+"'", Color.rgb(64,64,128)));
+			else
+				inst.addProperty(new BubbleNode(""+(int)data[0], Color.rgb(64,64,128)));
+		}
+		else if (data.length > 1)
+		{
+			inst.addProperty(new BubbleNode(new String(data), Color.rgb(64,64,128)));
+		}
+		
+		return inst;
+	}
 }

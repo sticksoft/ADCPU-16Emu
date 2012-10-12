@@ -2,6 +2,10 @@ package uk.co.sticksoft.adce.asm2;
 import android.graphics.*;
 import java.util.*;
 
+import uk.co.sticksoft.adce.Options;
+import uk.co.sticksoft.adce.asm.Assembler_1_7;
+import uk.co.sticksoft.adce.asm._1_7.Token;
+
 public class BubbleParser
 {
     private BubbleParser(String source, BubbleView view)
@@ -31,6 +35,7 @@ public class BubbleParser
 	
 	private void parse()
 	{
+		/*
 		char c;
 		while (index < source.length())
 		{
@@ -45,6 +50,13 @@ public class BubbleParser
 			else
 			    readInstruction(c);
 		}
+		*/
+		
+		view.getRoots().clear();
+		
+		ArrayList<Token> tokens = new Assembler_1_7().assembleAsStructure(source);
+		for (Token t : tokens)
+			view.getRoots().add(t.getBubble());
 		
 		view.layoutBubbles();
 		view.invalidate();
@@ -129,7 +141,7 @@ public class BubbleParser
 			for (int j = 0; j < node.properties.size(); j++)
 			{
 				builder.append((j == 0) ? " " : ", ");
-				builder.append(node.children.get(j));
+				builder.append(node.properties.get(j));
 			}
 			
 			builder.append("\n");

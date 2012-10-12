@@ -3,7 +3,10 @@ package uk.co.sticksoft.adce.asm._1_7;
 import java.util.List;
 import java.util.Map;
 
+import android.graphics.Color;
+
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
+import uk.co.sticksoft.adce.asm2.BubbleNode;
 
 
 public class Instruction implements Token
@@ -16,11 +19,15 @@ public class Instruction implements Token
 	
 	private String debugString;
 	
+	private String originalA, originalB;
+	
 	public Instruction(char opcode, String b, String a, Assembler_1_7 assembler)
 	{
 		this.opcode = opcode;
 		this.aValue = translateValue(a, true, assembler);
 		this.bValue = translateValue(b, false, assembler);
+		this.originalA = a;
+		this.originalB = b;
 		try
 		{
 			this.debugString = Consts.BasicOpcode.values()[opcode].toString() + " " + b + " " + a;
@@ -36,13 +43,36 @@ public class Instruction implements Token
 		this.opcode = 0;
 		this.bValue = new Value(opcode);
 		this.aValue = translateValue(a, true, assembler);
+		this.originalA = a;
 		try
 		{
-			this.debugString = Consts.AdvancedOpcode.values()[opcode].toString() + " " + a;
+			this.debugString = Consts.AdvancedOpcode.values()[bValue.valcode].toString() + " " + a;
 		}
 		catch (Exception e)
 		{
-			this.debugString = "Instruction, opcode: "+opcode+" a:"+a;
+			this.debugString = "Instruction, opcode: "+bValue.valcode+" a:"+a;
+		}
+	}
+	
+	public BubbleNode getBubble()
+	{
+		if (opcode > 0)
+		{
+			BubbleNode inst = new BubbleNode(Consts.BasicOpcode.values()[opcode].name(), Color.rgb(64,64,128));
+			BubbleNode b = new BubbleNode(originalB, Color.rgb(192,64,64));
+			BubbleNode a = new BubbleNode(originalA, Color.rgb(192,64,64));
+			
+			inst.addProperty(b);
+			inst.addProperty(a);
+			return inst;
+		}
+		else
+		{
+			BubbleNode inst = new BubbleNode(Consts.AdvancedOpcode.values()[bValue.valcode].name(), Color.rgb(64,64,128));
+			BubbleNode a = new BubbleNode(originalA, Color.rgb(192,64,64));
+			
+			inst.addProperty(a);
+			return inst;
 		}
 	}
 	

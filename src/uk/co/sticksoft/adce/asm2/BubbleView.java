@@ -133,19 +133,19 @@ public class BubbleView extends View implements TextWatcher
 	{
 		try
 		{
-		do
-		{
-			restartUnparsing = false;
-			unparsed = BubbleParser.unparse(this);
-		} while (restartUnparsing);
-		if (editor != null)
-		{
-			this.post(new Runnable() { public void run()
+			do
 			{
-				writing = true;
-				editor.setText(unparsed);
-			} });
-		}
+				restartUnparsing = false;
+				unparsed = BubbleParser.unparse(this);
+			} while (restartUnparsing);
+			if (editor != null)
+			{
+				this.post(new Runnable() { public void run()
+				{
+					writing = true;
+					editor.setText(unparsed);
+				} });
+			}
 		}
 		catch (Exception e)
 		{

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
+import uk.co.sticksoft.adce.asm2.BubbleNode;
 
 public class DebugToken implements Token
 {
@@ -49,4 +50,9 @@ public class DebugToken implements Token
 		return "Debug token";//+token;
 	}
 
+	@Override
+	public BubbleNode getBubble()
+	{
+		return new BubbleNode(";"+token);
+	}
 }

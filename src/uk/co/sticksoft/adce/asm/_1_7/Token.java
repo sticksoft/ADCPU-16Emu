@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
+import uk.co.sticksoft.adce.asm2.BubbleNode;
 
 public interface Token
 {
@@ -17,4 +18,6 @@ public interface Token
 	
 	@Override
 	public String toString();
+	
+	public BubbleNode getBubble();
 }

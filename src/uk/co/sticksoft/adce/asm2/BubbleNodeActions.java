@@ -12,12 +12,19 @@ public class BubbleNodeActions
 {
 	public static BubbleNode clipboard = null;
 	
-	public final static String[] basicOpcodes = new String[] { "set", "add", "sub", "mul", "div", "mod", "shl", "shr", "and", "bor", "xor", "ife", "ifn", "ifg", "ifb" };
+	public final static String[] basicOpcodes = new String[] { "set", "add", "sub", "mul", "mli", "div", "dvi", "mod", "mdi", "and", "bor", "xor", "shr", "asr", "shl", "ifb", "ifc", "ife", "ifn", "ifg", "ifa", "ifl", "ifu", "adx", "sbx", "sti", "std" };
+	
+	public final static String[] advancedOpcodes = new String[] { "jsr", "int", "iag", "ias", "rfi", "iaq", "hwn", "hwq", "hwi" };
+	
+	public final static String[] registers = new String[] { "a", "b", "c", "x", "y", "z", "i", "j", "pop", "peek", "pick", "sp", "pc", "ex" };
 	
 	public static void collectActions(ArrayList<BubbleNode.NodeAction> list, BubbleNode node)
 	{
 		// Replacements
 		collectReplacementsMatchCase(list, node, basicOpcodes);
+		collectReplacementsMatchCase(list, node, advancedOpcodes);
+		collectReplacementsMatchCase(list, node, registers);
+		
 		/*
 		// Prefixes and suffixes
 		if (!"//".equals(node.text) && node.relation != NodeRelation.Property)

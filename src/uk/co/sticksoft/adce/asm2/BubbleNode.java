@@ -41,6 +41,12 @@ public class BubbleNode
 		this.text = text;
 	}
 	
+	public BubbleNode(String text, int colour)
+	{
+		this.text = text;
+		this.normalColour = colour;
+	}
+	
 	public BubbleNode(BubbleNode original)
 	{
 		for (int i = 0; i < original.children.size(); i++)
