@@ -53,6 +53,6 @@ public class DebugToken implements Token
 	@Override
 	public BubbleNode getBubble()
 	{
-		return new BubbleNode(";"+token);
+		return null; // new BubbleNode(";"+token);
 	}
 }

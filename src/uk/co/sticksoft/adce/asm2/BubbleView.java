@@ -138,7 +138,7 @@ public class BubbleView extends View implements TextWatcher
 				restartUnparsing = false;
 				unparsed = BubbleParser.unparse(this);
 			} while (restartUnparsing);
-			if (editor != null)
+			if (editor != null && unparsed != null)
 			{
 				this.post(new Runnable() { public void run()
 				{
@@ -589,7 +589,7 @@ public class BubbleView extends View implements TextWatcher
 		{
 			try
 			{
-				Thread.sleep(500);
+				Thread.sleep(5000);
 			}
 			catch (Exception e)
 			{

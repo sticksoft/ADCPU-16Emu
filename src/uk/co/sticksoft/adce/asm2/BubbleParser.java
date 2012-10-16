@@ -19,9 +19,10 @@ public class BubbleParser
 	private BubbleView view;
 	private int index;
 	
+	private static boolean parsed, unparsed;
+	
 	public static void parse(String source, BubbleView view)
 	{
-		view.getRoots().clear();
 		new BubbleParser(source, view).parse();
 	}
 	
@@ -35,6 +36,13 @@ public class BubbleParser
 	
 	private void parse()
 	{
+		if (unparsed)
+		{
+			unparsed = false;
+			return;
+		}
+		parsed = true;
+		
 		/*
 		char c;
 		while (index < source.length())
@@ -52,14 +60,23 @@ public class BubbleParser
 		}
 		*/
 		
-		view.getRoots().clear();
+		final ArrayList<Token> tokens = new Assembler_1_7().assembleAsStructure(source);
 		
-		ArrayList<Token> tokens = new Assembler_1_7().assembleAsStructure(source);
+		view.post(new Runnable()
+		{
+			public void run()
+			{
+				view.getRoots().clear();
 		for (Token t : tokens)
-			view.getRoots().add(t.getBubble());
+		{
+			BubbleNode n = t.getBubble();
+			if (n != null)
+			    view.getRoots().add(n);
+		}
 		
 		view.layoutBubbles();
 		view.invalidate();
+		}});
 	}
 	
 	private void readLabel()
@@ -130,6 +147,14 @@ public class BubbleParser
 	
 	public static String unparse(BubbleView view)
 	{
+		if (parsed)
+		{
+			parsed = false;
+			return null;
+		}
+		
+		unparsed = true;
+		
 		StringBuilder builder = new StringBuilder();
 		
 		ArrayList<BubbleNode> roots = view.getRoots();
@@ -141,7 +166,7 @@ public class BubbleParser
 			for (int j = 0; j < node.properties.size(); j++)
 			{
 				builder.append((j == 0) ? " " : ", ");
-				builder.append(node.properties.get(j));
+				builder.append(node.properties.get(j).text());
 			}
 			
 			builder.append("\n");
