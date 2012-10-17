@@ -7,6 +7,7 @@ import android.graphics.Color;
 
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
 import uk.co.sticksoft.adce.asm2.BubbleNode;
+import uk.co.sticksoft.adce.asm2.BubbleNodeProperty;
 
 
 public class Instruction implements Token
@@ -59,8 +60,8 @@ public class Instruction implements Token
 		if (opcode > 0)
 		{
 			BubbleNode inst = new BubbleNode(Consts.BasicOpcode.values()[opcode].name(), Color.rgb(64,64,128));
-			BubbleNode b = new BubbleNode(originalB, Color.rgb(192,64,64));
-			BubbleNode a = new BubbleNode(originalA, Color.rgb(192,64,64));
+			BubbleNodeProperty b = new BubbleNodeProperty(originalB, Color.rgb(192,64,64));
+			BubbleNodeProperty a = new BubbleNodeProperty(originalA, Color.rgb(192,64,64));
 			
 			inst.addProperty(b);
 			inst.addProperty(a);
@@ -69,7 +70,7 @@ public class Instruction implements Token
 		else
 		{
 			BubbleNode inst = new BubbleNode(Consts.AdvancedOpcode.values()[bValue.valcode].name(), Color.rgb(64,64,128));
-			BubbleNode a = new BubbleNode(originalA, Color.rgb(192,64,64));
+			BubbleNodeProperty a = new BubbleNodeProperty(originalA, Color.rgb(192,64,64));
 			
 			inst.addProperty(a);
 			return inst;

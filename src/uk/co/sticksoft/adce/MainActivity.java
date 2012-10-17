@@ -391,6 +391,12 @@ public class MainActivity extends Activity
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event)
 	{
+		if (keyCode == KeyEvent.KEYCODE_BACK && backHandler != null)
+		{
+			backHandler.run();
+			backHandler = null;
+			return true;
+		}
 		return super.onKeyDown(keyCode, event);
 	}
 	
@@ -418,6 +424,12 @@ public class MainActivity extends Activity
 		}
 		
 		return super.onKeyUp(keyCode, event);
+	}
+	
+	private static Runnable backHandler = null;
+	public static void setBackHandler(Runnable runnable)
+	{
+		backHandler = runnable;
 	}
 
 }

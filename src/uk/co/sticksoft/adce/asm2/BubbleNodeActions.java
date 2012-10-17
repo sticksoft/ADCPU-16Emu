@@ -1,11 +1,12 @@
 package uk.co.sticksoft.adce.asm2;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import uk.co.sticksoft.adce.asm2.BubbleNode.NamedNodeAction;
 import uk.co.sticksoft.adce.asm2.BubbleNode.NodeAction;
-import uk.co.sticksoft.adce.asm2.BubbleNode.NodeRelation;
-
 import android.content.Context;
 
 public class BubbleNodeActions
@@ -16,107 +17,54 @@ public class BubbleNodeActions
 	
 	public final static String[] advancedOpcodes = new String[] { "jsr", "int", "iag", "ias", "rfi", "iaq", "hwn", "hwq", "hwi" };
 	
-	public final static String[] registers = new String[] { "a", "b", "c", "x", "y", "z", "i", "j", "pop", "peek", "pick", "sp", "pc", "ex" };
+	public final static String[] allOpcodes = combineStringArrays(basicOpcodes, advancedOpcodes);
+	
+	public final static String[] registers = new String[] { "A", "B", "C", "X", "Y", "Z", "I", "J", "POP", "PEEK", "PICK", "SP", "PC", "EX" };
+	
+	public static Set<String> labels = new HashSet<String>();
 	
 	public static void collectActions(ArrayList<BubbleNode.NodeAction> list, BubbleNode node)
 	{
 		// Replacements
-		collectReplacementsMatchCase(list, node, basicOpcodes);
-		collectReplacementsMatchCase(list, node, advancedOpcodes);
-		collectReplacementsMatchCase(list, node, registers);
+		collectReplacementsMatchCase(list, node, allOpcodes);
 		
-		/*
-		// Prefixes and suffixes
-		if (!"//".equals(node.text) && node.relation != NodeRelation.Property)
-			list.add(new NamedNodeAction("//")
-			{
-				@Override
-				public void performAction(Context context, BubbleView view, BubbleNode node)
-				{
-					BubbleNode child = new BubbleNode();
-					child.text = node.text;
-					node.insertProperty(child, 0);
-					
-					node.text = "//";
-					
-					view.layoutBubbles();
-				}
-			});
-		else if ("//".equals(node.text) && node.properties.size() > 0)
-			list.add(new NamedNodeAction("//")
-			{
-				@Override
-				public void performAction(Context context, BubbleView view, BubbleNode node)
-				{
-					BubbleNode child = node.properties.get(0);
-					node.text = child.text;
-					node.removeProperty(child);
-					
-					view.layoutBubbles();
-				}
-			});
+		//String[] allValues = combineStringArrays(registers, labels.toArray(new String[labels.size()]));
 		
-		if (node.parent != null)
+		if (collectReplacementsMatchCase(list, node, registers) || isNumeric(node.text))
+			addTextActions(list, labels);
+		else if (labels.contains(node.text))
 		{
-			if (node.relation == NodeRelation.Property && !";".equals(node.text) && node.parent.properties.get(node.parent.properties.size()-1) == node)
-			{
-				list.add(new NamedNodeAction(";")
-				{
-					@Override
-					public void performAction(Context context, BubbleView view, BubbleNode node)
-					{
-						BubbleNode child = new BubbleNode();
-						child.text = ";";
-						node.parent.addProperty(child);
-						view.layoutBubbles();
-					}
-				});
-				
-				if (node.parent.parent != null)
-					list.add(new NamedNodeAction("{ }")
-					{
-						@Override
-						public void performAction(Context context, BubbleView view, BubbleNode node)
-						{
-							int index = node.parent.parent.children.indexOf(node.parent);
-							if (index < 0)
-								return;
-							
-							BubbleNode child = new BubbleNode();
-							child.text = "{";
-							node.parent.parent.insertChild(child, index + 1);
-							
-							child = new BubbleNode();
-							child.text = "}";
-							node.parent.parent.insertChild(child, index + 2);
-							
-							view.layoutBubbles();
-						}
-					});
-			}
+			addTextActions(list, registers);
+			String lab = node.text.substring(1);
+			for (String s : labels)
+				if (!s.equals(lab))
+					addTextAction(list, s);
 		}
-		*/
-		// Generic actions
-		/*
-		list.add(new NamedNodeAction("Add Child")
+		
+		
+		list.add(new NamedNodeAction("Add")
 		{
 			@Override
 			public void performAction(Context context, BubbleView view, BubbleNode node)
 			{
-				BubbleNode child = new BubbleNode();
-				node.addChild(child);
-				child.showEdit(context, view);
+				int index = 0;
+				if (node != null)
+					index = view.getRoots().indexOf(node.getRoot()) + 1;
+				
+				BubbleNode instr = new BubbleNode("Set");
+				instr.addProperty(new BubbleNodeProperty("A"));
+				instr.addProperty(new BubbleNodeProperty("B"));
+				view.getRoots().add(index, instr);
 				view.layoutBubbles();
 			}
 		});
-		*/
 		
 		list.add(new NamedNodeAction("Append")
 		{
 			@Override
 			public void performAction(Context context, BubbleView view, BubbleNode node)
 			{
-				BubbleNode child = new BubbleNode();
+				BubbleNodeProperty child = new BubbleNodeProperty();
 				node.addProperty(child);
 				child.showEdit(context, view);
 				view.layoutBubbles();
@@ -177,6 +125,19 @@ public class BubbleNodeActions
 			});
 		}
 		
+		list.add(new NamedNodeAction("Indirect")
+		{
+			@Override
+			public void performAction(Context context, BubbleView view, BubbleNode node)
+			{
+				String text = node.text;
+				if (text.startsWith("[") && text.endsWith("]"))
+					node.text(text.substring(1, text.length()-1));
+				else
+					node.text("["+text+"]");
+			}
+		});
+		
 		list.add(new NamedNodeAction("Delete")
 		{
 			@Override
@@ -185,6 +146,19 @@ public class BubbleNodeActions
 				node.delete(context, view);
 			}
 		});
+	}
+
+	private static String[] combineStringArrays(String[] a, String[] b)
+	{
+		if (b.length == 0)
+			return a;
+		if (a.length == 0)
+			return b;
+		
+		String[] output = new String[a.length + b.length];
+		System.arraycopy(a, 0, output, 0, a.length);
+		System.arraycopy(b, 0, output, a.length, b.length);
+		return output;
 	}
 	
 	private static void collectGenericReplacements(ArrayList<NodeAction> list, BubbleNode node, final String[] reps)
@@ -222,11 +196,11 @@ public class BubbleNodeActions
 		}
 	}
 	
-	private static void collectReplacementsMatchCase(ArrayList<NodeAction> list, BubbleNode node, final String[] reps)
+	private static boolean collectReplacementsMatchCase(ArrayList<NodeAction> list, BubbleNode node, final String[] reps)
 	{
 		String text = node.text();
 		if (text == null || text.length() == 0)
-			return;
+			return false;
 
 		int index = -1;
 		for (int i = 0; i < reps.length; i++)
@@ -238,7 +212,7 @@ public class BubbleNodeActions
 			}
 		}
 		if (index == -1)
-			return;
+			return false;
 
 		for (int i = 0; i < reps.length; i++)
 		{
@@ -257,14 +231,66 @@ public class BubbleNodeActions
 			}
 			
 			final String name = sb.toString();
-			list.add(new NamedNodeAction(name)
+			addTextAction(list, name);
+		}
+		
+		return true;
+	}
+	
+	private static void addTextAction(ArrayList<NodeAction> list, final String text)
+	{
+		list.add(new NamedNodeAction(text)
+		{
+			@Override
+			public void performAction(Context context, BubbleView view, BubbleNode node)
+			{
+				node.text(text);
+			}
+		});
+	}
+	
+	private static void addTextActions(ArrayList<NodeAction> list, Iterable<String> strings)
+	{
+		for (String s : strings)
+			addTextAction(list, s);
+	}
+	
+	private static void addTextActions(ArrayList<NodeAction> list, String[] strings)
+	{
+		for (String s : strings)
+			addTextAction(list, s);
+	}
+	
+	private static boolean isNumeric(String text)
+	{
+		if (text.startsWith("0x"))
+		{
+			if (text.length() > 2)
+			{
+				try
 				{
-					@Override
-					public void performAction(Context context, BubbleView view, BubbleNode node)
-					{
-						node.text(name);
-					}
-				});
+					Integer.parseInt(text.substring(2));
+					return true;
+				}
+				catch (NumberFormatException nfe)
+				{
+				}
+			}
+			
+			return false;
+		}
+		else
+		{
+			try
+			{
+				Integer.parseInt(text);
+				return true;
+			}
+			catch (NumberFormatException nfe)
+			{
+				return false;
+			}
 		}
 	}
+	
 }

@@ -57,7 +57,7 @@ public class InstructionBuilder
 				{
 					node.text(opBtn.getText().toString());
 					while (node.properties.size() < 2)
-						node.properties.add(new BubbleNode());
+						node.properties.add(new BubbleNodeProperty());
 					node.properties.get(0).text(aTxt.getText().toString());
 					node.properties.get(1).text(bTxt.getText().toString());
 					view.layoutBubbles();

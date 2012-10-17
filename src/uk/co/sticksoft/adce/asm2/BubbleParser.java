@@ -137,7 +137,7 @@ public class BubbleParser
 			sb.append(c);
 
 
-		BubbleNode root = new BubbleNode(sb.toString());
+		BubbleNodeProperty root = new BubbleNodeProperty(sb.toString());
 		root.normalColour = Color.rgb(192,64,64);
 		node.addProperty(root);
 		

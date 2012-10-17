@@ -1,7 +1,11 @@
 package uk.co.sticksoft.adce.asm2;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
+import uk.co.sticksoft.adce.ErrorHandling;
+import uk.co.sticksoft.adce.asm2.BubbleNode.NodeAction;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,17 +18,13 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.graphics.Shader.TileMode;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
-import android.view.*;
-import java.lang.reflect.*;
-import org.apache.http.client.methods.*;
-import android.app.*;
-import org.apache.http.impl.auth.*;
-import android.text.*;
-import uk.co.sticksoft.adce.*;
 
 public class BubbleView extends View implements TextWatcher
 {
@@ -54,6 +54,7 @@ public class BubbleView extends View implements TextWatcher
 	}
 	
 	private boolean layoutChanged = true;
+	private boolean covered = false;
 	
 	private PointF canvasOrigin = new PointF();
 	private float scale = 1.0f;
@@ -62,6 +63,9 @@ public class BubbleView extends View implements TextWatcher
 	public void draw(Canvas canvas)
 	{
 		super.draw(canvas);
+		
+		if (covered)
+			return;
 		
 		canvas.drawColor(Color.DKGRAY);
 		
@@ -73,9 +77,6 @@ public class BubbleView extends View implements TextWatcher
 		
 		canvas.scale(scale, scale);
 		canvas.translate(canvasOrigin.x, canvasOrigin.y);
-		
-		
-		
 		
 		
 		if (layoutChanged)
@@ -118,6 +119,8 @@ public class BubbleView extends View implements TextWatcher
 			reading = false;
 			return;
 		}
+		writing = true;
+		
 		if (unparseThread == null)
 		{
 			unparseThread = new Thread(new Runnable() { public void run() { unparse_onThread(); } });
@@ -194,17 +197,6 @@ public class BubbleView extends View implements TextWatcher
 		point.x = childrenX;
 		point.y = maxY;
 		
-		for (int i = 0; i < b.children.size(); i++)
-		{
-			BubbleNode child = b.children.get(i);
-			layoutBubble(child, point);
-			
-			if (point.x > maxX)
-				maxX = point.x;
-			
-			point.x = childrenX;
-		}
-		
 		point.x = maxX;
 		
 		return point;
@@ -236,20 +228,6 @@ public class BubbleView extends View implements TextWatcher
 		textPaint.setColor(Color.BLACK);
 		//linePaint.setColor(Color.WHITE);
 		
-		if (b.children.size() > 0)
-		{
-			float left = b.x + b.width / 2;
-			
-			BubbleNode lowest = b.children.get(b.children.size()-1);
-			c.drawLine(left, b.y + b.height / 2, left, lowest.y + lowest.height / 2, linePaint);
-			for (int i = 0; i < b.children.size(); i++)
-			{
-				BubbleNode child = b.children.get(i);
-				float y = child.y + child.height / 2;
-				float right = child.x + child.width / 2;
-				c.drawLine(left, y, right, y, linePaint);
-			}
-		}
 		
 		if (b.properties.size() > 0)
 		{
@@ -284,10 +262,7 @@ public class BubbleView extends View implements TextWatcher
 				c.drawRoundRect(new RectF(b.x, b.y, b.x+b.width, b.y+b.height), 10, 10, p);
 			c.drawText(b.text(), b.x + 4, b.y + 12, textPaint);
 		}
-		
-		for (int i = 0; i < b.children.size(); i++)
-			drawBubble(c, b.children.get(i));
-		
+
 		for (int i = 0; i < b.properties.size(); i++)
 			drawBubble(c, b.properties.get(i));
 	}
@@ -373,6 +348,9 @@ public class BubbleView extends View implements TextWatcher
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
 	{
+		if (covered)
+			return true;
+		
 		boolean currentlyMultitouch = isMultitouch(event);
 		if (currentlyMultitouch)
 			multitouch = true;
@@ -455,7 +433,7 @@ public class BubbleView extends View implements TextWatcher
 		for (int i = roots.size(); i-->0;)
 		{
 			BubbleNode b = roots.get(i);
-			if (y < b.y - 1 || y > b.y + 1 + b.getChildrenHeight())
+			if (y < b.y - 1 || y > b.y + 1 + b.height)
 				continue;
 			
 			BubbleNode result = b.checkTap(x, y);
@@ -485,9 +463,9 @@ public class BubbleView extends View implements TextWatcher
 		{
 			String[] actions;
 			if (BubbleNodeActions.clipboard == null)
-				actions = new String[] { "Add Instruction", "Add comment", "Add label" };
+				actions = new String[] { "Add instruction", "Add comment", "Add label", "Update text" };
 			else
-			    actions = new String[] { "Add Instruction", "Add comment", "Add label", "Paste" };
+			    actions = new String[] { "Add instruction", "Add comment", "Add label", "Update text", "Paste" };
 			
 			new AlertDialog.Builder(getContext()).setItems(actions, new DialogInterface.OnClickListener()
 			{
@@ -496,41 +474,48 @@ public class BubbleView extends View implements TextWatcher
 				{
 					switch (which)
 					{
-					case 0:
-					{
-					    BubbleNode root = new BubbleNode();
-				     	roots.add(root);
-					    //root.showEdit(getContext(), BubbleView.this);
-					    new InstructionBuilder(getContext(), root, BubbleView.this).show();
-				    	layoutBubbles();
-					    invalidate();
-						break;
-					}
-					case 1:
-					{
-						BubbleNode root = new BubbleNode("; ");
-						roots.add(root);
-						root.showEdit(getContext(), BubbleView.this);
-						layoutBubbles();
-						invalidate();
-						break;
-					}
+						case 0:
+						{
+						    BubbleNode root = new BubbleNode("SET");
+						    root.addProperty(new BubbleNodeProperty("A"));
+						    root.addProperty(new BubbleNodeProperty("B"));
+					     	roots.add(root);
+						    //root.showEdit(getContext(), BubbleView.this);
+						    //new InstructionBuilder(getContext(), root, BubbleView.this).show();
+					    	layoutBubbles();
+						    invalidate();
+							break;
+						}
+						case 1:
+						{
+							BubbleNode root = new BubbleNode("; ");
+							roots.add(root);
+							root.showEdit(getContext(), BubbleView.this);
+							layoutBubbles();
+							invalidate();
+							break;
+						}
 						case 2:
-							{
-								BubbleNode root = new BubbleNode(":");
-								roots.add(root);
-								root.showEdit(getContext(), BubbleView.this);
-								layoutBubbles();
-								invalidate();
-								break;
-							}
+						{
+							BubbleNode root = new BubbleNode(":");
+							roots.add(root);
+							root.showEdit(getContext(), BubbleView.this);
+							layoutBubbles();
+							invalidate();
+							break;
+						}
 						case 3:
-							{
-								roots.add(new BubbleNode(BubbleNodeActions.clipboard));
-								layoutBubbles();
-								invalidate();
-								break;
-							}
+						{
+							unparse();
+							break;
+						}
+						case 4:
+						{
+							roots.add(new BubbleNode(BubbleNodeActions.clipboard));
+							layoutBubbles();
+							invalidate();
+							break;
+						}
 					}
 				}
 			}).show();
@@ -564,6 +549,7 @@ public class BubbleView extends View implements TextWatcher
 	}
 
 	private boolean canUpdate = true;
+	private boolean firstUpdate = true;
 	public void afterTextChanged(Editable p1)
 	{
 		if (writing)
@@ -571,9 +557,12 @@ public class BubbleView extends View implements TextWatcher
 			writing = false;
 			return;
 		}
+		
 		if (canUpdate)
 		{
-			updateWait = System.currentTimeMillis() + 1000;
+			reading = true;
+			updateWait = System.currentTimeMillis() + (firstUpdate ? 100 : 3000);
+			firstUpdate = false;
 			if (updateThread == null)
 			{
 				updateThread = new Thread(new Runnable() { public void run() {waitToUpdate();}});
@@ -589,7 +578,7 @@ public class BubbleView extends View implements TextWatcher
 		{
 			try
 			{
-				Thread.sleep(5000);
+				Thread.sleep(500);
 			}
 			catch (Exception e)
 			{
@@ -599,9 +588,23 @@ public class BubbleView extends View implements TextWatcher
 				return;
 		}
 		
-		BubbleParser.parse(editor.getText().toString(), this);
+		synchronized(this)
+		{
+			BubbleParser.parse(editor.getText().toString(), this);
+		}
 		
-		if (updateThread == Thread.currentThread())
-			updateThread = null;
+		updateThread = null;
+	}
+	
+	public void showActions(List<NodeAction> actions, BubbleNode node)
+	{
+		container.addView(new ActionTable(this, actions, node));
+		covered = true;
+	}
+	
+	public void uncover(View view)
+	{
+		container.removeView(view);
+		covered = false;
 	}
 }
