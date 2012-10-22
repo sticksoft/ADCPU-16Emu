@@ -32,6 +32,17 @@ public class HardwareManager
 		return devices.size();
 	}
 	
+	public void clear()
+	{
+		devices.clear();
+	}
+	
+	public void reset()
+	{
+		for (Device d : devices)
+		    d.Reset();
+	}
+	
 	public Device getDevice(int index)
 	{
 		if (index >= 0 && index < devices.size())

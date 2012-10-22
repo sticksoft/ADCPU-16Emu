@@ -20,6 +20,13 @@ import android.view.View;
 
 public class LEM1802 extends View implements Device, CPU.Observer, Options.Observer
 {
+
+	public void Reset()
+	{
+		memAddress = 0;
+		optionsChanged();
+	}
+
 	public final static int DISPLAY_W = 32, DISPLAY_H = 16;
 	public final static int CHARACTER_W = 4, CHARACTER_H = 8;
 	
@@ -56,11 +63,13 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 		
 		loadDefaultFont();
 		loadDefaultPalette();
+		updateBackbuffer();
 	}
 	
+	Bitmap fontBmp;
 	private void loadDefaultFont()
 	{
-		Bitmap fontBmp;
+		
 		try
 		{
 			InputStream is = getResources().getAssets().open("lem1802_font.png");
@@ -76,17 +85,27 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 		int bmpW = fontBmp.getWidth(), bmpH = fontBmp.getHeight();
 		int[] pixels = new int[bmpW * bmpH];
 		fontBmp.getPixels(pixels, 0, bmpW, 0, 0, bmpW, bmpH);
-		
+		int scale = 4;
 		int dst = 0;
-		for (int y = 0; y < bmpH / CHARACTER_H; y++)
-			for (int x = 0; x < bmpW / CHARACTER_W; x++)
+		for (int y = 0; y < bmpH / (CHARACTER_H * scale); y++)
+			for (int x = 0; x < bmpW / (CHARACTER_W * scale); x++)
 			{
-				int pix = x * CHARACTER_W + y * CHARACTER_H * bmpW;
+				for (int j = 0; j < CHARACTER_H; j++)
+				{
+				for (int i = 0; i < CHARACTER_W; i++)
+				{
+				int pix = i + x * CHARACTER_W + (j + y * CHARACTER_H) * bmpW;
+				pix *= scale;
 				if (dst < font.length && pix < pixels.length)
 					font[dst++] = (((pixels[pix]) >> 8) & 0xff) > 128;
 				else
 					break;
+				}
+				}
 			}
+		
+		//for (int i = 0; i < font.length && i < pixels.length; i++)
+		    //font[i] = (Color.red(pixels[i]) > 127);
 	}
 	
 	private void loadDefaultPalette()
@@ -145,15 +164,22 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 	
 	private void updateBackbuffer()
 	{
+		//for (int i = 0; i < backbuffer.length && i < font.length; i++)
+		    //backbuffer[i] = palette[font[i]?3:15];
+		
+		/*
 		if (memAddress == 0)
-			return;
+			return;*/
 		
 		final int stride = DISPLAY_W * CHARACTER_W;
+		
 		int dest_base = 0;
 		int mem = memAddress;
+		
 		for (int j = 0; j < DISPLAY_H; j++) for (int i = 0; i < DISPLAY_W; i++)
 		{
 			dest_base = i * CHARACTER_W + j * CHARACTER_H * stride;
+			
 			
 			int w = cpu.RAM[mem++];
 			
@@ -161,6 +187,11 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 			boolean b = (w & 128) != 0;
 			int fg = (w >> 8) & 15;
 			int bg = (w >> 12) & 15;
+			/*
+			int c = (mem++ - memAddress) & 127;
+			int fg = 0;
+			int bg = 15;
+			*/
 			
 			int dst = dest_base;
 			int src = c * CHARACTER_PIXELS;
@@ -168,15 +199,17 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 			{
 				for (int x = 0; x < CHARACTER_W; x++)
 				{
-					backbuffer[dst++] = palette[font[src++] ? fg : bg];
+					backbuffer[dst+x+y*stride] = palette[font[src++] ? fg : bg];
 				}
-				dst += stride - CHARACTER_W;
+				//dst += stride - CHARACTER_W;
 			}
 			
 			dest_base += CHARACTER_W;
 			if (dest_base % stride == 0)
 				dest_base += stride * (CHARACTER_H - 1);
 		}
+		
+		
 		
 		synchronized (framebuffer)
 		{
@@ -187,15 +220,17 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 	@Override
 	protected void onDraw(Canvas canvas)
 	{
+		/*
 		if (memAddress == 0)
 		{
 			canvas.drawColor(Color.BLACK);
 			return;
-		}
+		}*/
 		
 		canvas.save();
 		canvas.scale(4.0f, 4.0f);
 		canvas.drawBitmap(framebuffer, 0, 0, null);
+		//canvas.drawBitmap(fontBmp, 0, 0, null);
 		canvas.restore();
 	}
 	
@@ -221,7 +256,8 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 	@Override
 	public void optionsChanged()
 	{
-		cpu.removeObserver(this);
+		if (cpu != null)
+		    cpu.removeObserver(this);
 		cpu = Options.GetCPU();
 		cpu.addObserver(this);
 	}

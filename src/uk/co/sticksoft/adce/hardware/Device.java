@@ -11,4 +11,5 @@ public interface Device
 	char GetManuLo();
 	
 	void HWI_1_7(CPU_1_7 cpu);
+	void Reset();
 }

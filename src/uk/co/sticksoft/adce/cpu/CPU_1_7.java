@@ -185,7 +185,7 @@ public class CPU_1_7 extends CPU
 	}
 
 	@Override
-	public void execute()
+	public synchronized void execute()
 	{
 		cycleCount++;
 		tSP = SP;			// Cache SP
@@ -385,17 +385,7 @@ public class CPU_1_7 extends CPU
 					error = true;
 					break;
 				case 0x08: // INT
-					char interrupt = read(addressType(a), addressA(a));
-					if (interruptQueueing)
-						interruptQueue.add(Character.valueOf(interrupt));
-					else if (IA != 0)
-					{
-						interruptQueueing = true;
-						RAM[--tSP] = tPC;
-						RAM[--tSP] = register[A];
-						tPC = IA;
-						register[A] = interrupt;
-					}
+					interrupt(read(addressType(a), addressA(a)));
 					break;
 				case 0x09: // IAG
 					write(addressType(a), addressA(a), IA);
@@ -467,6 +457,23 @@ public class CPU_1_7 extends CPU
 		SP = tSP;
 		
 		notifyObservers();
+	}
+	
+	public synchronized void interrupt(char interrupt)
+	{
+		if (interruptQueueing)
+			interruptQueue.add(Character.valueOf(interrupt));
+		else if (IA != 0)
+		{
+			interruptQueueing = true;
+			RAM[--tSP] = tPC;
+			RAM[--tSP] = register[A];
+			tPC = IA;
+			register[A] = interrupt;
+		}
+		
+		PC = tPC;
+		SP = tSP;
 	}
 
 	@Override

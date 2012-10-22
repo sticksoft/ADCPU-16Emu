@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import uk.co.sticksoft.adce.hardware.*;
 
 public class ControlTab extends ScrollView implements CPU.Observer, Options.Observer 
 {
@@ -220,6 +221,7 @@ public class ControlTab extends ScrollView implements CPU.Observer, Options.Obse
     {
 		stop();
     	cpu.reset();
+		HardwareManager.instance().reset();
     	
     	System.arraycopy(mainActivity.getAssembled(), 0, cpu.RAM, 0, mainActivity.getAssembled().length);
     	

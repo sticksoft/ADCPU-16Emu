@@ -84,8 +84,15 @@ public class Assembler_1_7 implements Assembler
 	
 	protected void parseToStructre()
 	{
+		try
+		{
 		while (sourceIndex < sourceLength)
 			readNextToken();
+		}
+		catch (Exception e)
+		{
+			
+		}
 	}
 	
 	protected char readNextCharacter()
@@ -246,7 +253,7 @@ public class Assembler_1_7 implements Assembler
 		}
 
 		boolean foundOpenBracket = false;
-		for (sourceIndex = start+1; sourceIndex < sourceLength; sourceIndex++)
+		for (sourceIndex = start; sourceIndex < sourceLength; sourceIndex++)
 		{
 			char c = source.charAt(sourceIndex);
 			if (!foundOpenBracket)
@@ -255,6 +262,8 @@ public class Assembler_1_7 implements Assembler
 				{
 					break;
 				}
+				else if (c == '[')
+				    foundOpenBracket = true;
 			}
 			else
 			{

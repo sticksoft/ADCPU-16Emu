@@ -40,6 +40,7 @@ public class MainActivity extends Activity
         me = this;
         
         cpu = Options.GetCPU();
+		HardwareManager.instance().clear();
         
 		/*
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -94,6 +95,7 @@ public class MainActivity extends Activity
         
         
         setContentView(tabHost);
+		HardwareManager.instance().addDevice(new GenericClock());
         
         
         // Prepare to start
