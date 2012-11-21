@@ -198,7 +198,7 @@ public class MainActivity extends Activity implements Observer
     		}
     	}
     	
-    	if (true || !up_to_date)
+    	if (!up_to_date)
     	{
     		if (!massiveUpdate)
     			Toast.makeText(this, currentMessage, Toast.LENGTH_LONG).show();
