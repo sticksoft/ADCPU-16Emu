@@ -176,7 +176,7 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 		int dest_base = 0;
 		int mem = memAddress;
 		
-		for (int j = 0; j < DISPLAY_H; j++) for (int i = 0; i < DISPLAY_W; i++)
+		for (int j = 0; j < DISPLAY_H && mem < cpu.RAM.length; j++) for (int i = 0; i < DISPLAY_W && mem < cpu.RAM.length; i++)
 		{
 			dest_base = i * CHARACTER_W + j * CHARACTER_H * stride;
 			
@@ -260,6 +260,11 @@ public class LEM1802 extends View implements Device, CPU.Observer, Options.Obser
 		    cpu.removeObserver(this);
 		cpu = Options.GetCPU();
 		cpu.addObserver(this);
+		
+		loadDefaultFont();
+		loadDefaultPalette();
+		updateBackbuffer();
+		postInvalidate();
 	}
 
 	@Override

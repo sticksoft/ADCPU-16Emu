@@ -1,4 +1,5 @@
 ; Sample keyboard program
+; For DCPU 1.1 only!
 ; (mostly written on the bus!)
 ;
 ; Outputs keys to console and maps

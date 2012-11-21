@@ -196,6 +196,9 @@ public class CPU_1_7 extends CPU
 		// Fetch
 		char instr = RAM[PC];
 		
+		if (instr == 0) // Invalid instruction; stop.
+			return;
+		
 		// Decode
 		int opcode = instr & 0x1f;
 		char b = (char)((instr >> 5) & 0x1f);
@@ -412,17 +415,25 @@ public class CPU_1_7 extends CPU
 				case 0x11: // HWQ
 				{
 					Device device = HardwareManager.instance().getDevice(read(addressType(a), addressA(a)));
-					register[A] = device.GetIDLo();
-					register[B] = device.GetIDHi();
-					register[C] = device.GetVersion();
-					register[X] = device.GetManuLo();
-					register[Y] = device.GetManuHi();
+					if (device != null)
+					{
+						register[A] = device.GetIDLo();
+						register[B] = device.GetIDHi();
+						register[C] = device.GetVersion();
+						register[X] = device.GetManuLo();
+						register[Y] = device.GetManuHi();
+					}
+					else
+						error = true;
 					break;
 				}
 				case 0x12: // HWI
 				{
 					Device device = HardwareManager.instance().getDevice(read(addressType(a), addressA(a)));
-					device.HWI_1_7(this);
+					if (device != null)
+						device.HWI_1_7(this);
+					else
+						error = true;
 					break;
 				}
 				case 0x13: // -

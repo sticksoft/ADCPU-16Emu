@@ -9,6 +9,9 @@ import android.view.inputmethod.*;
 import android.widget.*;
 import android.widget.TabHost.*;
 import java.io.*;
+
+import uk.co.sticksoft.adce.Options.DCPU_VERSION;
+import uk.co.sticksoft.adce.Options.Observer;
 import uk.co.sticksoft.adce.asm.*;
 import uk.co.sticksoft.adce.asm2.*;
 import uk.co.sticksoft.adce.cpu.*;
@@ -18,7 +21,7 @@ import uk.co.sticksoft.adce.help.*;
 import android.view.View.OnClickListener;
 import uk.co.sticksoft.adce.hardware.Console;
 
-public class MainActivity extends Activity
+public class MainActivity extends Activity implements Observer
 {
 	private CPU cpu;// = new CPU_1_1();
 	
@@ -32,12 +35,35 @@ public class MainActivity extends Activity
 	
 	public static MainActivity me;
 	
+	public static Context getCurrentContext()
+	{
+		return me;
+	}
+	
+	public static void showToast(final String text, final int longOrShort)
+	{
+		try
+		{
+			me.runOnUiThread(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					Toast.makeText(getCurrentContext(), text, longOrShort).show();
+				}
+			});
+		}
+		catch (Exception ex) {}
+	}
+	
     @Override
     public void onCreate(Bundle savedInstanceState)
 	{
         super.onCreate(savedInstanceState);
         
         me = this;
+        
+        Options.loadOptions(this);
         
         cpu = Options.GetCPU();
 		HardwareManager.instance().clear();
@@ -54,6 +80,24 @@ public class MainActivity extends Activity
 			
 		//ErrorHandling.handle(this, null);
 
+		setupTabs();
+        
+		HardwareManager.instance().addDevice(new GenericClock());
+		HardwareManager.instance().addDevice(new GenericKeyboard());
+        
+        
+        // Prepare to start
+        controlTab.reset();
+        
+        //testMyAssembler();
+        checkVersion();
+        
+        Options.addObserver(this);
+        
+    }
+    
+    private void setupTabs()
+    {
 		// This is NOT the way you're meant to make tabs
 		tabHost = new TabHost(this, null);
 		LinearLayout tablyt = new LinearLayout(this);
@@ -74,15 +118,21 @@ public class MainActivity extends Activity
 
         
         // Make assembly editor tab
-        addTab(tabHost, "ASM", asmEditor = new AssemblyEditorTab(this, this));
+		asmEditor = new AssemblyEditorTab(this, this);
+		if (Options.IsTextEditorShown())
+			addTab(tabHost, "ASM", asmEditor);
 		
 		// Add test of editor v2
-        
-		FrameLayout tmpcon = new FrameLayout(this);
-		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
-		tmpcon.setLayoutParams(lp);
-		tmpcon.addView(bubbleView = new BubbleView(this, tmpcon, asmEditor.getEditor()));
-		addTab(tabHost, "ASM2", tmpcon);
+		
+		if (Options.IsVisualEditorShown())
+		{
+			FrameLayout tmpcon = new FrameLayout(this);
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.FILL_PARENT, FrameLayout.LayoutParams.FILL_PARENT);
+			bubbleView = new BubbleView(this, tmpcon, asmEditor.getEditor());
+			tmpcon.setLayoutParams(lp);
+			tmpcon.addView(bubbleView);
+			addTab(tabHost, "ASM2", tmpcon);
+		}
 		
 		
         
@@ -95,15 +145,6 @@ public class MainActivity extends Activity
         
         
         setContentView(tabHost);
-		HardwareManager.instance().addDevice(new GenericClock());
-        
-        
-        // Prepare to start
-        controlTab.reset();
-        
-        //testMyAssembler();
-        checkVersion();
-        
     }
     
     private void addTab(TabHost tabHost, String name, final View view)
@@ -124,8 +165,9 @@ public class MainActivity extends Activity
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.24";
-    	final String currentMessage = "NEW: Fixed bug with JSR!";
+    	final String currentVersion = "0.30";
+    	final String currentMessage = "NEW: Added DCPU 1.7 support and some hardware.\n\nIf your 1.1 program no longer works, don't fret - the DCPU version can be changed in the new Settings menu!\n\nFor hardware info, see Help.\n";
+    	final boolean massiveUpdate = true;
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;
@@ -156,9 +198,12 @@ public class MainActivity extends Activity
     		}
     	}
     	
-    	if (!up_to_date)
+    	if (true || !up_to_date)
     	{
-    		Toast.makeText(this, currentMessage, Toast.LENGTH_LONG).show();
+    		if (!massiveUpdate)
+    			Toast.makeText(this, currentMessage, Toast.LENGTH_LONG).show();
+    		else
+    			new AlertDialog.Builder(this).setTitle("Updates!").setMessage(currentMessage).setPositiveButton("SET [mind], [blown]", null).show();
     		
     		FileOutputStream fos = null;
     		try
@@ -197,11 +242,23 @@ public class MainActivity extends Activity
 		return assembled;
 	}
 	
-	public void log(String s)
+	public void log(final String s)
 	{
-		controlTab.log(s);
+		runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				controlTab.log(s);
+			}
+		});
 		//log.append(s+'\n');
 		//Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+	}
+	
+	public void logFromUIThread(String s)
+	{
+		controlTab.log(s);
 	}
 	
 	private void testMyAssembler()
@@ -246,6 +303,7 @@ public class MainActivity extends Activity
 		menu.add(Menu.NONE, 4, Menu.NONE, "Start/stop");
 		menu.add(Menu.NONE, 5, Menu.NONE, "Help");
 		menu.add(Menu.NONE, 6, Menu.NONE, "Toggle Keyboard");
+		menu.add(Menu.NONE, 7, Menu.NONE, "Settings");
 		return super.onCreateOptionsMenu(menu);
 	}
     
@@ -287,6 +345,12 @@ public class MainActivity extends Activity
 		    {
 		    	InputMethodManager imm = ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE));
 		    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+		    	break;
+		    }
+		    case 7:
+		    {
+		    	Intent intent = new Intent(this, OptionsPreferenceActivity.class);
+		    	startActivity(intent);
 		    	break;
 		    }
 		}
@@ -399,6 +463,13 @@ public class MainActivity extends Activity
 			backHandler = null;
 			return true;
 		}
+		else if (Options.GetDcpuVersion() == DCPU_VERSION._1_7)
+		{
+			GenericKeyboard kbd = GenericKeyboard.GetLastInstance();
+			if (kbd != null)
+				kbd.keyDown((char)(event.getUnicodeChar() & 0xFFFF));
+		}
+		
 		return super.onKeyDown(keyCode, event);
 	}
 	
@@ -408,21 +479,30 @@ public class MainActivity extends Activity
 		char c = (char)(event.getUnicodeChar() & 0xFFFF);
 		if (c < 32 && c != 13 && c != 10)
 			return super.onKeyUp(keyCode, event);
+		
+		if (Options.GetDcpuVersion() == DCPU_VERSION._1_1)
+		{
+			char next = cpu.RAM[0x9010];
+			if (next == 0)
+				next = 0x9000;
+			else
+			{
+				next++;
+				if (next >= 0x9010)
+					next = 0x9000;
+			}
 			
-		char next = cpu.RAM[0x9010];
-		if (next == 0)
-			next = 0x9000;
+			if (cpu.RAM[next] == 0)
+			{
+				cpu.RAM[next] = (char)(event.getUnicodeChar() & 0xFFFF);
+				cpu.RAM[0x9010] = next;
+			}
+		}
 		else
 		{
-			next++;
-			if (next >= 0x9010)
-				next = 0x9000;
-		}
-		
-		if (cpu.RAM[next] == 0)
-		{
-			cpu.RAM[next] = (char)(event.getUnicodeChar() & 0xFFFF);
-			cpu.RAM[0x9010] = next;
+			GenericKeyboard kbd = GenericKeyboard.GetLastInstance();
+			if (kbd != null)
+				kbd.keyUp((char)(event.getUnicodeChar() & 0xFFFF));
 		}
 		
 		return super.onKeyUp(keyCode, event);
@@ -432,6 +512,19 @@ public class MainActivity extends Activity
 	public static void setBackHandler(Runnable runnable)
 	{
 		backHandler = runnable;
+	}
+
+	@Override
+	public void optionsChanged()
+	{
+		runOnUiThread(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				setupTabs();
+			}
+		});
 	}
 
 }

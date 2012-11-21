@@ -17,13 +17,15 @@ import uk.co.sticksoft.adce.asm._1_7.Token;
 public class Assembler_1_7 implements Assembler
 {
 	private final static String TAG = "ADCPU";
-	private final static boolean VERBOSE_DEBUG = true;
+	private final static boolean VERBOSE_DEBUG = false;
 	
 	private void verbose(String s)
 	{
 		if (VERBOSE_DEBUG)
+		{
 			Log.i(TAG, s);
-		messages.add(s);
+			messages.add(s);
+		}
 	}
 	
 	public Assembler_1_7() {}

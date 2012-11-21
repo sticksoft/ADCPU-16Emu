@@ -7,7 +7,10 @@ import java.util.HashMap;
 
 import uk.co.sticksoft.adce.asm.Assembler_1_1;
 import uk.co.sticksoft.adce.cpu.CPU;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +18,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class AssemblyEditorTab extends ScrollView
 {
@@ -103,69 +107,149 @@ public class AssemblyEditorTab extends ScrollView
     
     public void assemble()
     {
-    	main.stop();
-    	autosave();
-    	main.log("Assembling...");
-    	CPU cpu = Options.GetCPU();
-    	cpu.reset();
-    	asmOutput.setText("");
+    	synchronized (assemblerLock)
+		{
+    		if (assembling)
+    			return;
+    		assembling = true;
+		}
     	
-    	
-    	ArrayList<String> messages = new ArrayList<String>();
-		HashMap<Integer,String> debugSymbols = new HashMap<Integer,String>();
-    	char[] assembled = Options.getAssembler().assemble(asmInput.getText().toString(), messages, debugSymbols);
-    	
-    	for (int i = 0; i < messages.size(); i++)
-    	{
-    		main.log(messages.get(i));
-    		asmOutput.append(messages.get(i) + "\n");
-    	}
-    	
-    	StringBuilder sb = new StringBuilder();
-    	for (int i = 0; i < assembled.length; i += 8)
-    	{
-    		sb.append(String.format("%04x", i)).append(":");
-    		for (int j = 0; j < 8; j++)
-    		{
-    			if (i+j < assembled.length)
-    				sb.append(" ").append(String.format("%04x", (int)assembled[i+j]));
-    			else
-    				sb.append(" 0000");
-    		}
-    		sb.append('\n');
-    	}
-    	
-    	sb.append('\n');
-    	
-    	int words = 0;
-    	for (int i = 0; i < assembled.length; i++)
-    	{
-    		Integer intobj = Integer.valueOf(i);
-    		if (debugSymbols.containsKey(intobj))
-    		{
-    			sb.append("\n\n").append(debugSymbols.get(intobj)).append('\n');
-    			words = 0;
-    		}
-    		
-    		if (words == 0)
-    			sb.append(String.format("%04x: ", i));
-    		else
-    			sb.append(' ');
-    		
-    		sb.append(String.format("%04x", (int)assembled[i]));
-    		words++;
-    		if (words == 4 || (i > 0 && ((i%4) == 0)))
-    		{
-    			sb.append('\n');
-    			words = 0;
-    		}
-    	}
-    	
-    	asmOutput.append(sb);
-    	
-    	System.arraycopy(assembled, 0, cpu.RAM, 0, assembled.length);
-    	main.setAssembled(assembled);
-    	main.log("");
-    	main.updateInfo();
+		new AssembleTask().execute(asmInput.getText().toString());
     }
+    
+    private class AssembleTask extends AsyncTask<String, Integer, Boolean>
+    {
+    	ProgressDialog progress;
+    	
+    	@Override
+    	protected void onPreExecute()
+    	{
+    		super.onPreExecute();
+    		
+    		main.stop();
+        	autosave();
+        	main.log("Assembling...");
+        	//MainActivity.showToast("Assembling...!", Toast.LENGTH_SHORT);
+        	CPU cpu = Options.GetCPU();
+        	cpu.reset();
+        	asmOutput.setText("");
+        	
+        	progress = new ProgressDialog(getContext());
+        	progress.setMessage("Assembling...");
+        	progress.setIndeterminate(true);
+        	progress.show();
+    	}
+    	
+    	private ArrayList<String> messages = new ArrayList<String>();
+    	String output;
+    	String messageOutput;
+    	
+		@Override
+		protected Boolean doInBackground(String... source)
+		{
+			try
+			{
+				HashMap<Integer,String> debugSymbols = new HashMap<Integer,String>();
+				
+		    	char[] assembled = Options.getAssembler().assemble(source[0], messages, debugSymbols);
+		    	
+		    	System.arraycopy(assembled, 0, Options.GetCPU().RAM, 0, assembled.length);
+		    	main.setAssembled(assembled);
+		    	
+		    	StringBuilder sb = new StringBuilder();
+		    	for (int i = 0; i < assembled.length; i += 8)
+		    	{
+		    		sb.append(String.format("%04x", i)).append(":");
+		    		for (int j = 0; j < 8; j++)
+		    		{
+		    			if (i+j < assembled.length)
+		    				sb.append(" ").append(String.format("%04x", (int)assembled[i+j]));
+		    			else
+		    				sb.append(" 0000");
+		    		}
+		    		sb.append('\n');
+		    	}
+		    	
+		    	sb.append('\n');
+		    	
+		    	int words = 0;
+		    	for (int i = 0; i < assembled.length; i++)
+		    	{
+		    		Integer intobj = Integer.valueOf(i);
+		    		if (debugSymbols.containsKey(intobj))
+		    		{
+		    			sb.append("\n\n").append(debugSymbols.get(intobj)).append('\n');
+		    			words = 0;
+		    		}
+		    		
+		    		if (words == 0)
+		    			sb.append(String.format("%04x: ", i));
+		    		else
+		    			sb.append(' ');
+		    		
+		    		sb.append(String.format("%04x", (int)assembled[i]));
+		    		words++;
+		    		if (words == 4 || (i > 0 && ((i%4) == 0)))
+		    		{
+		    			sb.append('\n');
+		    			words = 0;
+		    		}
+		    	}
+		    	
+		    	output = sb.toString();
+		    	
+		    	// Now do messages
+		    	sb.setLength(0);
+		    	for (String s : messages)
+		    		sb.append(s).append('\n');
+		    			
+		    	messageOutput = sb.toString();
+		    	
+		    	return true;
+			}
+			catch (Exception ex)
+			{
+				MainActivity.showToast("Assembling failed! "+ex.getClass().getSimpleName(), Toast.LENGTH_LONG);
+				return false;
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(Boolean result)
+		{
+			if (result)
+			{
+				/*
+		    	for (int i = 0; i < messages.size(); i++)
+		    	{
+		    		main.log(messages.get(i));
+		    		asmOutput.append(messages.get(i) + "\n");
+		    	}*/
+				
+				
+				main.log(messageOutput);
+				asmOutput.append(messageOutput);
+		    	
+		    	asmOutput.append(output);
+		    	
+		    	main.log("");
+		    	main.updateInfo();
+		    	
+		    	//MainActivity.showToast("Assembling finished!", Toast.LENGTH_LONG);
+			}
+			
+			progress.hide();
+			
+			synchronized (assemblerLock)
+			{
+				assembling = false;
+			}
+		}
+		
+		
+    }
+    
+    private static boolean assembling = false;
+    private static Object assemblerLock = new Object();
+
 }
