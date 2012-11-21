@@ -3,6 +3,8 @@ package uk.co.sticksoft.adce.hardware;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import uk.co.sticksoft.adce.Options;
+import uk.co.sticksoft.adce.Options.Observer;
 import uk.co.sticksoft.adce.R;
 import uk.co.sticksoft.adce.cpu.CPU;
 import android.content.Context;
@@ -14,7 +16,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 
-public class Console extends View implements CPU.Observer
+public class Console extends View implements CPU.Observer, Options.Observer
 {
 	private CPU cpu;
 	public final static int KEYBOARD_MEM_ADDRESS = 0x8000;
@@ -24,13 +26,14 @@ public class Console extends View implements CPU.Observer
 	
 	private long lastUpdate;
 	
-	public Console(Context context, CPU cpu)
+	public Console(Context context)
 	{
 		super(context);
 		
-		this.cpu = cpu;
+		this.cpu = Options.GetCPU();
 		
 		cpu.addObserver(this);
+		Options.addObserver(this);
 		
 		lastUpdate = System.currentTimeMillis();
 	}
@@ -189,5 +192,13 @@ public class Console extends View implements CPU.Observer
 			lastUpdate = time;
 			postInvalidate();
 		}
+	}
+
+	@Override
+	public void optionsChanged()
+	{
+		cpu.removeObserver(this);
+		cpu = Options.GetCPU();
+		cpu.addObserver(this);
 	}
 }

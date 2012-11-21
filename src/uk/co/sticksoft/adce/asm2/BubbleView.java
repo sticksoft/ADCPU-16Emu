@@ -1,7 +1,11 @@
 package uk.co.sticksoft.adce.asm2;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 
+import uk.co.sticksoft.adce.ErrorHandling;
+import uk.co.sticksoft.adce.asm2.BubbleNode.NodeAction;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,50 +18,43 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.graphics.Shader.TileMode;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
-import android.view.*;
 
-public class BubbleView extends View
+public class BubbleView extends View implements TextWatcher
 {
+
 	private ArrayList<BubbleNode> roots = new ArrayList<BubbleNode>();
 	private ViewGroup container;
 	//private Interpreter interpreter;
+	private TextView editor;
 	
-	public BubbleView(Context context, ViewGroup container)
+	public BubbleView(Context context, ViewGroup container, TextView editor)
 	{
 		super(context);
 		
 		this.container = container;
+		this.editor = editor;
+		
+		if (editor != null)
+		{
+			editor.addTextChangedListener(this);
+			reading = true;
+			BubbleParser.parse(editor.getText().toString(), this);
+		}
 		//this.interpreter = new Interpreter(this);
 		
 		LayoutParams lp = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT);
 		setLayoutParams(lp);
-		
-		/*
-		for (int i = 0; i < 5; i++)
-		{
-			BubbleNode root = new BubbleNode();
-			for (int j = (int)(Math.random() * 5); j-->0;)
-			{
-				BubbleNode child = new BubbleNode();
-				root.addChild(child);
-				
-				if (Math.random() < 0.2)
-				{
-					for (int k = (int)(Math.random() * 3); k-->0;)
-						child.addChild(new BubbleNode());
-				}
-			}
-			roots.add(root);
-		}*/
-		
-		roots.add(new BubbleNode());
 	}
 	
 	private boolean layoutChanged = true;
+	private boolean covered = false;
 	
 	private PointF canvasOrigin = new PointF();
 	private float scale = 1.0f;
@@ -66,6 +63,9 @@ public class BubbleView extends View
 	public void draw(Canvas canvas)
 	{
 		super.draw(canvas);
+		
+		if (covered)
+			return;
 		
 		canvas.drawColor(Color.DKGRAY);
 		
@@ -77,9 +77,6 @@ public class BubbleView extends View
 		
 		canvas.scale(scale, scale);
 		canvas.translate(canvasOrigin.x, canvasOrigin.y);
-		
-		
-		
 		
 		
 		if (layoutChanged)
@@ -101,6 +98,63 @@ public class BubbleView extends View
 		}
 		
 		layoutChanged = false;
+		try
+		{
+		    unparse();
+		}
+		catch (Exception e)
+		{
+			ErrorHandling.handle(getContext(), e);
+		}
+	}
+	
+	private String unparsed;
+	private Thread unparseThread;
+	private boolean restartUnparsing;
+	private boolean reading = false, writing = false;
+	private void unparse()
+	{
+		if (reading)
+		{
+			reading = false;
+			return;
+		}
+		writing = true;
+		
+		if (unparseThread == null)
+		{
+			unparseThread = new Thread(new Runnable() { public void run() { unparse_onThread(); } });
+			restartUnparsing = false;
+			unparseThread.start();
+		}
+		else
+		{
+			restartUnparsing = true;
+		}
+	}
+	private void unparse_onThread()
+	{
+		try
+		{
+			do
+			{
+				restartUnparsing = false;
+				unparsed = BubbleParser.unparse(this);
+			} while (restartUnparsing);
+			if (editor != null && unparsed != null)
+			{
+				this.post(new Runnable() { public void run()
+				{
+					writing = true;
+					editor.setText(unparsed);
+				} });
+			}
+		}
+		catch (Exception e)
+		{
+			ErrorHandling.handle(getContext(), e);
+		}
+		unparseThread = null;
 	}
 	
 	private final static Paint measurePaint = new Paint();
@@ -110,9 +164,10 @@ public class BubbleView extends View
 	public PointF layoutBubble(BubbleNode b, PointF point)
 	{
 		b.width = 16;
-		if (b.text != null)
+		String text = b.text();
+		if (text != null)
 		{
-			measurePaint.getTextBounds(b.text, 0, b.text.length(), bounds);
+			measurePaint.getTextBounds(text, 0, text.length(), bounds);
 			final float extra = 12;
 			if (bounds.width() + extra > b.width)
 				b.width = bounds.width() + extra;
@@ -141,17 +196,6 @@ public class BubbleView extends View
 		
 		point.x = childrenX;
 		point.y = maxY;
-		
-		for (int i = 0; i < b.children.size(); i++)
-		{
-			BubbleNode child = b.children.get(i);
-			layoutBubble(child, point);
-			
-			if (point.x > maxX)
-				maxX = point.x;
-			
-			point.x = childrenX;
-		}
 		
 		point.x = maxX;
 		
@@ -184,20 +228,6 @@ public class BubbleView extends View
 		textPaint.setColor(Color.BLACK);
 		//linePaint.setColor(Color.WHITE);
 		
-		if (b.children.size() > 0)
-		{
-			float left = b.x + b.width / 2;
-			
-			BubbleNode lowest = b.children.get(b.children.size()-1);
-			c.drawLine(left, b.y + b.height / 2, left, lowest.y + lowest.height / 2, linePaint);
-			for (int i = 0; i < b.children.size(); i++)
-			{
-				BubbleNode child = b.children.get(i);
-				float y = child.y + child.height / 2;
-				float right = child.x + child.width / 2;
-				c.drawLine(left, y, right, y, linePaint);
-			}
-		}
 		
 		if (b.properties.size() > 0)
 		{
@@ -211,8 +241,8 @@ public class BubbleView extends View
 		{
 			// Calculate colours
 			float alpha = 1.0f;
-			if (scale > 1.5f)
-				alpha = 1.0f / (1.0f + (scale - 1.5f) * 10.0f);
+			//if (scale > 1.5f)
+			//	alpha = 1.0f / (1.0f + (scale - 1.5f) * 10.0f);
 			float radius = b.width * (scale) / 2.0f;
 			
 			boolean selected = b == selectedBubble;
@@ -230,12 +260,9 @@ public class BubbleView extends View
 			// Draw
 			if (alpha > 0.02f)
 				c.drawRoundRect(new RectF(b.x, b.y, b.x+b.width, b.y+b.height), 10, 10, p);
-			c.drawText(b.text, b.x + 4, b.y + 12, textPaint);
+			c.drawText(b.text(), b.x + 4, b.y + 12, textPaint);
 		}
-		
-		for (int i = 0; i < b.children.size(); i++)
-			drawBubble(c, b.children.get(i));
-		
+
 		for (int i = 0; i < b.properties.size(); i++)
 			drawBubble(c, b.properties.get(i));
 	}
@@ -247,10 +274,85 @@ public class BubbleView extends View
 	
 	private float lastPinchDistance = 0;
 	
+	private boolean _no_multitouch = false;
+	private boolean isMultitouch(MotionEvent event)
+	{
+		if (_no_multitouch)
+			return false;
+		
+		int d = 0;
+		try
+		{
+			d=1;
+			Method meth = event.getClass().getMethod("getPointerCount", new Class[0]);
+			d=2;
+			Integer count = (Integer)meth.invoke(event);
+			d=3;
+			return count > 1;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			String msg = ""+ d + "\n" + e.toString() + "\n" + e.getMessage() + "\n" + event.getClass().toString() + "\n";
+			for (Method m : event.getClass().getMethods())
+			    msg += m.toString() + "\n";
+			new AlertDialog.Builder(getContext()).setMessage(msg).setPositiveButton("Ok",null).show();
+			_no_multitouch = true;
+			return false;
+		}
+	}
+	
+	private float getPinchDist(MotionEvent event)
+	{
+		if (_no_multitouch)
+			return 0;
+		
+		try
+		{
+			Method getPointerCount = event.getClass().getMethod("getPointerCount");
+			int pointercount = ((Integer)getPointerCount.invoke(event)).intValue();
+			Method getXI = event.getClass().getMethod("getX", new Class[] { int.class });
+			Method getYI = event.getClass().getMethod("getY", new Class[] { int.class });
+			
+			float[] xs = new float[pointercount];
+			float[] ys = new float[pointercount];
+			
+			for (int i = 0; i < pointercount; i++)
+			{
+				xs[i] = ((Float)getXI.invoke(event, Integer.valueOf(i))).floatValue();
+				ys[i] = ((Float)getYI.invoke(event, Integer.valueOf(i))).floatValue();
+			}
+			
+			float maxDistSq = 0;
+			for (int j = pointercount; j-->0;)
+				for (int i = j; i-->0;)
+				{
+					float dx = xs[j] - xs[i], dy = ys[j] - ys[i];
+					float distSq = dx*dx + dy*dy;
+					if (distSq > maxDistSq)
+						maxDistSq = distSq;
+				}
+			return (float)Math.sqrt(maxDistSq);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			String msg = e.toString() + "\n" + e.getMessage() + "\n";
+			//for (Method m : event.getClass().getMethods())
+			    //msg += m.toString() + "\n";
+			new AlertDialog.Builder(getContext()).setMessage(msg).setPositiveButton("Ok",null).show();
+		}
+		return 0;
+	}
+	
 	@Override
 	public boolean onTouchEvent(MotionEvent event)
-	{/*
-		if (event.getPointerCount() > 1)
+	{
+		if (covered)
+			return true;
+		
+		boolean currentlyMultitouch = isMultitouch(event);
+		if (currentlyMultitouch)
 			multitouch = true;
 		
 		switch (event.getAction())
@@ -282,8 +384,9 @@ public class BubbleView extends View
 				
 				invalidate();
 			}
-			else if (event.getPointerCount() > 1)
+			else if (currentlyMultitouch)
 			{
+				/*
 				float maxDistSq = 0;
 				for (int j = event.getPointerCount(); j-->0;)
 					for (int i = j; i-->0;)
@@ -294,6 +397,9 @@ public class BubbleView extends View
 							maxDistSq = distSq;
 					}
 				float dist = (float)Math.sqrt(maxDistSq);
+				*/
+				
+				float dist = getPinchDist(event);
 				
 				if (dist != 0 && lastPinchDistance != 0)
 				{
@@ -314,8 +420,6 @@ public class BubbleView extends View
 				return handleTap(event);
 		}
 		
-		
-		*/
 		return true;
 	}
 	
@@ -329,7 +433,7 @@ public class BubbleView extends View
 		for (int i = roots.size(); i-->0;)
 		{
 			BubbleNode b = roots.get(i);
-			if (y < b.y - 1 || y > b.y + 1 + b.getChildrenHeight())
+			if (y < b.y - 1 || y > b.y + 1 + b.height)
 				continue;
 			
 			BubbleNode result = b.checkTap(x, y);
@@ -357,20 +461,62 @@ public class BubbleView extends View
 			b.showOptions(getContext(), this);
 		else
 		{
-			new AlertDialog.Builder(getContext()).setItems(new String[] { "Add Root", "Cancel" }, new DialogInterface.OnClickListener()
+			String[] actions;
+			if (BubbleNodeActions.clipboard == null)
+				actions = new String[] { "Add instruction", "Add comment", "Add label", "Update text" };
+			else
+			    actions = new String[] { "Add instruction", "Add comment", "Add label", "Update text", "Paste" };
+			
+			new AlertDialog.Builder(getContext()).setItems(actions, new DialogInterface.OnClickListener()
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which)
 				{
-					if (which != 0)
-						return;
-					
-					BubbleNode root = new BubbleNode();
-					roots.add(root);
-					root.showEdit(getContext(), BubbleView.this);
-					
-					layoutBubbles();
-					invalidate();
+					switch (which)
+					{
+						case 0:
+						{
+						    BubbleNode root = new BubbleNode("SET");
+						    root.addProperty(new BubbleNodeProperty("A"));
+						    root.addProperty(new BubbleNodeProperty("B"));
+					     	roots.add(root);
+						    //root.showEdit(getContext(), BubbleView.this);
+						    //new InstructionBuilder(getContext(), root, BubbleView.this).show();
+					    	layoutBubbles();
+						    invalidate();
+							break;
+						}
+						case 1:
+						{
+							BubbleNode root = new BubbleNode("; ");
+							roots.add(root);
+							root.showEdit(getContext(), BubbleView.this);
+							layoutBubbles();
+							invalidate();
+							break;
+						}
+						case 2:
+						{
+							BubbleNode root = new BubbleNode(":");
+							roots.add(root);
+							root.showEdit(getContext(), BubbleView.this);
+							layoutBubbles();
+							invalidate();
+							break;
+						}
+						case 3:
+						{
+							unparse();
+							break;
+						}
+						case 4:
+						{
+							roots.add(new BubbleNode(BubbleNodeActions.clipboard));
+							layoutBubbles();
+							invalidate();
+							break;
+						}
+					}
 				}
 			}).show();
 		}
@@ -390,5 +536,75 @@ public class BubbleView extends View
 	public void onPause()
 	{
 	    //interpreter.stop();
+	}
+	
+	public void beforeTextChanged(CharSequence p1, int p2, int p3, int p4)
+	{
+		// TODO: Implement this method
+	}
+
+	public void onTextChanged(CharSequence p1, int p2, int p3, int p4)
+	{
+		// TODO: Implement this method
+	}
+
+	private boolean canUpdate = true;
+	private boolean firstUpdate = true;
+	public void afterTextChanged(Editable p1)
+	{
+		if (writing)
+		{
+			writing = false;
+			return;
+		}
+		
+		if (canUpdate)
+		{
+			reading = true;
+			updateWait = System.currentTimeMillis() + (firstUpdate ? 100 : 3000);
+			firstUpdate = false;
+			if (updateThread == null)
+			{
+				updateThread = new Thread(new Runnable() { public void run() {waitToUpdate();}});
+				updateThread.start();
+			}
+		}
+	}
+	private long updateWait = 0;
+	private Thread updateThread = null;
+	private void waitToUpdate()
+	{
+		while (System.currentTimeMillis() < updateWait)
+		{
+			try
+			{
+				Thread.sleep(500);
+			}
+			catch (Exception e)
+			{
+				
+			}
+			if (updateThread != Thread.currentThread())
+				return;
+		}
+		
+		synchronized(this)
+		{
+			BubbleParser.parse(editor.getText().toString(), this);
+		}
+		
+		updateThread = null;
+	}
+	
+	public void showActions(List<NodeAction> actions, BubbleNode node)
+	{
+		container.addView(new ActionTable(this, actions, node));
+		covered = true;
+	}
+	
+	public void uncover(View view)
+	{
+		container.removeView(view);
+		covered = false;
 	}
 }

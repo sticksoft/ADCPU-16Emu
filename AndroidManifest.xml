@@ -24,6 +24,8 @@
         <activity android:name="DirectoryBrowserActivity"></activity>
         <activity android:name=".help.HelpActivity" android:label="Help"></activity>
         <activity android:name=".help.TextActivity" android:label="Help"></activity>
+        <activity android:name="OptionsActivity"></activity>
+        <activity android:name="OptionsPreferenceActivity"></activity>
     </application>
 
 </manifest>

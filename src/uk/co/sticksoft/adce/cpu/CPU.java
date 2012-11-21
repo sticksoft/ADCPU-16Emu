@@ -27,16 +27,13 @@ public abstract class CPU
 		observers.remove(ob);
 	}
 	
-	private int notifyCounter = 0;
+	private long lastNotify = 0;
 	public void notifyObservers()
 	{
-		if (notifyCounter > 0)
-		{
-			notifyCounter--;
+		long time = System.currentTimeMillis();
+		if (time == lastNotify)
 			return;
-		}
-		else
-			notifyCounter = 100;
+		lastNotify = time;
 		
 		for (Observer o : observers)
 			o.onCpuExecution(this);
