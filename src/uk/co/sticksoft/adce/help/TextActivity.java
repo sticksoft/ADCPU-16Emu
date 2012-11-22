@@ -48,9 +48,15 @@ public class TextActivity extends Activity
 			
 			String loadedText = new String(baos.toByteArray(), Charset.defaultCharset().name());
 		
-			//text.setAutoLinkMask(Linkify.WEB_URLS);
-			text.setText(Html.fromHtml(loadedText));
-			text.setMovementMethod(LinkMovementMethod.getInstance());
+		    if (loadedText.contains("<br"))
+			{
+			    //text.setAutoLinkMask(Linkify.WEB_URLS);
+			    text.setText(Html.fromHtml(loadedText));
+			    text.setMovementMethod(LinkMovementMethod.getInstance());
+			}
+			else
+			    text.setText(loadedText);
+			
 			text.setTextSize(20);
 		}
 		catch (Exception ex)

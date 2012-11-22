@@ -59,7 +59,8 @@ public class HelpActivity extends ListActivity implements ListAdapter
 				showTextRes(R.raw.help_assembly);
 				break;
 			case 2:
-				showTextRes(R.raw.help_dasm_qr);
+				//showTextRes(R.raw.help_dasm_qr);
+				showTextRes(R.raw.dcpu_1_7);
 				break;
 			case 3:
 				showTextRes(R.raw.help_io_qr);
