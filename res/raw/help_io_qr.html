@@ -1,4 +1,66 @@
-<h1>I/O Quick Reference</h1>
+<h1>Hardware in v1.7</h1>
+<h2>Discovering and controlling hardware</h2>
+Previously, hardware was controlled by writing data to hard-coded memory addresses.<br/><br/>
+However, with the new 1.7 specification, the HWN, HWQ and HWI instructions are used to query, enumerate and control hardware via hardware interrupts.<br/><br/>
+<br/>
+The HWN instruction sets its parameter to the number of connected hardware devices.<br/><br/>
+Typical programs will then iterate over the connected devices, obtaining info about them with the HWQ instruction.<br/><br/>
+This instruction's parameter indicates the device whose information to obtain.  The information is then written to the A, B, C, X and Y registers.<br/><br/>
+A and B receive the hardware ID.<br/><br/>
+C receives the hardware version number.<br/><br/>
+X and Y receive the manufacturer's ID.<br/><br/>
+<br/>
+Finally, the HWI instruction sends an interrupt message to a given hardware device indicated by its parameter.<br/><br/>
+Any parameters for the interrupt must be set in the correct registers prior to using HWI.<br/><br/>
+For example, most hardware (so far) reads from the A register to determine the type of interrupt being sent, and the B and C registers are commonly used to hold extra information.<br/><br/>
+The exact meaning of each of the registers depends on the hardware device to which the interrupt is sent.  See below for currently-supported devices.<br/><br/>
+<br/>
+Putting this all together, the following example finds the number of devices, searches (backwards) for the LEM1802 display device, and calls an interrupt on it:<br/><br/>
+<br/>
+; Get hardware count<br/>
+HWN J<br/>
+<br/>
+:loop<br/>
+; Check we have some hardware<br/>
+IFE J, 0<br/>
+SET PC, end<br/>
+<br/>
+; Device numbers start from 0, so subtract 1 from J now<br/>
+SUB 1, J<br/>
+; Query device J<br/>
+HWQ J<br/>
+<br/>
+; Check if device info matches LEM1802
+IFN A, 0xF615<br/>
+SET PC, loop<br/>
+IFE B, 0x7349<br/>
+SET PC, loop<br/>
+IFE C, 0x1802<br/>
+SET PC, loop<br/>
+IFE X, 0x8B36<br/>
+SET PC, loop<br/>
+IFE Y, 0x1C6C<br/>
+SET PC, loop<br/>
+<br/>
+; Reaching this point means the device matches<br/>
+; Set up registers for the interrupt, then send it<br/>
+SET A, 0x0<br/>
+SET B, 0x8000<br/>
+HWI J<br/>
+<br/>
+SET PC, loop
+:end
+<br/>
+
+<h2>Supported Devices</h2>
+<a href="http://0x10cwiki.com/wiki/LEM1802">LEM1802</a><br/><br/>
+<a href="http://0x10cwiki.com/wiki/Generic_clock">Generic Clock</a><br/><br/>
+<a href="http://0x10cwiki.com/wiki/Generic_keyboard">Generic Keyboard</a><br/>
+
+<br/><br/><br/><br/>  
+
+
+<h1>Appendix - old v1.1 I/O Quick Reference</h1>
 Currently, I/O consists of writing to the console (somewhat standardised), keyboard input (somewhat standard), and interfacing with the ship (non-standard).
 
 <h2>Console</h2>
