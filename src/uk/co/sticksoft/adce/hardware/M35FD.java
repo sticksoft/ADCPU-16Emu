@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.util.*;
 
 public class M35FD extends View implements Device, OnClickListener
 {
@@ -33,6 +34,36 @@ public class M35FD extends View implements Device, OnClickListener
 		dumpButton.setOnClickListener(this);
 		layout.addView(dumpButton);
 	}
+	
+	private StringBuilder disk = new StringBuilder(); // Hahahahaha
+	
+	public static final int SECTOR_SIZE = 1024;
+	public static final int SECTORS = 1440;
+	private void blankDisk(int words)
+	{
+		disk.setLength(0);
+		disk.setLength(words);
+	}
+	
+	private void ensureSector(int sec)
+	{
+		int cap = (sec + 1) * SECTOR_SIZE;
+		if (disk.length() < cap)
+			disk.setLength(cap);
+	}
+	
+	private void writeSector(char sector, char[] data)
+	{
+		ensureSector(sector);
+		disk.replace(sector * SECTOR_SIZE, (sector+1)*SECTOR_SIZE-1, new String(data));
+	}
+	
+	private void readSector(char sector, char[] buffer)
+	{
+		ensureSector(sector);
+		disk.getChars(sector * SECTOR_SIZE, (sector+1)*SECTOR_SIZE-1, buffer, 0);
+	}
+	
 
 	@Override
 	public void onClick(View v)
@@ -73,7 +104,12 @@ public class M35FD extends View implements Device, OnClickListener
 	@Override
 	public void HWI_1_7(CPU_1_7 cpu)
 	{
+		char A = cpu.register[cpu.A];
 		
+		switch (A)
+		{
+		    
+		}
 	}
 
 	@Override
