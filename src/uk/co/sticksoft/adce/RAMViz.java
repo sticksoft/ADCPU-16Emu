@@ -67,6 +67,8 @@ public class RAMViz extends ImageView implements Observer
 			{
 				try
 				{
+					threadShouldUpdate = true;
+					
 					int misses = 0;
 					
 					while (thread == Thread.currentThread()) // Can end this thread simply by starting a new one or setting to null
@@ -89,6 +91,10 @@ public class RAMViz extends ImageView implements Observer
 							
 							if (misses++ > 100) // Naturally die if not used for a while
 							{
+								// One last update
+								updateBitmapBuffer();
+								post(updateRunnable);
+								
 								Log.i("ADCPU", "RAM thread not being used; killing.");
 								break;
 							}

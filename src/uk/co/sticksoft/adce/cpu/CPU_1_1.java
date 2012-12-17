@@ -1,5 +1,8 @@
 package uk.co.sticksoft.adce.cpu;
 
+import android.widget.Toast;
+import uk.co.sticksoft.adce.MainActivity;
+
 public class CPU_1_1 extends CPU
 {
 	public char[] register = new char[8];
@@ -304,6 +307,47 @@ public class CPU_1_1 extends CPU
 		}
 		
 		notifyObservers();
+	}
+	
+	public char[] getStateInfo()
+	{
+		int size = register.length /* registers */ + 3 /* PC, SP, O */ + 1 /* skipping */ + 2 /* cyclecount */;
+		
+		char[] out = new char[size];
+		int cursor = 0;
+		System.arraycopy(register, 0, out, 0, cursor = register.length);
+		out[cursor++] = PC;
+		out[cursor++] = SP;
+		out[cursor++] = O;
+		out[cursor++] = (char) (skipping ? 0xFFFF : 0x0000);
+		intToLittleEndian((int)cycleCount, out, cursor);
+		
+		return out;
+	}
+	
+	public void setStateInfo(char[] state)
+	{
+		try
+		{
+			int size = register.length /* registers */ + 3 /* PC, SP, O */ + 1 /* skipping */ + 2 /* cyclecount */;
+			if (state.length != size)
+			{
+				MainActivity.showToast("State info doesn't match this processor version!", Toast.LENGTH_LONG);
+				return;
+			}
+			
+			int cursor = 0;
+			System.arraycopy(state, 0, register, 0, cursor = register.length);
+			PC = state[cursor++];
+			SP = state[cursor++];
+			O  = state[cursor++];
+			skipping = (state[cursor++] == 0xFFFF);
+			cycleCount = intFromLittleEndian(state, cursor);
+		}
+		catch (Exception ex)
+		{
+			MainActivity.showToast("Unable to retreive CPU state!", Toast.LENGTH_LONG);
+		}
 	}
 	
 	public String getStatusText()

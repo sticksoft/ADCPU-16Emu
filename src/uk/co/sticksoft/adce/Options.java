@@ -15,6 +15,7 @@ import uk.co.sticksoft.adce.cpu.CPU_1_7;
 import uk.co.sticksoft.adce.hardware.Console;
 import uk.co.sticksoft.adce.hardware.HardwareManager;
 import uk.co.sticksoft.adce.hardware.LEM1802;
+import uk.co.sticksoft.adce.hardware.M35FD;
 import android.content.Context;
 import android.util.Xml;
 import android.view.View;
@@ -46,12 +47,15 @@ public class Options
 	
 	private static boolean showTextEditor = true;
 	private static boolean showVisualEditor = true, visualEditorSet = false;
+	private static boolean showM35FD = true;
 	
 	public static boolean IsTextEditorShown() { return showTextEditor; }
 	public static boolean IsVisualEditorShown() { return showVisualEditor; }
+	public static boolean IsM35fdShown() { return showM35FD; }
 	
 	public static void SetTextEditorShown(boolean show) { showTextEditor = show; optionsChanged(); }
 	public static void SetVisualEditorShown(boolean show) { showVisualEditor = show; optionsChanged(); }
+	public static void SetM35fdShown(boolean show) { showM35FD = show; optionsChanged(); }
 	
 	
 	private static CPU cpu;
@@ -106,6 +110,17 @@ public class Options
 		return null;
 	}
 	
+	private static M35FD m35fd;
+	public static View getM35fdView(Context context)
+	{
+		if (m35fd == null)
+		{
+			m35fd = new M35FD(context);
+			HardwareManager.instance().addDevice(m35fd);
+		}
+		return m35fd;
+	}
+	
 	private static boolean loading = false;
 	private static void optionsChanged()
 	{
@@ -150,6 +165,7 @@ public class Options
 		XML_ELEMENT_EDITORS = "editors",
 		XML_ELEMENT_TEXT_EDITOR = "text_editor",
 		XML_ELEMENT_VISUAL_EDITOR = "visual_editor",
+		XML_ELEMENT_M35FD_CONTROL = "m35fd_control",
 		XML_ATTRIBUTE_SHOWN = "shown",
 		
 		XML_VALUE_TRUE = "true",
@@ -189,6 +205,10 @@ public class Options
 					serializer.startTag("", XML_ELEMENT_VISUAL_EDITOR);
 						serializer.attribute("", XML_ATTRIBUTE_SHOWN, showVisualEditor ? XML_VALUE_TRUE : (visualEditorSet ? XML_VALUE_FALSE : XML_VALUE_UNSET));
 					serializer.endTag("", XML_ELEMENT_VISUAL_EDITOR);
+					serializer.startTag("", XML_ELEMENT_M35FD_CONTROL);
+						serializer.attribute("", XML_ATTRIBUTE_SHOWN, showM35FD ? XML_VALUE_TRUE : XML_VALUE_FALSE);
+					serializer.endTag("", XML_ELEMENT_M35FD_CONTROL);
+					
 				serializer.endTag("", XML_ELEMENT_EDITORS);
 			
 			serializer.endTag("", XML_ELEMENT_ROOT);
@@ -205,6 +225,7 @@ public class Options
 		int dcpuMajor = 1, dcpuMinor = 7;
 		boolean textEditor = true;
 		boolean visualEditor = true;
+		boolean m35fd = false;
 		
 		try
 		{
@@ -244,6 +265,11 @@ public class Options
 							visualEditorSet = !XML_VALUE_UNSET.equals(parser.getAttributeValue(0));
 						}
 					}
+					else if (parser.getName().equals(XML_ELEMENT_M35FD_CONTROL))
+					{
+						if (parser.getAttributeCount() == 1 && XML_ATTRIBUTE_SHOWN.equals(parser.getAttributeName(0)))
+							m35fd = XML_VALUE_TRUE.equals(parser.getAttributeValue(0));
+					}
 				}
 				event = parser.next();
 			}
@@ -260,6 +286,7 @@ public class Options
 			
 			SetTextEditorShown(textEditor);
 			SetVisualEditorShown(visualEditor);
+			SetM35fdShown(m35fd);
 		}
 		catch (Exception ex)
 		{

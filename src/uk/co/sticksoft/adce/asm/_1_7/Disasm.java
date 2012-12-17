@@ -45,12 +45,16 @@ public class Disasm
 						bName,
 						aName));
 				}
-				else
+				else if (val != 0)
 				{
 					builder.append(String.format("0x%04x %s %s",
 					    pc,
 						Consts.AdvancedOpcode.values()[b].toString(),
 						GetValueName(a, true)));
+				}
+				else
+				{
+					builder.append(String.format("0x%04x <halt>", pc));
 				}
 				builder.append(" ").append(coda.toString()).append('\n');
 			}

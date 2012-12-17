@@ -40,6 +40,11 @@ public class MainActivity extends Activity implements Observer
 		return me;
 	}
 	
+	public static MainActivity getLastInstance()
+	{
+		return me;
+	}
+	
 	public static void showToast(final String text, final int longOrShort)
 	{
 		try
@@ -139,6 +144,11 @@ public class MainActivity extends Activity implements Observer
         // Make console tab
         addTab(tabHost, "Console", Options.getConsoleView(this));
         
+        if (Options.IsM35fdShown())
+        {
+        	// Make M35FD tab
+        	addTab(tabHost, "M35FD", Options.getM35fdView(this));
+        }
         
         // Make ship tab
         addTab(tabHost, "Ship", new ShipView2D(this));
@@ -360,6 +370,23 @@ public class MainActivity extends Activity implements Observer
     
     private boolean dont_autoload = false;
     
+    public interface FileDialogCallback { void onPathSelected(String s); }
+    
+    private static FileDialogCallback fileDialogCallback = null;
+    public static void showFileDialog(boolean saving, FileDialogCallback fdc)
+    {
+    	fileDialogCallback = fdc;
+    	
+    	if (me == null)
+    		return;
+    	
+    	
+    	Intent intent = new Intent(me, DirectoryBrowserActivity.class);
+    	if (saving)
+    		intent.putExtra("saving", true);
+		me.startActivityForResult(intent, 2);
+    }
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -371,6 +398,14 @@ public class MainActivity extends Activity implements Observer
     	if (data == null || (path = data.getStringExtra("path")) == null || path.length() == 0)
     	{
     		log("No file path returned!\n");
+    		return;
+    	}
+    	
+    	if (fileDialogCallback != null)
+    	{
+    		FileDialogCallback fdc = fileDialogCallback;
+    		fileDialogCallback = null;
+    		fdc.onPathSelected(path);
     		return;
     	}
     	

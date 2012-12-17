@@ -46,6 +46,7 @@ public class OptionsPreferenceActivity extends PreferenceActivity
 		root.addPreference(makeDcpuVersionPreference());
 		root.addPreference(makeTextEditorShownPreference());
 		root.addPreference(makeVisualEditorShownPreference());
+		root.addPreference(makeM35fdShownPreference());
 		
 		setPreferenceScreen(root);
 	}
@@ -86,43 +87,51 @@ public class OptionsPreferenceActivity extends PreferenceActivity
 		return dcpuVersion;
 	}
 	
+	private CheckBoxPreference makeCheckboxPreference(String title, boolean checked, OnPreferenceChangeListener listener)
+	{
+		final CheckBoxPreference checkbox = new CheckBoxPreference(this);
+		checkbox.setTitle(title);
+		checkbox.setChecked(checked);
+		checkbox.setOnPreferenceChangeListener(listener);
+		return checkbox;
+	}
+	
 	private CheckBoxPreference makeTextEditorShownPreference()
 	{
-		final CheckBoxPreference textEditorShown = new CheckBoxPreference(this);
-		
-		textEditorShown.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		return makeCheckboxPreference("Show Text Editor", Options.IsTextEditorShown(), new OnPreferenceChangeListener()
 		{
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue)
 			{
 				Options.SetTextEditorShown(Boolean.TRUE.equals(newValue));
-
 				return true;
 			}
 		});
-		
-		textEditorShown.setChecked(Options.IsTextEditorShown());
-		textEditorShown.setTitle("Show Text Editor");
-		return textEditorShown;
 	}
 	
 	private CheckBoxPreference makeVisualEditorShownPreference()
 	{
-		final CheckBoxPreference visualEditorShown = new CheckBoxPreference(this);
-
-		visualEditorShown.setOnPreferenceChangeListener(new OnPreferenceChangeListener()
+		return makeCheckboxPreference("Show Visual Editor", Options.IsVisualEditorShown(), new OnPreferenceChangeListener()
 		{
 			@Override
 			public boolean onPreferenceChange(Preference preference, Object newValue)
 			{
 				Options.SetVisualEditorShown(Boolean.TRUE.equals(newValue));
-
 				return true;
 			}
 		});
-		
-		visualEditorShown.setChecked(Options.IsVisualEditorShown());
-		visualEditorShown.setTitle("Show Visual Editor");
-		return visualEditorShown;
+	}
+	
+	private CheckBoxPreference makeM35fdShownPreference()
+	{
+		return makeCheckboxPreference("Show M35FD Drive Controls", Options.IsM35fdShown(), new OnPreferenceChangeListener()
+		{
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue)
+			{
+				Options.SetM35fdShown(Boolean.TRUE.equals(newValue));
+				return true;
+			}
+		});
 	}
 }

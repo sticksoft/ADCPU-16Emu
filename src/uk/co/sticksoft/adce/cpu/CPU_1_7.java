@@ -2,6 +2,9 @@ package uk.co.sticksoft.adce.cpu;
 
 import java.util.LinkedList;
 import java.util.Queue;
+
+import android.widget.Toast;
+import uk.co.sticksoft.adce.MainActivity;
 import uk.co.sticksoft.adce.asm._1_7.*;
 import uk.co.sticksoft.adce.hardware.Device;
 import uk.co.sticksoft.adce.hardware.HardwareManager;
@@ -197,7 +200,10 @@ public class CPU_1_7 extends CPU
 		char instr = RAM[PC];
 		
 		if (instr == 0) // Invalid instruction; stop.
+		{
+			notifyObservers();
 			return;
+		}
 		
 		// Decode
 		int opcode = instr & 0x1f;
@@ -485,6 +491,64 @@ public class CPU_1_7 extends CPU
 		
 		PC = tPC;
 		SP = tSP;
+	}
+	
+	public char[] getStateInfo()
+	{
+		int size = 1 /* version */ + register.length /* registers */ + 4 /* PC, SP, EX, IA */ + 3 /* on fire, skipping, interrupt queueing */ + 2 /* cyclecount */ + 1 /* interrupt queue size*/ + interruptQueue.size() /* interrupt queue */;
+		
+		char[] out = new char[size];
+		int cursor = 0;
+		out[cursor++] = 0x0107; // Version 1.7
+		System.arraycopy(register, 0, out, cursor, register.length); cursor += register.length; 
+		out[cursor++] = PC;
+		out[cursor++] = SP;
+		out[cursor++] = EX;
+		out[cursor++] = IA;
+		out[cursor++] = (char) (onFire ? 0xFFFF : 0x0000);
+		out[cursor++] = (char) (skipping ? 0xFFFF : 0x0000);
+		out[cursor++] = (char) (interruptQueueing ? 0xFFFF : 0x0000);
+		intToLittleEndian((int)cycleCount, out, cursor); cursor += 2;
+		out[cursor++] = (char) interruptQueue.size();
+		
+		for (Character c : interruptQueue)
+			out[cursor++] = c;
+		
+		return out;
+	}
+	
+	public void setStateInfo(char[] state)
+	{
+		try
+		{
+			//int size = 1 /* version */ + register.length /* registers */ + 4 /* PC, SP, EX, IA */ + 3 /* on fire, skipping, interrupt queueing */ + 2 /* cyclecount */ + 1 /* interrupt queue size*/ + interruptQueue.size() /* interrupt queue */;
+			
+			char version = state[0];
+			if (version != 0x0107)
+			{
+				MainActivity.showToast("State info doesn't match this processor version!", Toast.LENGTH_LONG);
+				return;
+			}
+			
+			int cursor = 0;
+			System.arraycopy(state, 0, register, 0, cursor = register.length);
+			PC = state[cursor++];
+			SP = state[cursor++];
+			EX = state[cursor++];
+			IA = state[cursor++];
+			onFire = (state[cursor++] == 0xFFFF);
+			skipping = (state[cursor++] == 0xFFFF);
+			interruptQueueing = (state[cursor++] == 0xFFFF);
+			cycleCount = intFromLittleEndian(state, cursor); cursor += 2;
+			char iqSize = state[cursor++];
+			interruptQueue.clear();
+			for (int i = cursor; i < iqSize + cursor; i++)
+				interruptQueue.add(state[cursor]);
+		}
+		catch (Exception ex)
+		{
+			MainActivity.showToast("Unable to retreive CPU state!", Toast.LENGTH_LONG);
+		}
 	}
 
 	@Override
