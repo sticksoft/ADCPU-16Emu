@@ -103,6 +103,8 @@ public class MainActivity extends Activity implements Observer
     
     private void setupTabs()
     {
+		Options.onCreate();
+		
 		// This is NOT the way you're meant to make tabs
 		tabHost = new TabHost(this, null);
 		LinearLayout tablyt = new LinearLayout(this);

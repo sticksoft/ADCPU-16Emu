@@ -121,6 +121,13 @@ public class Options
 		return m35fd;
 	}
 	
+	public static void onCreate()
+	{
+		cpu = null;
+		lem1802 = null;
+		m35fd = null;
+	}
+	
 	private static boolean loading = false;
 	private static void optionsChanged()
 	{
