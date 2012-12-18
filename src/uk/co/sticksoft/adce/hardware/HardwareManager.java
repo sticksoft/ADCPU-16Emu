@@ -3,6 +3,8 @@ package uk.co.sticksoft.adce.hardware;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.Log;
+
 public class HardwareManager
 {
 	private static HardwareManager mgr = new HardwareManager();
@@ -19,6 +21,7 @@ public class HardwareManager
 	
 	public void addDevice(Device d)
 	{
+		Log.i("HardwareManager", "Device "+devices.size()+" added:" + d.getClass().getSimpleName());
 		devices.add(d);
 	}
 	

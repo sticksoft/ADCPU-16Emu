@@ -16,6 +16,8 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.util.*;
@@ -24,13 +26,16 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 {
 	private Button blankButton, loadButton, saveButton, dumpButton, bootButton, ejectButton;
 	private ToggleButton stateToggle;
+	private TextView statusText;
 	
 	public M35FD(Context context)
 	{
 		super(context);
 		
+		ScrollView scroll = new ScrollView(context);
 		LinearLayout layout = new LinearLayout(context);
 		layout.setOrientation(LinearLayout.VERTICAL);
+		scroll.addView(layout);
 		
 		blankButton = new Button(context);
 		blankButton.setText("Insert blank disk");
@@ -67,7 +72,12 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		bootButton.setOnClickListener(this);
 		layout.addView(bootButton);
 		
-		addView(layout);
+		statusText = new TextView(context);
+		layout.addView(statusText);
+		
+		addView(scroll);
+		
+		updateStatus();
 	}
 	
 	private StringBuilder disk; // Hahahahaha
@@ -85,12 +95,14 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 	
 	private void writeSector(char sector, char[] data)
 	{
+		sectorWrites++;
 		ensureSector(sector);
 		disk.replace(sector * SECTOR_SIZE, (sector+1)*SECTOR_SIZE-1, new String(data));
 	}
 	
 	private void readSector(char sector, char[] buffer)
 	{
+		sectorReads++;
 		ensureSector(sector);
 		disk.getChars(sector * SECTOR_SIZE, (sector+1)*SECTOR_SIZE-1, buffer, 0);
 	}
@@ -158,6 +170,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		{
 			disk = new StringBuilder();
 			state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
+			updateStatus();
 		}
 		else if (v == loadButton)
 		{
@@ -172,6 +185,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 						disk = new StringBuilder(buffer.length);
 						disk.append(buffer);
 						state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
+						updateStatus();
 					}
 					catch (Exception ex)
 					{
@@ -267,6 +281,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		{
 			disk = null;
 			state = State.STATE_NO_MEDIA;
+			updateStatus();
 		}
 	}
 
@@ -305,9 +320,12 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 	
 	private Thread ioThread;
 	
+	private int hwiCount, sectorReads, sectorWrites;
+	
 	@Override
-	public void HWI_1_7(CPU_1_7 cpu)
+	public void HWI_1_7(final CPU_1_7 cpu)
 	{
+		hwiCount++;
 		char A = cpu.register[CPU_1_7.A];
 		
 		switch (A)
@@ -319,6 +337,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		case 1:
 			this.cpu = cpu;
 			this.interrupt = cpu.register[CPU_1_7.X];
+			updateStatus();
 			break;
 		case 2:
 			if (state == State.STATE_READY || state == State.STATE_READY_WP)
@@ -329,22 +348,31 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 					@Override
 					public void run()
 					{
-						try { Thread.sleep(16); } catch (Exception ex) { return; }
-						char[] buffer = new char[SECTOR_SIZE];
-						
-						if (disk != null)
+						try
 						{
-							readSector(X, buffer);
-							System.arraycopy(buffer, 0, M35FD.this.cpu.RAM, Y, SECTOR_SIZE);
-							if (interrupt != 0)
-								M35FD.this.cpu.interrupt(interrupt);
-							state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
+							Thread.sleep(16); 
+							char[] buffer = new char[SECTOR_SIZE];
+							
+							if (disk != null)
+							{
+								readSector(X, buffer);
+								System.arraycopy(buffer, 0, cpu.RAM, Y, SECTOR_SIZE);
+								if (interrupt != 0)
+									cpu.interrupt(interrupt);
+								state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
+							}
+							else
+							{
+								state = State.STATE_NO_MEDIA;
+								error = Error.ERROR_EJECT;
+							}
 						}
-						else
+						catch (Exception ex)
 						{
-							state = State.STATE_NO_MEDIA;
-							error = Error.ERROR_EJECT;
+							MainActivity.showToast("Exception reading: "+ex.getClass().getSimpleName(), Toast.LENGTH_SHORT);
+							Log.e("M35FD", "Exception reading.", ex);
 						}
+						updateStatus();
 					}
 				});
 				
@@ -360,7 +388,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 				else if (state == State.STATE_BUSY)
 					error = Error.ERROR_BUSY;
 			}
-			
+			updateStatus();
 			break;
 		case 3:
 			if ((state == State.STATE_READY || state == State.STATE_READY_WP) && !writeProtected)
@@ -371,27 +399,36 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 					@Override
 					public void run()
 					{
-						try { Thread.sleep(16); } catch (Exception ex) { return; }
-						char[] buffer = new char[SECTOR_SIZE];
-						
-						if (disk != null && !writeProtected)
+						try
 						{
-							System.arraycopy(M35FD.this.cpu.RAM, Y, buffer, 0, SECTOR_SIZE);
-							writeSector(X, buffer);
-							if (interrupt != 0)
-								M35FD.this.cpu.interrupt(interrupt);
-							state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
+							Thread.sleep(16);
+							char[] buffer = new char[SECTOR_SIZE];
+							
+							if (disk != null && !writeProtected)
+							{
+								System.arraycopy(cpu.RAM, Y, buffer, 0, SECTOR_SIZE);
+								writeSector(X, buffer);
+								if (interrupt != 0)
+									cpu.interrupt(interrupt);
+								state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
+							}
+							else if (writeProtected)
+							{
+								state = State.STATE_READY_WP;
+								error = Error.ERROR_PROTECTED;
+							}
+							else
+							{
+								state = State.STATE_NO_MEDIA;
+								error = Error.ERROR_EJECT;
+							}
 						}
-						else if (writeProtected)
+						catch (Exception ex)
 						{
-							state = State.STATE_READY_WP;
-							error = Error.ERROR_PROTECTED;
+							MainActivity.showToast("Exception writing: "+ex.getClass().getSimpleName(), Toast.LENGTH_SHORT);
+							Log.e("M35FD", "Exception writing.", ex);
 						}
-						else
-						{
-							state = State.STATE_NO_MEDIA;
-							error = Error.ERROR_EJECT;
-						}
+						updateStatus();
 					}
 				});
 				
@@ -409,7 +446,36 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 				else if (writeProtected)
 					error = Error.ERROR_PROTECTED;
 			}
+			updateStatus();
 			break;
+		}
+	}
+	
+	private boolean statusUpdatePending = false;
+	public synchronized void updateStatus()
+	{
+		if (statusUpdatePending)
+			return;
+		else
+		{
+			statusUpdatePending = true;
+			postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					statusText.setText(
+							"State: "+state.name()+" \n" +
+							"Error: "+error.name()+" \n" +
+							"Interrupt: "+interrupt+" \n" +
+							"Received HWIs: "+hwiCount+" \n" +
+							"Sector reads: "+sectorReads+" \n" +
+							"Sector writes: "+sectorWrites+" \n"
+					);
+					
+					statusUpdatePending = false;
+				}
+			}, 500);
 		}
 	}
 
