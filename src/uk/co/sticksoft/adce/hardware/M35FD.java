@@ -83,7 +83,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 	private StringBuilder disk; // Hahahahaha
 	private boolean writeProtected = false;
 	
-	public static final int SECTOR_SIZE = 1024;
+	public static final int SECTOR_SIZE = 512;
 	public static final int SECTORS = 1440;
 	
 	private void ensureSector(int sec)
@@ -451,6 +451,31 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		}
 	}
 	
+	private static String humanReadableSize(long size)
+	{
+		return humanReadableSize((float)size);
+	}
+	private static String humanReadableSize(int size)
+	{
+		return humanReadableSize((float)size);
+	}
+	private static String humanReadableSize(float size)
+	{
+		return humanReadableSize(size, true);
+	}
+	private static String humanReadableSize(float size, boolean kiloIs1024)
+	{
+		final int k = (kiloIs1024 ? 1024 : 1000);
+		if (size < k)
+			return String.format("%.0f", size);
+		else if (size < k * k)
+			return String.format("%.1fk", size / 1000.0f);
+		else if (size < k * k * k)
+			return String.format("%.2fM", size / (1000.0f * 1000.0f));
+		else
+			return String.format("%.2fG", size / (1000.0f * 1000.0f * 1000.0f));
+	}
+	
 	private boolean statusUpdatePending = false;
 	public synchronized void updateStatus()
 	{
@@ -470,7 +495,8 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 							"Interrupt: "+interrupt+" \n" +
 							"Received HWIs: "+hwiCount+" \n" +
 							"Sector reads: "+sectorReads+" \n" +
-							"Sector writes: "+sectorWrites+" \n"
+							"Sector writes: "+sectorWrites+" \n" +
+							"Disk size: "+((disk == null) ? "" : (humanReadableSize(disk.length()) + "B (" + humanReadableSize(disk.length()/2) + "w)"))
 					);
 					
 					statusUpdatePending = false;
