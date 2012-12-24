@@ -177,9 +177,9 @@ public class MainActivity extends Activity implements Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.30";
-    	final String currentMessage = "NEW: Added DCPU 1.7 support and some hardware.\n\nIf your 1.1 program no longer works, don't fret - the DCPU version can be changed in the new Settings menu!\n\nFor hardware info, see Help.\n";
-    	final boolean massiveUpdate = true;
+    	final String currentVersion = "0.31";
+    	final String currentMessage = "NEW: Fix for EX bug, and M35FD support!";
+    	final boolean massiveUpdate = false;
     	
     	FileInputStream fis = null;
     	boolean up_to_date = false;

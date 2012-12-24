@@ -1,14 +1,14 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1 and v1.7) (http://0x10c.com)
-Version 0.30
+Version 0.31
 By Andrew "Stick" Boothroyd (@sticksoft)
 Latest stable version: https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce
 Don't forget you can post issues / feature requests on GitHub :)
 
 LICENSE
 =======
-You may do whatever the fsck you want with this software, at your own risk. (http://en.wikipedia.org/wiki/WTFPL)
+You may do whatever you want with this software, at your own risk. (http://en.wikipedia.org/wiki/WTFPL)
 If you use it in a project, letting me know and putting a link to https://github.com/sticksoft/ADCPU-16Emu in would be appreciated.
 If I ever meet you in person, a beer would be even more appreciated!
 
@@ -19,7 +19,7 @@ README
 Overview
 --------
 This version successfully assembles and runs the example found at http://0x10c.com/doc/dcpu-16.txt.
-Supported features include emulator, assembler, console output and virtual ship (2D).
+Supported features include emulator, assembler, console output, some hardware, and virtual ship (2D).
 
 Installation
 ------------
@@ -71,6 +71,11 @@ The asteroids are offset slightly on the radar
 
 CHANGELOG
 =========
+v0.31
+-----
+Added fix for EX being set too early (thanks thedarkfreak!)
+Added support for M35FD (disk drive)
+
 v0.30
 -----
 Major upgrade to DCPU v1.7

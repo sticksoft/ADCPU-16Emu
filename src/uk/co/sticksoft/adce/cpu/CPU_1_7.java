@@ -245,11 +245,11 @@ public class CPU_1_7 extends CPU
 						break;
 					case 0x02: // ADD
 						res = bVal + aVal;
-						EX = (res < 0xffff) ? (char)0 : (char)1;
+						EX = (res <= 0xffff) ? (char)0 : (char)1;
 						break;
 					case 0x03: // SUB
 						res = bVal - aVal;
-						EX = (res > 0) ? 0 : (char)0xffff;
+						EX = (res >= 0) ? 0 : (char)0xffff;
 						break;
 					case 0x04: // MUL
 						res = bVal * aVal;
@@ -330,11 +330,11 @@ public class CPU_1_7 extends CPU
 						break;
 					case 0x1a: // ADX
 						res = bVal + aVal + EX;
-						EX = (char)((res < 0) ? 0 : 1);
+						EX = (char)((res <= 0xFFFF) ? 0 : 1);
 						break;
 					case 0x1b: // SBX
 						res = bVal - aVal - EX;
-						EX = (char)((res > 0) ? 0 : 1);
+						EX = (char)((res >= 0) ? 0 : 1);
 						break;
 					case 0x1c: // -
 					case 0x1d: // -
