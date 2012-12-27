@@ -1,0 +1,261 @@
+;
+; dcpu_1_7_arithmetic.dasm
+; ========================
+;
+; This is a sample program that demonstrates arithmetic
+; operations.
+;
+; The lines beginning with a ';' (such as this one!) are
+; ignored by the assembler, and contain explanatory
+; comments.
+;
+; The lines that do not start with a ';' are instructions
+; performed by the DCPU when the program is run.
+;
+; Although this program is split into several examples, the
+; DCPU will execute all the statements one after another.
+; So, the result of one example will be the starting
+; conditions of the next.
+;
+; Each example uses "operands" in lower-case to denote two
+; values ("a" and "b").  These are placeholders for any
+; value you might use.  In the DCPU code, X and Y are used
+; in upper-case to denote the registers X and Y (although
+; the assembler is case-insensitive).
+;
+; For more information on the internals of the DCPU, see the
+; help documents, or the dcpu_1_7_addressing.dasm example.
+
+
+
+; BASIC ARITHMETIC
+; ================
+
+
+
+; SET a, b
+; --------
+; Sets the first operand ("a") to the value of the second ("b")
+; Example:
+
+SET X, 10
+SET Y, 3
+
+; Result: X = 10, Y = 3
+
+
+
+; ADD a, b
+; --------
+; Adds the operands together and stores the result in "a"
+; Example:
+
+ADD X, Y
+
+; Result: X = 13, Y = 3
+
+
+
+; SUB a, b
+; --------
+; Subtracts "b" from "a", and stores the result in "a"
+; Example:
+
+SUB X, Y
+
+; Result: X = 10, Y = 3
+
+
+
+; MUL a, b
+; --------
+; Multiplies the operands together and stores the result in
+; "a"
+; Example:
+
+MUL X, Y
+
+; Result: X = 30, Y = 3
+
+
+
+; DIV a, b
+; --------
+; Divides "a" by "b" and stores the result in "a"
+; Example:
+
+DIV X, Y
+
+; Result: X = 10, Y = 3
+
+
+
+; MOD a, b
+; --------
+; Stores the remainder of "a" divided by "b" in "a"
+; Example:
+
+MOD X, Y
+
+; Result: X = 1, Y = 3
+
+
+
+
+; BITWISE OPERATIONS
+; ==================
+; These operations treat values as strings of binary digits
+; (bits) - 0s and 1s.
+
+
+
+; AND a, b
+; --------
+; Performs bitwise-and of "a" and "b" and stores the result
+; in "a"
+; Example:
+
+SET X, 10 ; X = binary 1010
+SET Y, 12 ; Y = binary 1100
+
+AND X, Y
+
+; Result: X = 8 (binary 1000), Y = 12 (binary 1100)
+
+
+
+; BOR a, b
+; --------
+; Performs bitwise-or of "a" and "b" and stores the result
+; in "a"
+; Example:
+
+SET X, 10 ; X = binary 1010
+SET Y, 12 ; Y = binary 1100
+
+BOR X, Y
+
+; Result: X = 14 (binary 1110), Y = 12 (binary 1100)
+
+
+
+; XOR a, b
+; --------
+; Performs bitwise-xor of "a" and "b" and stores the result
+; in "a"
+; Example:
+
+SET X, 10 ; X = binary 1010
+SET Y, 12 ; Y = binary 1100
+
+XOR X, Y
+
+; Result: X = 6 (binary 0110), Y = 12 (binary 1100)
+
+
+
+; SHR a, b
+; --------
+; Logically shifts "a" right by "b" places and stores the
+; result in "a"
+; Example:
+
+SET X, 8 ; X = binary 1000
+SET Y, 2
+
+SHR X, Y
+
+; Result: X = 2 (binary 0010), Y = 2
+
+
+
+; SHL a, b
+; --------
+; Logically shifts "a" left by "b" places and stores the
+; result in "a"
+; Example:
+
+SET X, 2 ; X = binary 0010
+SET Y, 2
+
+SHL X, Y
+
+; Result: X = 8 (binary 1000), Y = 2
+
+
+
+; SIGNED ARITHMETIC
+; =================
+; These operations treat values as signed two's-complement
+; 16-bit numbers. The most significant bit for each number
+; denotes whether it is positive (0) or negative (1).
+;
+; For example, in binary:
+; 0000000000000000 =  0,      00000000000000000001 =  1
+; 0111111111111110 =  32766,  01111111111111111111 =  32767
+; 1000000000000000 = -32768,  10000000000000000001 = -32767
+; 1111111111111110 = -2,      11111111111111111111 = -1
+
+;
+; The same, in hexadecimal:
+; 0x0000 =  0,                0x0001 =  1
+; 0x7ffe =  32766,            0x7fff =  32767
+; 0x8000 = -32768,            0x8001 = -32767
+; 0xfffe = -2,                0xffff = -1
+
+
+
+; MLI a, b
+; --------
+; Multiples the operands together, signed, and stores the
+; result in "a"
+; Example:
+
+SET X, 2
+SET Y, 0xffff ; Y = -1
+
+MLI X, Y
+
+; Result: X = 0xfffe (-2), Y = 0xffff (-1)
+
+
+
+; DVI a, b
+; Divides "a" by "b", signed, and stores the result in "a"
+; Example:
+
+SET X, 8
+SET Y, 0xfffe ; Y = -2
+
+DVI X, Y
+
+; Result: X = 0xfffc (-4), Y = 0xfffe (-2)
+
+
+
+; MDI a, b
+; --------
+; Stores the remainder of "a" divided by "b", signed, in "a"
+; Example:
+
+SET X, 10
+SET Y, 0xfffd ; Y = -3
+
+MDI X, Y
+
+; Result: X = 1, Y = 0xfffd (-3)
+
+
+
+; ASR a, b
+; --------
+; Arithmetically shifts "a" right by "b" places and stores
+; the result in "a"
+; Example:
+
+SET X, 0xfffc ; X = -4
+SET Y, 2
+
+ASR X, Y
+
+; Result: X = 0xffff (-1), Y = 2

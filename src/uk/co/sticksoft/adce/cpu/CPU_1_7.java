@@ -293,8 +293,8 @@ public class CPU_1_7 extends CPU
 						EX = (char)(((bVal << 16) >>> a) & 0xffff);
 						break;
 					case 0x0e: // ASR
-						res = bVal >> aVal;
-						EX = (char)(((bVal << 16) >> a) & 0xffff);
+						res = unsignedCharAsSignedInt(bVal) >> unsignedCharAsSignedInt(aVal);
+						EX = (char)(((unsignedCharAsSignedInt(bVal) << 16) >> unsignedCharAsSignedInt(aVal)) & 0xffff);
 						break;
 					case 0x0f: // SHL
 						res = bVal << aVal;
