@@ -1,0 +1,200 @@
+;
+; 1_7_addressing.dasm
+; ===================
+;
+; This is a sample program that demonstrates different
+; variables and addressing modes that can be used as
+; operands for DCPU instructions. 
+;
+; The lines beginning with a ';' (such as this one!) are
+; ignored by the assembler, and contain explanatory
+; comments.
+;
+; The lines that do not start with a ';' are instructions
+; performed by the DCPU when the program is run.
+;
+; Although this program is split into several examples, the
+; DCPU will execute all the statements one after another.
+; So, the result of one example will be the starting
+; conditions of the next.
+;
+
+
+
+; DIRECT ADDRESSING MODE
+; ======================
+; Numbers 0 - 65535 can be used directly, in either decimal
+; or hexadecimal.
+; Example:
+
+SET X, 42
+SET Y, 0xff
+
+; Result: X is set to 42, Y is set to 0xff (in decimal, 255)
+
+
+
+; REGISTER ADDRESSING MODE
+; ========================
+
+
+
+; General-purpose Registers
+; -------------------------
+; The DCPU has 8 general-purpose registers: A, B, C, X, Y,
+; Z, I and J.  These each hold a single 16-bit number, and
+; can be freely read from and written to.
+; Example:
+
+SET A, X
+SET B, Y
+
+; Result: Register A is set to the contents of register X,
+; and B is likewise set to Y.
+
+
+
+; Program-counter Register
+; ------------------------
+; The program-counter, PC, contains the address of the
+; next instruction to be executed.  The value represents a
+; location in the computer's RAM, 0 - 65535.  The PC is
+; updated after each instruction to the address of the next.
+; Example:
+
+SET A, PC
+SET PC, mylabel
+
+:mylabel ; Defines a label in the program to jump to  
+
+; Result: A is set to the value of PC, and PC is set to the
+; value of mylabel.  The value of mylabel is the address of
+; the next instruction following the label definition.
+; The actual value of mylabel is not known until the
+; program is assembled.  Since the label is defined
+; immediately after the line that jumps to it, setting PC
+; to it essentially does nothing.
+
+
+
+; Stack-pointer Register
+; ----------------------
+; The stack pointer starts at the end of the computer's RAM
+; and moves towards the beginning with each value that's
+; pushed onto the stack.  The current location of the top of
+; the stack is stored in the SP register.
+; Example:
+
+SET A, SP   ; This should be 0
+SET PUSH, B ; Pushes the content of B (0xff) onto the stack
+SET A, SP   ; This should now be 0xffff
+SET X, PEEK ; This looks at the top without removing it
+SET C, POP  ; Pops C off the stack (0xff)
+SET A, SP   ; This should be 0 again
+
+; Result: A = 0, B = 0xff, C = 0xff, X = 0xff, SP = 0
+
+
+
+; Extra / Excess Register
+; -----------------------
+; After each calculation, the EX register will contain any
+; overflow or underflow from the result being too large or
+; too small to store.
+; Example:
+
+SET A, 0
+
+ADD A, 1      ; 0 + 1 = 1, no overflow
+SET B, EX     ; Should be 0
+
+ADD A, 0xffff ; 1 + 0xffff -> 0, overflow
+SET B, EX     ; Should be 1
+
+SUB A, 1      ; 0 - 1 = 0xffff, underflow
+SET B, EX     ; Should be 0xffff
+
+Result: A = 0xffff, B = 0xffff, EX = 0xffff
+
+
+
+; Interrupt Address Register
+; --------------------------
+; The Interrupt Address register (IA) stores the location of
+; a place in the program to jump to in the event of an
+; interrupt being triggered.  Interrupts can be triggered
+; with the INT instruction (software interrupts), or by
+; various hardware devices under certain conditions
+; (hardware interrupts).  At the end of the interrupt
+; handler, the RFI instruction should be used to signify
+; its end and continue the program in the previous location.
+; Example:
+
+SET IA, interrupt_handler ; Set the handler location 
+SET A, 0                  ; Set the interrupt code
+SET B, 0                  ; 
+INT 0                     ; Interrupt type 0
+SET PC, continuing_on     ; Continue the program after 
+                          ; the interrupt
+
+:interrupt_handler
+IAQ 0                     ; Turn on interrupt queueing
+SET B, 1                  ; Set an arbitrary value
+RFI 0                     ; Return from interrupt
+
+:continuing_on
+SET A, B                  ; A should be set to 1, not 0
+
+; Result: A = 1, B = 1
+
+
+
+; INDIRECT ADDRESSING MODE
+; ========================
+; As well as directly assigning values to registers, values
+; can also be written into the computer's RAM.  This is
+; done by using an operand as the address of the location to
+; read from or write to.
+
+
+
+; Immediate indirect addressing
+; -----------------------------
+; The address in RAM can be specified with a literal value.
+; Example:
+
+SET [0x2000], 1
+SET A, [0x2000]
+
+; Result: A = 1, [0x2000] = 1
+
+
+
+; Register indirect addressing
+; ----------------------------
+; The value in a register can also be used as the address
+; of a location in RAM.
+; Example:
+
+SET A, 0x2000
+SET [A], 2
+SET B, [A]
+
+; Result: A = 0x2000, B = 2, [0x2000] = 2
+
+
+
+; Register offset indirect addressing
+; -----------------------------------
+; The value in a register can be combined with an immediate
+; value.
+; Example:
+
+SET A, 0x2000
+SET [A+10], 10
+SET B, [A+10]
+
+; Result: A = 0x2000, B = 10, [0x200a]  = 10
+
+
+
