@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DirectoryBrowserActivity extends ListActivity implements ListAdapter
 {
@@ -48,8 +49,8 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 			files.clear();
 			names.clear();
 			
-			boolean nullpath;
-			if (nullpath = (path == null))
+			boolean nullpath = (path == null);
+			if (nullpath)
 		    	path = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "ADCPU";
 		    
 			currentDirectory = new File(path);
@@ -86,10 +87,19 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
 	{
 		try
     	{
-    		File[] files = currentDirectory.listFiles();
+			File exampleDir = new File(currentDirectory, "Examples");
+			if (!exampleDir.exists())
+			{
+				if (!exampleDir.mkdirs())
+					exampleDir = currentDirectory;
+			}
+			else if (!exampleDir.isDirectory())
+				return;
+			
+    		File[] files = exampleDir.listFiles();
     		
-    		int[] ids = { R.raw.pong, R.raw.move, R.raw.radar, R.raw.keyboard };
-    		String[] filenames = { "pong.dasm", "move.dasm", "radar.dasm", "keyboard.dasm" };
+    		int[] ids = { R.raw.dcpu_1_7_arithmetic, R.raw.dcpu_1_7_addressing };
+    		String[] filenames = { "dcpu_1_7_arithmetic.dasm", "dcpu_1_7_addressing.dasm" };
     		
     		for (int i = 0; i < filenames.length; i++)
     		{
@@ -105,7 +115,7 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
     			if (!found)
     			{
     				// Based on http://stackoverflow.com/questions/8664468/copying-raw-file-into-sdcard
-    				File f = new File(currentDirectory, filenames[i]);
+    				File f = new File(exampleDir, filenames[i]);
     				FileOutputStream fos = new FileOutputStream(f);
     				InputStream is = getResources().openRawResource(ids[i]);
     				byte[] buffer = new byte[1024];
@@ -129,7 +139,7 @@ public class DirectoryBrowserActivity extends ListActivity implements ListAdapte
     	}
     	catch (Exception ex)
     	{
-    		
+    		Toast.makeText(this, "Unable to write examples out.", Toast.LENGTH_SHORT);
     	}
 	}
 	

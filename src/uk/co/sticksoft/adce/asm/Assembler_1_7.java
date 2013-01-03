@@ -467,6 +467,26 @@ public class Assembler_1_7 implements Assembler
 				verbose("Dat number: \""+builder.toString()+"\"");
 				structure.add(new Dat((char)readDatNumber(builder.toString())));
 			}
+			else if (Character.isLetter(c))
+			{
+				StringBuilder builder = new StringBuilder();
+				builder.append(c);
+				while (sourceIndex < sourceLength)
+				{
+					c = readNextCharacter();
+					if (!Character.isDigit(c) && !Character.isLetter(c) && c != '_')
+					{
+						if (c == ',')
+							carryOn = true;
+						break;
+					}
+					else
+						builder.append(c);
+				}
+				
+				verbose("Dat label: \""+builder.toString()+"\"");
+				structure.add(new Dat(builder.toString(), true));
+			}
 		}
 		
 		verbose("End of dat.");

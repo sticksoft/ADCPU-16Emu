@@ -12,6 +12,8 @@ public class Dat implements Token
 {
 	private char[] data;
 	
+	private String label;
+	
 	public Dat(char c)
 	{
 		data = new char[1];
@@ -21,6 +23,17 @@ public class Dat implements Token
 	public Dat(String s)
 	{
 		data = s.toCharArray();
+	}
+	public Dat(String s, boolean isLabel)
+	{
+		if (!isLabel)
+			data = s.toCharArray();
+		else
+		{
+			data = new char[1];
+			data[0] = 0;
+			label = s;
+		}
 	}
 	
 	@Override
@@ -39,6 +52,11 @@ public class Dat implements Token
 	@Override
 	public void substituteLabels(Map<String, Character> labelMap)
 	{
+		if (label != null)
+		{
+			data = new char[1];
+			data[0] = labelMap.get(label);
+		}
 	}
 
 	@Override
@@ -56,16 +74,24 @@ public class Dat implements Token
 	public BubbleNode getBubble()
 	{
 		BubbleNode inst = new BubbleNode("DAT", Color.rgb(64,64,128));
-		if (data.length == 1)
-		{
-			if (data[0] >= 32 && data[0] < 127)
-				inst.addProperty(new BubbleNodeProperty("'"+data[0]+"'", Color.rgb(64,64,128)));
-			else
-				inst.addProperty(new BubbleNodeProperty(""+(int)data[0], Color.rgb(64,64,128)));
-		}
-		else if (data.length > 1)
+		
+		if (label != null)
 		{
 			inst.addProperty(new BubbleNodeProperty(new String(data), Color.rgb(64,64,128)));
+		}
+		else
+		{
+			if (data.length == 1)
+			{
+				if (data[0] >= 32 && data[0] < 127)
+					inst.addProperty(new BubbleNodeProperty("'"+data[0]+"'", Color.rgb(64,64,128)));
+				else
+					inst.addProperty(new BubbleNodeProperty(""+(int)data[0], Color.rgb(64,64,128)));
+			}
+			else if (data.length > 1)
+			{
+				inst.addProperty(new BubbleNodeProperty(new String(data), Color.rgb(64,64,128)));
+			}
 		}
 		
 		return inst;
