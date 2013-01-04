@@ -1,11 +1,17 @@
 package uk.co.sticksoft.adce.ship2d;
-import uk.co.sticksoft.adce.*;
-import uk.co.sticksoft.adce.cpu.*;
-import java.util.*;
-import android.content.*;
-import android.graphics.*;
-import uk.co.sticksoft.adce.maths.*;
-import java.io.*;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Random;
+
+import uk.co.sticksoft.adce.Environment;
+import uk.co.sticksoft.adce.ShipView2D;
+import uk.co.sticksoft.adce.cpu.CPU;
+import uk.co.sticksoft.adce.maths.Vector2;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 
 public class Ship2DEnvironment implements Environment
 {

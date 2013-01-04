@@ -3,10 +3,9 @@ package uk.co.sticksoft.adce.asm._1_7;
 import java.util.List;
 import java.util.Map;
 
-import android.graphics.Color;
-
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
 import uk.co.sticksoft.adce.asm2.BubbleNode;
+import android.graphics.Color;
 
 public class Label implements Token
 {

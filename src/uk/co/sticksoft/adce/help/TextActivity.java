@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.text.util.Linkify;
 import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;

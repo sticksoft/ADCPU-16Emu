@@ -1,7 +1,7 @@
 package uk.co.sticksoft.adce.cpu;
 
-import android.widget.Toast;
 import uk.co.sticksoft.adce.MainActivity;
+import android.widget.Toast;
 
 public class CPU_1_1 extends CPU
 {
