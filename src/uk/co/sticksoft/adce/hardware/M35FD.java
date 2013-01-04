@@ -27,6 +27,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 	private Button blankButton, loadButton, saveButton, dumpButton, bootButton, ejectButton;
 	private ToggleButton stateToggle;
 	private TextView statusText;
+	private ToggleButton endiannessToggle; // Only in this fucking game
 	
 	public M35FD(Context context)
 	{
@@ -63,7 +64,9 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		layout.addView(dumpButton);
 		
 		stateToggle = new ToggleButton(context);
-		stateToggle.setText("Append CPU state info");
+		stateToggle.setTextOn("Append CPU state info");
+		stateToggle.setTextOff("Append CPU state info");
+		stateToggle.setChecked(true);
 		layout.addView(stateToggle);
 
 		
@@ -71,6 +74,12 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		bootButton.setText("Load RAM dump");
 		bootButton.setOnClickListener(this);
 		layout.addView(bootButton);
+		
+		endiannessToggle = new ToggleButton(context);
+		endiannessToggle.setTextOn("Little endian");
+		endiannessToggle.setTextOff("Big endian");
+		endiannessToggle.setChecked(true);
+		layout.addView(endiannessToggle);
 		
 		statusText = new TextView(context);
 		layout.addView(statusText);
@@ -107,6 +116,14 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		disk.getChars(sector * SECTOR_SIZE, (sector+1)*SECTOR_SIZE-1, buffer, 0);
 	}
 	
+	private char[] loadFileAndConvertToChars(String path) throws Exception
+	{
+		if (endiannessToggle.isChecked())
+			return loadFileAndConvertToCharsLittleEndian(path);
+		else
+			return loadFileAndConvertToCharsBigEndian(path);
+	}
+
 	private static char[] loadFileAndConvertToCharsLittleEndian(String path) throws Exception
 	{
 		FileInputStream fis = new FileInputStream(path);
@@ -122,6 +139,29 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		return cbuffer;
 	}
 	
+	private static char[] loadFileAndConvertToCharsBigEndian(String path) throws Exception
+	{
+		FileInputStream fis = new FileInputStream(path);
+		byte[] buffer = new byte[Math.max((int) fis.getChannel().size(), SECTORS * SECTOR_SIZE * 2)]; // Ensure we don't overrun disk size
+		fis.read(buffer);
+		fis.close();
+
+		char[] cbuffer = new char[buffer.length / 2];
+		
+		for (int i = 0, j = 0; i < buffer.length-1 && j < cbuffer.length; i+=2, j++)
+			cbuffer[j] = (char) ((buffer[i+1] & 0xFF) + ((buffer[i] & 0xFF) << 8));
+		
+		return cbuffer;
+	}
+	
+	private void saveChars(String path, char[] cbuffer) throws Exception
+	{
+		if (endiannessToggle.isChecked())
+			saveCharsLittleEndian(path, cbuffer);
+		else
+			saveCharsBigEndian(path, cbuffer);
+	}
+	
 	private static void saveCharsLittleEndian(String path, char[] cbuffer) throws Exception
 	{
 		FileOutputStream fos = new FileOutputStream(path);
@@ -130,6 +170,20 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 		{
 			buffer[j] = (byte)(cbuffer[i] & 0xFF);
 			buffer[j+1] = (byte)((cbuffer[i] >> 8) & 0xFF);
+		}
+		
+		fos.write(buffer);
+		fos.close();
+	}
+	
+	private static void saveCharsBigEndian(String path, char[] cbuffer) throws Exception
+	{
+		FileOutputStream fos = new FileOutputStream(path);
+		byte[] buffer = new byte[cbuffer.length*2];
+		for (int i = 0, j = 0; i < cbuffer.length; i++, j+=2)
+		{
+			buffer[j+1] = (byte)(cbuffer[i] & 0xFF);
+			buffer[j] = (byte)((cbuffer[i] >> 8) & 0xFF);
 		}
 		
 		fos.write(buffer);
@@ -181,7 +235,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 				{
 					try
 					{
-						char[] buffer = loadFileAndConvertToCharsLittleEndian(path);
+						char[] buffer = loadFileAndConvertToChars(path);
 						disk = new StringBuilder(buffer.length);
 						disk.append(buffer);
 						state = isWriteProtected() ? State.STATE_READY_WP : State.STATE_READY;
@@ -205,7 +259,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 					{
 						char[] cbuffer = new char[disk.length()];
 						disk.getChars(0, disk.length(), cbuffer, 0);
-						saveCharsLittleEndian(path, cbuffer);
+						saveChars(path, cbuffer);
 					}
 					catch (Exception ex)
 					{
@@ -236,7 +290,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 				{
 					try
 					{
-						saveCharsLittleEndian(path, data);
+						saveChars(path, data);
 					}
 					catch (Exception ex)
 					{
@@ -255,7 +309,7 @@ public class M35FD extends FrameLayout implements Device, OnClickListener
 				{
 					try
 					{
-						char[] buffer = loadFileAndConvertToCharsLittleEndian(path);
+						char[] buffer = loadFileAndConvertToChars(path);
 						
 						CPU cpu = Options.GetCPU();
 						int extra = buffer.length - cpu.RAM.length;

@@ -106,9 +106,9 @@ public class Disasm
 		    return String.format("[0x%04x] (0x%x)", add, (int)RAM[add]);
 		}
 		else if (val == 31)
-		    return String.format("0x%04x", (int)RAM[PC++]);
+		    return String.format("0x%04x (%d)", (int)RAM[PC], (int)RAM[PC++]);
 		else
-		    return String.format("0x%x", val-33);
+		    return String.format("%d", val-33);
 	}
 	
 	public static int addCoda(int address)
