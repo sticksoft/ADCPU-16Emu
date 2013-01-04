@@ -8,6 +8,8 @@ public class CPU_1_1 extends CPU
 	public char[] register = new char[8];
 	public char PC,SP,O;
 	
+	public char lastResult;
+	public char getLastResult() { return lastResult; }
 	public enum Value
 	{
 		A,B,C,X,Y,Z,I,J,
@@ -192,7 +194,7 @@ public class CPU_1_1 extends CPU
 			// Grab the actual values
 			char a = read(aType, aAddr), b = read(bType, bAddr);
 			
-			int res; // Result holder
+			int res = 0; // Result holder
 			
 			if (skipping)
 			{
@@ -206,7 +208,7 @@ public class CPU_1_1 extends CPU
 			case non_basic_instruction:
 				break;
 			case SET:
-				write(aType, aAddr, read(bType, bAddr));
+				write(aType, aAddr, (char)(res = read(bType, bAddr)));
 				break;
 			case ADD:
 				res = a + b;
@@ -226,7 +228,7 @@ public class CPU_1_1 extends CPU
 			case DIV:
 				if (b != 0)
 				{
-					write(aType, aAddr, (char)((a / b) & 0xffff));
+					write(aType, aAddr, (char)(res = ((a / b) & 0xffff)));
 					O = (char)(((a << 16)/b) & 0xffff);
 				}
 				else
@@ -237,7 +239,7 @@ public class CPU_1_1 extends CPU
 				break;
 			case MOD:
 				if (b != 0)
-					write(aType, aAddr, (char)(a % b));
+					write(aType, aAddr, (char)(res = (a % b)));
 				else
 					write(aType, aAddr, (char)0);
 				break;
@@ -247,17 +249,18 @@ public class CPU_1_1 extends CPU
 				O = (char)((res >> 16) & 0xffff);
 				break;
 			case SHR:
-				write(aType, aAddr, (char)((a >> b) & 0xffff));
+			    res = a >> b;
+				write(aType, aAddr, (char)(res & 0xffff));
 				O = (char)(((a << 16) >> b) & 0xffff);
 				break;
 			case AND:
-				write(aType, aAddr, (char)(a & b));
+				write(aType, aAddr, (char)(res = (a & b)));
 				break;
 			case BOR:
-				write(aType, aAddr, (char)(a | b));
+				write(aType, aAddr, (char)(res = (a | b)));
 				break;
 			case XOR:
-				write(aType, aAddr, (char)(a ^ b));
+				write(aType, aAddr, (char)(res = (a ^ b)));
 				break;
 			case IFE:
 				if (a != b)
@@ -276,6 +279,8 @@ public class CPU_1_1 extends CPU
 					skipping = true;
 				break;
 			}
+			
+			lastResult = skipping ? 1 : (char)res;
 		}
 		else // Non-basic instruction!
 		{

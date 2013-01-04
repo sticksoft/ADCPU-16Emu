@@ -17,6 +17,7 @@ public class CPU_1_7 extends CPU
 	public static final int A = 0, B = 1, C = 2, X = 3, Y = 4, Z = 5, I = 6, J = 7;
 	public char[] register = new char[J+1];	
 	public char PC, SP, EX, IA;
+	public int lastResult;
 	
 	// Flags
 	private boolean onFire, skipping, interruptQueueing;
@@ -186,6 +187,11 @@ public class CPU_1_7 extends CPU
 	{
 		return c < 0x8000 ? c : c - 0x10000;
 	}
+	
+	public char getLastResult()
+	{
+		return (char)lastResult;
+	}
 
 	@Override
 	public synchronized void execute()
@@ -193,6 +199,7 @@ public class CPU_1_7 extends CPU
 		cycleCount++;
 		tSP = SP;			// Cache SP
 		tPC = (char)(PC+1); // Pre-increment tPC
+		lastResult = 0;
 		
 		boolean error = false; // Not sure what to do with this yet (maybe set on fire?)
 		
@@ -351,6 +358,8 @@ public class CPU_1_7 extends CPU
 						register[J]--;
 						break;
 				}
+				
+				lastResult = res;
 				
 				if (opcode < 0x10 || opcode > 0x17)
 					write(bType, bAddr, (char)(res & 0xffff));

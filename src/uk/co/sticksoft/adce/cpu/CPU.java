@@ -12,6 +12,7 @@ public abstract class CPU
 	public abstract String getStatusText();
 	public abstract char[] getStateInfo();
 	public abstract void setStateInfo(char[] state);
+	public abstract char getLastResult();
 	
 	public interface Observer
 	{
