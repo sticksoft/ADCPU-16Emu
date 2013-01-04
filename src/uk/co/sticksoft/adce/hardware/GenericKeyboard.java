@@ -6,7 +6,6 @@ import java.util.Queue;
 import uk.co.sticksoft.adce.Options;
 import uk.co.sticksoft.adce.Options.DCPU_VERSION;
 import uk.co.sticksoft.adce.Options.Observer;
-import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_7;
 
 public class GenericKeyboard implements Device, Observer

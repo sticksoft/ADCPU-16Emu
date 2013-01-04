@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.util.Log;
-
 import uk.co.sticksoft.adce.asm._1_7.Consts;
 import uk.co.sticksoft.adce.asm._1_7.Dat;
 import uk.co.sticksoft.adce.asm._1_7.DebugToken;
 import uk.co.sticksoft.adce.asm._1_7.Instruction;
 import uk.co.sticksoft.adce.asm._1_7.Label;
 import uk.co.sticksoft.adce.asm._1_7.Token;
+import android.util.Log;
 
 
 public class Assembler_1_7 implements Assembler

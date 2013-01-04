@@ -1,7 +1,6 @@
 package uk.co.sticksoft.adce.hardware;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import uk.co.sticksoft.adce.MainActivity;
@@ -9,8 +8,8 @@ import uk.co.sticksoft.adce.MainActivity.FileDialogCallback;
 import uk.co.sticksoft.adce.Options;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_7;
-import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -20,7 +19,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import android.util.*;
 
 public class M35FD extends FrameLayout implements Device, OnClickListener
 {

@@ -1,8 +1,7 @@
 package uk.co.sticksoft.adce;
 
-import uk.co.sticksoft.adce.Options.Observer;
 import uk.co.sticksoft.adce.cpu.CPU;
-import android.content.Context;
+import uk.co.sticksoft.adce.hardware.HardwareManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -10,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import uk.co.sticksoft.adce.hardware.*;
 
 public class ControlTab extends ScrollView implements CPU.Observer, Options.Observer 
 {

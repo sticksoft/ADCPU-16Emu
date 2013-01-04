@@ -1,6 +1,7 @@
 package uk.co.sticksoft.adce.hardware;
-import uk.co.sticksoft.adce.cpu.*;
-import uk.co.sticksoft.adce.*;
+import uk.co.sticksoft.adce.MainActivity;
+import uk.co.sticksoft.adce.Options;
+import uk.co.sticksoft.adce.cpu.CPU_1_7;
 
 public class GenericClock implements Device
 {

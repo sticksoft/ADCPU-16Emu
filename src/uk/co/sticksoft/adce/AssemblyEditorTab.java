@@ -5,9 +5,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import uk.co.sticksoft.adce.asm.Assembler_1_1;
 import uk.co.sticksoft.adce.cpu.CPU;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;

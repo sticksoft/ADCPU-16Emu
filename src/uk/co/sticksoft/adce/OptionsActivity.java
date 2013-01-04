@@ -3,15 +3,13 @@ package uk.co.sticksoft.adce;
 import java.util.HashSet;
 
 import uk.co.sticksoft.adce.Options.DCPU_VERSION;
-
 import android.app.Activity;
 import android.database.DataSetObserver;
-import android.graphics.Region.Op;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
