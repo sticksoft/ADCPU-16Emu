@@ -2,6 +2,7 @@ package uk.co.sticksoft.adce;
 
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.hardware.HardwareManager;
+import android.annotation.SuppressLint;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -179,7 +180,9 @@ public class ControlTab extends ScrollView implements CPU.Observer, Options.Obse
     
     private long lastActualUpdate = System.currentTimeMillis(), lastCycleCount = 0;
     private String lastSpeed = "(unknown)";
-    public void updateInfo()
+    
+    @SuppressLint("DefaultLocale") // we format data the same way for all locales
+	public void updateInfo()
     {
     	statusLabel.setText(cpu.getStatusText());
     	
