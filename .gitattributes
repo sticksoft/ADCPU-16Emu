@@ -1,3 +1,2 @@
-# Stop propagating the myth that it is okay to muck about with my line endings!
-
-* binary
+*         text=auto
+*.java    text diff=java
