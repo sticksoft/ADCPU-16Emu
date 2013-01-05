@@ -1,6 +1,6 @@
 package uk.co.sticksoft.adce;
-import android.content.*;
-import android.app.*;
+import android.app.AlertDialog;
+import android.content.Context;
 
 public class ErrorHandling
 {

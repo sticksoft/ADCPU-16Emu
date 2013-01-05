@@ -1,6 +1,7 @@
 package uk.co.sticksoft.adce.asm;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public interface Assembler
 {

@@ -1,10 +1,9 @@
 package uk.co.sticksoft.adce.asm2;
-import android.graphics.*;
-import java.util.*;
+import java.util.ArrayList;
 
-import uk.co.sticksoft.adce.Options;
 import uk.co.sticksoft.adce.asm.Assembler_1_7;
 import uk.co.sticksoft.adce.asm._1_7.Token;
+import android.graphics.Color;
 
 public class BubbleParser
 {

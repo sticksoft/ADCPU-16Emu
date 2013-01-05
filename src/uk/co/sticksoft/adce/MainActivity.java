@@ -1,25 +1,35 @@
 package uk.co.sticksoft.adce;
 
-import android.app.*;
-import android.content.*;
-import android.os.*;
-import android.view.*;
-import android.view.View.*;
-import android.view.inputmethod.*;
-import android.widget.*;
-import android.widget.TabHost.*;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 import uk.co.sticksoft.adce.Options.DCPU_VERSION;
 import uk.co.sticksoft.adce.Options.Observer;
-import uk.co.sticksoft.adce.asm.*;
-import uk.co.sticksoft.adce.asm2.*;
-import uk.co.sticksoft.adce.cpu.*;
-import uk.co.sticksoft.adce.hardware.*;
-import uk.co.sticksoft.adce.help.*;
-
-import android.view.View.OnClickListener;
-import uk.co.sticksoft.adce.hardware.Console;
+import uk.co.sticksoft.adce.asm.Assembler_1_1;
+import uk.co.sticksoft.adce.asm2.BubbleParser;
+import uk.co.sticksoft.adce.asm2.BubbleView;
+import uk.co.sticksoft.adce.cpu.CPU;
+import uk.co.sticksoft.adce.hardware.GenericClock;
+import uk.co.sticksoft.adce.hardware.GenericKeyboard;
+import uk.co.sticksoft.adce.hardware.HardwareManager;
+import uk.co.sticksoft.adce.help.HelpActivity;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TabHost;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
+import android.widget.TabWidget;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements Observer
 {

@@ -1,21 +1,16 @@
 package uk.co.sticksoft.adce.hardware;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import uk.co.sticksoft.adce.Options;
-import uk.co.sticksoft.adce.Options.Observer;
-import uk.co.sticksoft.adce.R;
 import uk.co.sticksoft.adce.cpu.CPU;
 import uk.co.sticksoft.adce.cpu.CPU_1_7;
-import android.R.integer;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.view.View;
 
 public class LEM1802 extends View implements Device, CPU.Observer, Options.Observer

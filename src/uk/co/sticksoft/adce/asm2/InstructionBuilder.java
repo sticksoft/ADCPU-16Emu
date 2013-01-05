@@ -1,9 +1,12 @@
 package uk.co.sticksoft.adce.asm2;
 
-import android.app.*;
-import android.content.*;
-import android.view.*;
-import android.widget.*;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 public class InstructionBuilder
 {
