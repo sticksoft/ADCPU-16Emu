@@ -4,8 +4,6 @@ import uk.co.sticksoft.adce.maths.Vector2;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffColorFilter;
 
 public class Asteroid
 {

@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import uk.co.sticksoft.adce.Options;
-import uk.co.sticksoft.adce.Options.Observer;
-import uk.co.sticksoft.adce.R;
 import uk.co.sticksoft.adce.cpu.CPU;
 import android.content.Context;
 import android.graphics.Bitmap;

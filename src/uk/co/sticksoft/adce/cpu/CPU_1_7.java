@@ -3,11 +3,11 @@ package uk.co.sticksoft.adce.cpu;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import android.widget.Toast;
 import uk.co.sticksoft.adce.MainActivity;
-import uk.co.sticksoft.adce.asm._1_7.*;
+import uk.co.sticksoft.adce.asm._1_7.Disasm;
 import uk.co.sticksoft.adce.hardware.Device;
 import uk.co.sticksoft.adce.hardware.HardwareManager;
+import android.widget.Toast;
 
 /*
  * Half-baked 1.7 version of the CPU

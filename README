@@ -70,6 +70,23 @@ Resuming previous CPU state
 Visual editor supporting comments
 Debugging from the visual editor
 
+Development
+-----------
+Compilation:
+* Using eclipse IDE:
+    1) Import project in eclipse IDE with android plugin installed and SDK setup
+    2) Cross your fingers
+    3) Compile
+
+* Using Ant builder:
+    1) Make sure that SDK is setup and tools,platform-tools directories from the SDK is in your PATH env. variable
+    2) Run following commands in project directory:
+        // following command will generate local.properties file for you
+        android update project --path .
+        // following command will build debug apk and install it on default emulator/device
+        ant debug install
+    3) Please refer to http://developer.android.com/tools/projects/projects-cmdline.html in case of troubles
+
 CHANGELOG
 =========
 v0.31
