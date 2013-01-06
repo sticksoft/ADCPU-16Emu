@@ -1,5 +1,6 @@
 package uk.co.sticksoft.adce;
 
+import java.io.FileInputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import uk.co.sticksoft.adce.hardware.HardwareManager;
 import uk.co.sticksoft.adce.hardware.LEM1802;
 import uk.co.sticksoft.adce.hardware.M35FD;
 import android.content.Context;
+import android.util.Log;
 import android.util.Xml;
 import android.view.View;
 import android.widget.Toast;
@@ -234,10 +236,22 @@ public class Options
 		boolean visualEditor = true;
 		boolean m35fd = false;
 		
+		FileInputStream optionsFile = null;
+		try
+		{
+			optionsFile = context.openFileInput(XML_FILENAME);
+		}
+		catch (Exception ex)
+		{
+			// No options file. Save a default one.
+			saveOptions(context);
+			return;
+		}
+		
 		try
 		{
 			XmlPullParser parser = Xml.newPullParser();
-			parser.setInput(context.openFileInput(XML_FILENAME), null);
+			parser.setInput(optionsFile, null);
 			int event = parser.getEventType();
 			
 			while (event != XmlPullParser.END_DOCUMENT)
@@ -297,6 +311,7 @@ public class Options
 		}
 		catch (Exception ex)
 		{
+			Log.e("ADCPU", "Unable to load settings!", ex);
 			MainActivity.showToast("Couldn't load settings, using defaults.", Toast.LENGTH_SHORT);
 		}
 		finally
