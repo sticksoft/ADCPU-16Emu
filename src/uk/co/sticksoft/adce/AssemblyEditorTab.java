@@ -2,14 +2,17 @@ package uk.co.sticksoft.adce;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import uk.co.sticksoft.adce.cpu.CPU;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.text.InputType;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,20 +25,28 @@ public class AssemblyEditorTab extends ScrollView
 {
 	private TextView asmInput, asmOutput;
 	private MainActivity main;
+	private int textSize = 12;
 	
 	public AssemblyEditorTab(MainActivity main, Context context)
 	{
 		super(context);
 		
 		this.main = main;
+		this.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, 480));
+		this.setMinimumHeight(480);
+		
 		
 		LinearLayout lyt = new LinearLayout(context);
 		lyt.setOrientation(LinearLayout.VERTICAL);
+		lyt.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		
 		asmInput = new EditText(context);
 		asmInput.setRawInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
 		//asmInput.setMaxLines(65536);
-        asmInput.setTextSize(12);
+        asmInput.setTextSize(textSize);
+        asmInput.setTypeface(Typeface.MONOSPACE);
+        asmInput.setHorizontallyScrolling(true);
+        
         autoload();
         lyt.addView(asmInput);
         
@@ -102,6 +113,105 @@ public class AssemblyEditorTab extends ScrollView
 			e.printStackTrace();
 		}
     }
+    
+    private float initialPinchDistance = 0, lastPinchDistance = 0;
+    private int initialFontSize;
+	private boolean _no_multitouch = false;
+	
+	private float getPinchDist(MotionEvent event)
+	{
+		if (_no_multitouch)
+			return 0;
+		
+		try
+		{
+			Method getPointerCount = event.getClass().getMethod("getPointerCount");
+			int pointercount = ((Integer)getPointerCount.invoke(event)).intValue();
+			
+			if (pointercount == 0)
+				return 0;
+			
+			Method getXI = event.getClass().getMethod("getX", new Class[] { int.class });
+			Method getYI = event.getClass().getMethod("getY", new Class[] { int.class });
+			
+			float[] xs = new float[pointercount];
+			float[] ys = new float[pointercount];
+			
+			for (int i = 0; i < pointercount; i++)
+			{
+				xs[i] = ((Float)getXI.invoke(event, Integer.valueOf(i))).floatValue();
+				ys[i] = ((Float)getYI.invoke(event, Integer.valueOf(i))).floatValue();
+			}
+			
+			float maxDistSq = 0;
+			for (int j = pointercount; j-->0;)
+				for (int i = j; i-->0;)
+				{
+					float dx = xs[j] - xs[i], dy = ys[j] - ys[i];
+					float distSq = dx*dx + dy*dy;
+					if (distSq > maxDistSq)
+						maxDistSq = distSq;
+				}
+			return (float)Math.sqrt(maxDistSq);
+		}
+		catch (Exception e)
+		{
+			_no_multitouch = true;
+		}
+		return 0;
+	}
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent event)
+	{
+		switch (event.getAction())
+		{
+		case MotionEvent.ACTION_DOWN:
+			lastPinchDistance = 0;
+			initialPinchDistance = 0;
+			initialFontSize = textSize;
+			break;
+		case MotionEvent.ACTION_MOVE:
+			float pinch = getPinchDist(event);
+			if (pinch > 40)
+			{
+				if (initialPinchDistance == 0)
+				{
+					initialPinchDistance = pinch;
+					initialFontSize = textSize;
+				}
+				else
+				{
+					if (Math.abs(lastPinchDistance - pinch) > 40) // Filter huge jumps
+					{
+						initialPinchDistance = pinch;
+						initialFontSize = textSize;
+					}
+					else
+					{
+						int font = (int)(initialFontSize * pinch / initialPinchDistance);
+						if (font != textSize)
+							asmInput.setTextSize(textSize = font);
+					}
+						
+				}
+			}
+			else
+				initialPinchDistance = 0;
+			lastPinchDistance = pinch;
+			
+			if (pinch > 0)
+				return true;
+			
+			break;
+		case MotionEvent.ACTION_UP:
+			lastPinchDistance = 0;
+			initialPinchDistance = 0;
+			break;
+		}
+		
+		return super.onTouchEvent(event);
+	}
     
     public void assemble()
     {

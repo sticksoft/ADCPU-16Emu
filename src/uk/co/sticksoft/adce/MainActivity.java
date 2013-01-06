@@ -22,6 +22,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -118,12 +119,14 @@ public class MainActivity extends Activity implements Observer
 		// This is NOT the way you're meant to make tabs
 		tabHost = new TabHost(this, null);
 		LinearLayout tablyt = new LinearLayout(this);
+		tablyt.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		tablyt.setOrientation(LinearLayout.VERTICAL);
 		TabWidget tw = new TabWidget(this);
 		tw.setId(android.R.id.tabs);
 		tablyt.addView(tw);
 		FrameLayout fl = new FrameLayout(this);
 		fl.setId(android.R.id.tabcontent);
+		fl.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
 		tablyt.addView(fl);
 		tabHost.addView(tablyt);
 		tabHost.setup();
