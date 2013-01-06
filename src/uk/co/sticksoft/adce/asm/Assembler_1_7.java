@@ -392,6 +392,7 @@ public class Assembler_1_7 implements Assembler
 			else
 			{
 				builder.append(unescapeCharacter(c));
+				escaping = false;
 			}
 		}
 		
@@ -426,6 +427,19 @@ public class Assembler_1_7 implements Assembler
 			return Integer.parseInt(number);
 		}
 		catch (Exception ex) { return 0; }
+	}
+	
+	protected boolean isNextNonWhitespaceChar(char c)
+	{
+		for (int i = sourceIndex; i < sourceLength; i++)
+		{
+			char current = source.charAt(i); 
+			if (current == c)
+				return true;
+			else if (!Character.isWhitespace(current))
+				return false;
+		}
+		return false;
 	}
 	
 	protected void readDat()
@@ -485,6 +499,13 @@ public class Assembler_1_7 implements Assembler
 				
 				verbose("Dat label: \""+builder.toString()+"\"");
 				structure.add(new Dat(builder.toString(), true));
+			}
+			
+			if (isNextNonWhitespaceChar(','))
+			{
+				carryOn = true;
+				readToNextNonWhitespace();
+				sourceIndex++;
 			}
 		}
 		
