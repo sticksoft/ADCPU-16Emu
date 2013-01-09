@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import uk.co.sticksoft.adce.MainActivity;
 import uk.co.sticksoft.adce.asm._1_7.Consts;
 import uk.co.sticksoft.adce.asm._1_7.Dat;
 import uk.co.sticksoft.adce.asm._1_7.DebugToken;
@@ -87,12 +88,12 @@ public class Assembler_1_7 implements Assembler
 	{
 		try
 		{
-		while (sourceIndex < sourceLength)
-			readNextToken();
+			while (sourceIndex < sourceLength)
+				readNextToken();
 		}
 		catch (Exception e)
 		{
-			
+			Log.e("ASM1_7", "Exception assembling: ", e);
 		}
 	}
 	
@@ -217,7 +218,7 @@ public class Assembler_1_7 implements Assembler
 		}
 		
 		
-		debugToken.setToken(source.substring(debugTokenIndex, sourceIndex));
+		debugToken.setToken(source.substring(debugTokenIndex, sourceIndex < sourceLength ? sourceIndex : sourceLength));
 		debugTokenIndex = sourceIndex;
 	}
 	
@@ -276,7 +277,12 @@ public class Assembler_1_7 implements Assembler
 			}
 		}
 		
-		return source.substring(start, sourceIndex++);
+		String val = source.substring(start, sourceIndex++);
+		
+		if (val.equalsIgnoreCase("PICK"))
+			return val + " " + readValue(); 
+		
+		return val;
 	}
 	
 	protected void readBasicInstruction(char opcode)

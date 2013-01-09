@@ -97,7 +97,9 @@ public class Disasm
 						add);
 		}
 		else if (val == 24)
-		    return aValue ? "PUSH" : "POP";
+		    return aValue ? "POP" : "PUSH";
+		else if (val == 26)
+			return String.format("PICK 0x%04x (%d)", (int)RAM[PC], (int)RAM[PC++]);
 		else if (val < 30)
 		    return Consts.ValueCode.values()[val].toString();
 		else if (val == 30)
