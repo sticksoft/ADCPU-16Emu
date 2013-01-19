@@ -267,12 +267,22 @@ public class CPU_1_7 extends CPU
 						EX = (char)(res >> 16);
 						break;
 					case 0x06: // DIV
-						res = bVal / aVal;
-						EX = (char)(((bVal << 16) / aVal) & 0xffff);
+						if (aVal != 0)
+						{
+							res = bVal / aVal;
+							EX = (char)(((bVal << 16) / aVal) & 0xffff);
+						}
+						else
+							res = EX = 0;
 						break;
 					case 0x07: // DVI
-						res = unsignedCharAsSignedInt(bVal) / unsignedCharAsSignedInt(aVal);
-						EX = (char)(((unsignedCharAsSignedInt(bVal) << 16) / unsignedCharAsSignedInt(aVal)) & 0xffff);
+						if (aVal != 0)
+						{
+							res = unsignedCharAsSignedInt(bVal) / unsignedCharAsSignedInt(aVal);
+							EX = (char)(((unsignedCharAsSignedInt(bVal) << 16) / unsignedCharAsSignedInt(aVal)) & 0xffff);
+						}
+						else
+							res = EX = 0;
 						break;
 					case 0x08: // MOD
 						if (aVal == 0)
