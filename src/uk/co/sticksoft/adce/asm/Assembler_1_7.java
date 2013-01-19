@@ -1,5 +1,6 @@
 package uk.co.sticksoft.adce.asm;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import uk.co.sticksoft.adce.asm._1_7.DebugToken;
 import uk.co.sticksoft.adce.asm._1_7.Instruction;
 import uk.co.sticksoft.adce.asm._1_7.Label;
 import uk.co.sticksoft.adce.asm._1_7.Token;
+import android.os.Environment;
 import android.util.Log;
 
 
@@ -33,6 +35,8 @@ public class Assembler_1_7 implements Assembler
 	public char[] assemble(String source, ArrayList<String> out_message, HashMap<Integer, String> out_debugSymbols)
 	{
 		reset();
+		
+		source = Preprocessor.preprocess(source, new File(Environment.getExternalStorageDirectory().getAbsolutePath() + File.separatorChar + "ADCPU"), out_message);
 		
 		this.source = source;
 		this.sourceLength = source.length();

@@ -12,6 +12,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -317,6 +318,7 @@ public class AssemblyEditorTab extends ScrollView
 			}
 			catch (Exception ex)
 			{
+				Log.e("ASM", "Assembling failed!", ex);
 				MainActivity.showToast("Assembling failed! "+ex.getClass().getSimpleName(), Toast.LENGTH_LONG);
 				return false;
 			}

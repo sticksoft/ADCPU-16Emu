@@ -31,7 +31,10 @@ public class Preprocessor
 			{
 				if (i < asm.length() && asm.regionMatches(true, i+1, INCLUDE_DIRECTIVE, 0, INCLUDE_DIRECTIVE.length()))
 				{
-					String filename = asm.substring(i+1+INCLUDE_DIRECTIVE.length(), indexOfLineEnding(asm, i+1));
+					int lineEnding = indexOfLineEnding(asm, i+1);
+					String filename = asm.substring(i+1+INCLUDE_DIRECTIVE.length(), lineEnding).trim();
+					if (filename.startsWith("\"") && filename.endsWith("\""))
+						filename = filename.substring(1, filename.length()-1);
 					String replacement = getFileContent(filename, searchPathRoot);
 					if (replacement == null)
 					{
@@ -40,7 +43,7 @@ public class Preprocessor
 					}
 					else
 					{
-						asm = asm.substring(0, i) + replacement + "\n" + asm.substring(i+1+INCLUDE_DIRECTIVE.length());
+						asm = asm.substring(0, i) + replacement + "\n" + asm.substring(lineEnding);
 						i += replacement.length();
 					}
 				}
