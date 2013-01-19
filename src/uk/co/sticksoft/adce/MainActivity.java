@@ -256,7 +256,7 @@ public class MainActivity extends Activity implements Observer
     
 
 	
-	private char[] assembled = SampleASM.notchs_example_assembled;
+	private char[] assembled = new char[0]; //SampleASM.notchs_example_assembled;
 	public void setAssembled(char[] bin)
 	{
 		assembled = bin;
