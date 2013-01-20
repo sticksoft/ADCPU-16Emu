@@ -113,48 +113,27 @@ public class BubbleNode
 	{
 		void performAction(Context context, BubbleView view, BubbleNode node);
 		String getName();
+		int getColour();
 	}
 	
 	public static abstract class NamedNodeAction implements NodeAction
 	{
-		public NamedNodeAction(String name) { this.name = name; }
 		private String name;
+		private int colour = Color.WHITE;
+		
+		public NamedNodeAction(String name, int colour) { this.name = name; this.colour = colour; }
 		public String getName() { return name; }
+		public int getColour() { return colour; }
 	}
 	
 	public void showOptions(final Context context, final BubbleView view)
 	{
-		final ArrayList<NodeAction> actions = new ArrayList<BubbleNode.NodeAction>();
-		collectOptions(actions);
+		final ArrayList<ArrayList<NodeAction>> actions = new ArrayList<ArrayList<NodeAction>>();
+		BubbleNodeActions.collectActions(actions, this);
 		
 		view.showActions(actions, this);
-		
-		/*
-		
-		String[] names = new String[actions.size()];
-		for (int i = 0; i < actions.size(); i++)
-			names[i] = actions.get(i).getName();
-		
-		new AlertDialog.Builder(context).setItems(names, new OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				actions.get(which).performAction(context, view, BubbleNode.this);
-				dialog.dismiss();
-				
-				view.layoutBubbles();
-				view.invalidate();
-			}
-		}).setNegativeButton("Cancel", null).show();
-		*/
 	}
-	
-	protected void collectOptions(ArrayList<NodeAction> list)
-	{
-		BubbleNodeActions.collectActions(list, this);
-	}
-	
+
 	public void showEdit(final Context context, final BubbleView view)
 	{
 		final EditText txt_edit = new EditText(context);
@@ -230,6 +209,11 @@ public class BubbleNode
 	public BubbleNode getRoot()
 	{
 		return this;
+	}
+	
+	public boolean isRoot()
+	{
+		return getRoot() == this;
 	}
 	
 	protected void guessColourBasedOnContent()
