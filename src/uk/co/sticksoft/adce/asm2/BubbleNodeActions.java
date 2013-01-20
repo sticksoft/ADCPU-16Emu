@@ -63,7 +63,7 @@ public class BubbleNodeActions
 				});
 		}
 		
-		utilList.add(new NamedNodeAction("Add", utilColour)
+		utilList.add(new NamedNodeAction("New Lines", utilColour)
 		{
 			@Override
 			public void performAction(Context context, BubbleView view, BubbleNode node)
@@ -72,10 +72,13 @@ public class BubbleNodeActions
 				if (node != null)
 					index = view.getRoots().indexOf(node.getRoot()) + 1;
 				
-				BubbleNode instr = new BubbleNode("Set");
-				instr.addProperty(new BubbleNodeProperty("A"));
-				instr.addProperty(new BubbleNodeProperty("B"));
-				view.getRoots().add(index, instr);
+				for (int i = 0; i < 3; i++)
+				{
+					BubbleNode instr = new BubbleNode("");
+					instr.addProperty(new BubbleNodeProperty(""));
+					instr.addProperty(new BubbleNodeProperty(""));
+					view.getRoots().add(index, instr);
+				}
 				view.layoutBubbles();
 			}
 		});
@@ -91,6 +94,18 @@ public class BubbleNodeActions
 				view.layoutBubbles();
 			}
 		});
+		
+		if (!node.isRoot())
+		{
+			utilList.add(new NamedNodeAction("Number", utilColour)
+			{
+				@Override
+				public void performAction(Context context, BubbleView view, BubbleNode node)
+				{
+					view.cover(new NumericInputTable(view, node));
+				}
+			});
+		}
 		
 		utilList.add(new NamedNodeAction("Edit Text", utilColour)
 		{

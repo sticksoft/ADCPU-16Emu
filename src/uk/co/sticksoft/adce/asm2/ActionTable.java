@@ -17,8 +17,16 @@ public class ActionTable extends ScrollView
 {
 	private final static int COLUMNS = 4;
 	
-	private BubbleView view;
-	private BubbleNode node;
+	protected BubbleView view;
+	protected BubbleNode node;
+	
+	protected ActionTable(BubbleView view, BubbleNode node)
+	{
+		super(view.getContext());
+		
+		this.view = view;
+		this.node = node;
+	}
 	
 	public ActionTable(BubbleView view, ArrayList<ArrayList<NodeAction>> actions, BubbleNode node)
 	{
