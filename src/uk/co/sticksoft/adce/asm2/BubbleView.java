@@ -601,13 +601,39 @@ public class BubbleView extends View implements TextWatcher
 	
 	public void showActions(ArrayList<ArrayList<NodeAction>> actions, BubbleNode node)
 	{
-		container.addView(new ActionTable(this, actions, node));
+		cover(new ActionTable(this, actions, node));
+	}
+	
+	private ArrayList<View> coverStack = new ArrayList<View>();
+	private View currentCover = null;
+	
+	public void cover(View view)
+	{
+		if (currentCover != null)
+			container.removeView(currentCover);
+		currentCover = view;
+		container.addView(view);
+		coverStack.add(view);
 		covered = true;
 	}
 	
 	public void uncover(View view)
 	{
-		container.removeView(view);
-		covered = false;
+		coverStack.remove(view);
+		if (view == currentCover)
+		{
+			container.removeView(currentCover);
+		
+			if (coverStack.isEmpty())
+			{
+				currentCover = null;
+				covered = false;
+			}
+			else
+			{
+				container.addView(currentCover = coverStack.get(coverStack.size()-1));
+				covered = true;
+			}
+		}
 	}
 }

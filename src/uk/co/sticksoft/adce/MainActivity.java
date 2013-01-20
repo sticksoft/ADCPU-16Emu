@@ -563,6 +563,11 @@ public class MainActivity extends Activity implements Observer
 	{
 		backHandler = runnable;
 	}
+	public static void removeBackHandler(Runnable runnable)
+	{
+		if (backHandler == runnable)
+			backHandler = null;
+	}
 
 	@Override
 	public void optionsChanged()

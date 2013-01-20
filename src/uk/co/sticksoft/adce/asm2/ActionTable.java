@@ -1,7 +1,6 @@
 package uk.co.sticksoft.adce.asm2;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import uk.co.sticksoft.adce.MainActivity;
 import uk.co.sticksoft.adce.asm2.BubbleNode.NodeAction;
@@ -9,7 +8,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -81,21 +79,37 @@ public class ActionTable extends ScrollView
 		}
 		
 		addView(table);
-		
-		MainActivity.setBackHandler(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				ActionTable.this.view.uncover(ActionTable.this);
-			}
-		});
 	}
 	
+	private Runnable backhandler = new Runnable()
+	{
+		@Override
+		public void run()
+		{
+			ActionTable.this.view.uncover(ActionTable.this);
+		}
+	};
+	
+	@Override
+	protected void onAttachedToWindow()
+	{
+		super.onAttachedToWindow();
+		
+		MainActivity.setBackHandler(backhandler);
+	}
+	
+	@Override
+	protected void onDetachedFromWindow()
+	{
+		super.onDetachedFromWindow();
+		MainActivity.removeBackHandler(backhandler);
+	}
+
 	public void onAction(NodeAction action)
 	{
-		view.uncover(this);
-		MainActivity.setBackHandler(null);
+		if (action.shouldPopActionTable())
+			view.uncover(this);
+		
 		action.performAction(view.getContext(), view, node);
 		view.layoutBubbles();
 	}

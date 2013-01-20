@@ -114,16 +114,19 @@ public class BubbleNode
 		void performAction(Context context, BubbleView view, BubbleNode node);
 		String getName();
 		int getColour();
+		boolean shouldPopActionTable();
 	}
 	
 	public static abstract class NamedNodeAction implements NodeAction
 	{
 		private String name;
 		private int colour = Color.WHITE;
-		
+		private boolean popActionTable = true;
 		public NamedNodeAction(String name, int colour) { this.name = name; this.colour = colour; }
+		public NamedNodeAction(String name, int colour, boolean popActionTable) { this.name = name; this.colour = colour; this.popActionTable = popActionTable; }
 		public String getName() { return name; }
 		public int getColour() { return colour; }
+		public boolean shouldPopActionTable() { return popActionTable; }		
 	}
 	
 	public void showOptions(final Context context, final BubbleView view)
