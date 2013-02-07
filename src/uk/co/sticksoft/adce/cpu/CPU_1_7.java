@@ -22,8 +22,8 @@ public class CPU_1_7 extends CPU
 	// Flags
 	private boolean onFire, skipping, interruptQueueing;
 	
-	// Temporary cache for SP and PC 
-	private char tSP, tPC;
+	// Temporary cache for SP 
+	private char tSP;
 	
 	// Interrupt queue
 	private Queue<Character> interruptQueue = new LinkedList<Character>();
@@ -88,13 +88,13 @@ public class CPU_1_7 extends CPU
 		if (value < 0x10)
 			return register[value-0x08];
 		if (value < 0x18)
-			return (char)(RAM[tPC++]+register[value-0x10]);
+			return (char)(RAM[PC++]+register[value-0x10]);
 		if (value == 0x18)
 			return tSP++;
 		if (value == 0x19)
 			return tSP;
 		if (value == 0x1a)
-			return (char)(RAM[tPC++] + tSP);
+			return (char)(RAM[PC++] + tSP);
 		if (value == 0x1b)
 			return 0;
 		if (value == 0x1c)
@@ -102,9 +102,9 @@ public class CPU_1_7 extends CPU
 		if (value == 0x1d)
 			return 0;
 		if (value == 0x1e)
-			return RAM[tPC++];
+			return RAM[PC++];
 		if (value == 0x1f)
-			return tPC++;
+			return PC++;
 		
 		return (char)(value - 0x20);
 	}
@@ -116,13 +116,13 @@ public class CPU_1_7 extends CPU
 		if (value < 0x10)
 			return register[value-0x08];
 		if (value < 0x18)
-			return (char)(RAM[tPC++]+register[value-0x10]);
+			return (char)(RAM[PC++]+register[value-0x10]);
 		if (value == 0x18)
 			return --tSP;
 		if (value == 0x19)
 			return tSP;
 		if (value == 0x1a)
-			return (char)(RAM[tPC++] + tSP);
+			return (char)(RAM[PC++] + tSP);
 		if (value == 0x1b)
 			return 0;
 		if (value == 0x1c)
@@ -130,9 +130,9 @@ public class CPU_1_7 extends CPU
 		if (value == 0x1d)
 			return 0;
 		if (value == 0x1e)
-			return RAM[tPC++];
+			return RAM[PC++];
 		if (value == 0x1f)
-			return tPC++;
+			return PC++;
 		
 		return (char)(value - 0x20);
 	}
@@ -170,7 +170,7 @@ public class CPU_1_7 extends CPU
 			RAM[address] = word;
 			break;
 		case PC:
-			tPC = word;
+			PC = word;
 			break;
 		case SP:
 			tSP = word;
@@ -198,13 +198,12 @@ public class CPU_1_7 extends CPU
 	{
 		cycleCount++;
 		tSP = SP;			// Cache SP
-		tPC = (char)(PC+1); // Pre-increment tPC
 		lastResult = 0;
 		
 		boolean error = false; // Not sure what to do with this yet (maybe set on fire?)
 		
-		// Fetch
-		char instr = RAM[PC];
+		// Fetch & increment PC
+		char instr = RAM[PC++];
 		
 		if (instr == 0) // Invalid instruction; stop.
 		{
@@ -223,11 +222,9 @@ public class CPU_1_7 extends CPU
 			{
 				// Skip reading next words 
 				if ((b >= 0x10 && b < 0x18) || b == 0x1a || b == 0x1e || b == 0x1f) // [register + next word], [SP + next word], [next word], next word
-					tPC++;
+					PC++;
 				if ((a >= 0x10 && a < 0x18) || a == 0x1a || a == 0x1e || a == 0x1f) // [register + next word], [SP + next word], [next word], next word
-					tPC++;
-				
-				PC = tPC;
+					PC++;
 				
 				if (opcode < 0x10 || opcode > 0x17) // Keep skipping over conditionals
 					skipping = false;
@@ -381,10 +378,9 @@ public class CPU_1_7 extends CPU
 			{
 				// Skip reading next word
 				if ((a >= 0x10 && a < 0x18) || a == 0x1a || a == 0x1e || a == 0x1f) // [register + next word], [SP + next word], [next word], next word
-					tPC++;
+					PC++;
 				
 				skipping = false;
-				PC = tPC;
 			}
 			else
 			{
@@ -399,10 +395,10 @@ public class CPU_1_7 extends CPU
 					char jmp = read(addressType(a), addressA(a));
 					
 					// Push PC
-					RAM[--tSP] = tPC;
+					RAM[--tSP] = PC;
 					
 					// Set PC to jump address (after increment)
-					tPC = jmp;
+					PC = jmp;
 					break;
 				case 0x02: // -
 				case 0x03: // -
@@ -424,7 +420,7 @@ public class CPU_1_7 extends CPU
 				case 0x0b: // RFI
 					interruptQueueing = false;
 					register[A] = RAM[tSP++];
-					tPC = RAM[tSP++];
+					PC = RAM[tSP++];
 					break;
 				case 0x0c: // IAQ
 					interruptQueueing = (read(addressType(a), addressA(a)) == 0);
@@ -483,13 +479,12 @@ public class CPU_1_7 extends CPU
 		if (!skipping && !interruptQueueing && !interruptQueue.isEmpty())
 		{
 			interruptQueueing = true;
-			RAM[tSP--] = tPC;
+			RAM[tSP--] = PC;
 			RAM[tSP--] = register[A];
-			tPC = IA;
+			PC = IA;
 			register[A] = interruptQueue.remove().charValue();
 		}
 		
-		PC = tPC;
 		SP = tSP;
 		
 		notifyObservers();
@@ -502,13 +497,12 @@ public class CPU_1_7 extends CPU
 		else if (IA != 0)
 		{
 			interruptQueueing = true;
-			RAM[--tSP] = tPC;
+			RAM[--tSP] = PC;
 			RAM[--tSP] = register[A];
-			tPC = IA;
+			PC = IA;
 			register[A] = interrupt;
 		}
 		
-		PC = tPC;
 		SP = tSP;
 	}
 	
