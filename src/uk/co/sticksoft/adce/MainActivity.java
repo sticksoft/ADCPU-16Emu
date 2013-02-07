@@ -190,8 +190,8 @@ public class MainActivity extends Activity implements Observer
     
     private void checkVersion()
     {
-    	final String currentVersion = "0.31";
-    	final String currentMessage = "NEW: Fix for EX bug, and M35FD support!";
+    	final String currentVersion = "0.33";
+    	final String currentMessage = "NEW: Fix for PC and divide by 0 bugs!";
     	final boolean massiveUpdate = false;
     	
     	FileInputStream fis = null;

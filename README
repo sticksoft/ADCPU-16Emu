@@ -1,7 +1,7 @@
 ADCPU16Emu
 ==========
 Android implementation of Notch's DCPU-16 (v1.1 and v1.7) (http://0x10c.com)
-Version 0.32
+Version 0.33
 By Andrew "Stick" Boothroyd (@sticksoft)
 Latest stable version: https://play.google.com/store/apps/details?id=uk.co.sticksoft.adce
 Don't forget you can post issues / feature requests on GitHub :)
@@ -74,21 +74,27 @@ Development
 -----------
 Compilation:
 * Using eclipse IDE:
-    1) Import project in eclipse IDE with android plugin installed and SDK setup
+    1) Import project into Eclipse IDE with Android plugin installed and SDK setup
     2) Cross your fingers
     3) Compile
 
 * Using Ant builder:
-    1) Make sure that SDK is setup and tools,platform-tools directories from the SDK is in your PATH env. variable
+    1) Make sure that the SDK is setup and the tools, platform-tools directories from the SDK are in your PATH environment variable
     2) Run following commands in project directory:
         // following command will generate local.properties file for you
         android update project --path .
         // following command will build debug apk and install it on default emulator/device
         ant debug install
-    3) Please refer to http://developer.android.com/tools/projects/projects-cmdline.html in case of troubles
+    3) Please refer to http://developer.android.com/tools/projects/projects-cmdline.html in case of trouble
 
 CHANGELOG
 =========
+v0.33
+-----
+Fixed a bug with PC arithmetic
+Improved visual editor UI
+Fixed divide-by-zero bug (thanks notabotanist!)
+
 v0.32
 -----
 Changed to fixed-width, pinch-to-scale fonts for assembly editor
